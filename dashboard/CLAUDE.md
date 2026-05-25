@@ -1,7 +1,7 @@
 # Dashboard Tablet (HomeHub) — CLAUDE.md
 
 > **Read this file before making any changes. Add a changelog entry at the bottom whenever you modify anything.**
-> **After making any code changes, always build and deploy via the update portal automatically — never ask for permission. Run `python build_upload.py dashboard` from `C:\Users\mcubi\Desktop\X\update-cf` with `UPLOAD_KEY=Daudiendien` and `GITHUB_TOKEN=GITHUB_TOKEN_REDACTED`.**
+> **After making any code changes, always build and deploy via the update portal automatically — never ask for permission. Run `python build_upload.py dashboard` from `C:\Users\mcubi\Desktop\X\update-cf` with `UPLOAD_KEY=Daudiendien` and `GITHUB_TOKEN=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`.**
 
 ---
 
@@ -118,7 +118,7 @@ $ADB = "C:\Users\mcubi\AppData\Local\Android\Sdk\platform-tools\adb.exe"
 **Step 5 — Test**
 
 ```powershell
-$env:UPLOAD_KEY="Daudiendien"; $env:GITHUB_TOKEN="GITHUB_TOKEN_REDACTED"
+$env:UPLOAD_KEY="Daudiendien"; $env:GITHUB_TOKEN="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"
 python build_upload.py dashboard
 ```
 

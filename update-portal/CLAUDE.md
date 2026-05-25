@@ -1,7 +1,7 @@
 # App Update Portal — CLAUDE.md
 
 > **Read this file before making any changes. Add a changelog entry at the bottom whenever you modify anything.**
-> **After making any code changes to an Android app, always build and deploy via the portal automatically — never ask for permission. Use `python build_upload.py <app>` with `UPLOAD_KEY=Daudiendien` and `GITHUB_TOKEN=GITHUB_TOKEN_REDACTED`.**
+> **After making any code changes to an Android app, always build and deploy via the portal automatically — never ask for permission. Use `python build_upload.py <app>` with `UPLOAD_KEY=Daudiendien` and `GITHUB_TOKEN=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`.**
 
 ---
 

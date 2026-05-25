@@ -1,7 +1,7 @@
 # AITeachingApp — CLAUDE.md
 
 > **Read this file before making any changes. Add a changelog entry at the bottom whenever you modify anything.**
-> **After making any code changes, always build and deploy via the update portal automatically — never ask for permission. Run `python build_upload.py aiteaching` from `C:\Users\mcubi\Desktop\X\update-cf` with `UPLOAD_KEY=Daudiendien` and `GITHUB_TOKEN=GITHUB_TOKEN_REDACTED`.**
+> **After making any code changes, always build and deploy via the update portal automatically — never ask for permission. Run `python build_upload.py aiteaching` from `C:\Users\mcubi\Desktop\X\update-cf` with `UPLOAD_KEY=Daudiendien` and `GITHUB_TOKEN=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`.**
 
 ---
 
@@ -29,7 +29,7 @@ gradlew.bat :app:assembleDebug --daemon
 ```
 # From the update-cf folder:
 set UPLOAD_KEY=Daudiendien
-set GITHUB_TOKEN=GITHUB_TOKEN_REDACTED
+set GITHUB_TOKEN=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
 set PYTHONIOENCODING=utf-8
 python build_upload.py aiteaching
 ```

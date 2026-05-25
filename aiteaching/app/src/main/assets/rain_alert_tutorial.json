@@ -1,0 +1,1596 @@
+{
+  "tutorialId": "rain-alert-vietnam",
+  "title": {
+    "en": "Build Rain Alert with AI",
+    "vn": "Xây dựng Rain Alert với AI"
+  },
+  "steps": [
+    {
+      "stepNumber": 1,
+      "type": "lesson",
+      "title": {
+        "en": "Tell the AI what you want to build",
+        "vn": "Nói AI bạn muốn xây gì"
+      },
+      "instruction": {
+        "en": "When you want to build an app, you don't need to know HOW to build it. You just need to say WHAT you want it to do, in plain words. The AI will figure out the rest. Our idea: an app where people tap a button to say \"it's raining here,\" and other users nearby get an alert.",
+        "vn": "Khi bạn muốn xây app, bạn không cần biết XÂY thế nào. Bạn chỉ cần nói app LÀM GÌ, bằng lời thường. AI sẽ lo phần còn lại. Ý tưởng: app cho người dùng nhấn nút \"trời đang mưa ở đây,\" và những người dùng gần đó nhận được thông báo."
+      },
+      "promptText": {
+        "en": "Hi! I've never built an app before and I have zero programming experience. I want to make an app where users can tap a button when they see rain in their area, and other users nearby get an alert on their phone. Can you help me build this? What decisions do I need to make first?",
+        "vn": "Xin chào! Tôi chưa bao giờ tạo app trước đây và hoàn toàn không có kinh nghiệm lập trình. Tôi muốn làm một app để người dùng nhấn nút khi thấy trời mưa ở khu vực mình, và những người dùng gần đó sẽ nhận thông báo trên điện thoại. Bạn có thể giúp tôi không? Tôi cần quyết định những gì trước tiên?"
+      },
+      "promptRationale": {
+        "en": "We start in plain English — no jargon. The AI's first job is to ask us the right QUESTIONS (what platform, what language, what features). We learn by answering those questions one at a time.",
+        "vn": "Bắt đầu bằng tiếng Anh thường — không thuật ngữ. Việc đầu tiên của AI là ĐẶT câu hỏi đúng (nền tảng nào, ngôn ngữ nào, tính năng gì). Bạn học bằng cách trả lời từng câu hỏi."
+      },
+      "aiResponse": {
+        "en": "Welcome! Love this idea — a community rain alert app. Before we write anything, I need to know a few things:\n\n(1) Which phones — Android, iPhone, or both? Each is a different world.\n(2) Free or paid app?\n(3) Do users sign up, or anonymous?\n\nI'd recommend Android first: the tools are free, the platform is the world's biggest, and you can install your own app without paying Apple's $99/year fee. Let me know which phones you want to target.",
+        "vn": "Chào bạn! Ý tưởng hay — app cảnh báo mưa cộng đồng. Trước khi viết code, tôi cần biết:\n\n(1) Điện thoại nào — Android, iPhone, hay cả hai?\n(2) App miễn phí hay tính phí?\n(3) User cần đăng ký hay dùng ẩn danh?\n\nTôi đề xuất Android trước: công cụ miễn phí, nền tảng lớn nhất thế giới, bạn có thể tự cài app lên máy mà không cần trả $99/năm cho Apple. Bạn muốn nhắm điện thoại nào?"
+      },
+      "codeSnippets": [
+        {
+          "fileName": "Project Overview",
+          "code": "// Rain Alert Vietnam — Project Structure\n//\n// LANGUAGE:   Kotlin (safe, concise, modern)\n// UI:         Jetpack Compose (declarative)\n// DATABASE:   Firebase Realtime Database\n// MAPS:       Google Maps SDK\n// LOCATION:   Google Play Services - FusedLocationProvider\n// NOTIFS:     Firebase Cloud Messaging (FCM)\n//\n// app/\n//   src/main/\n//     java/com/example/rainalert/\n//       MainActivity.kt       <- App entry point\n//       LocationManager.kt    <- GPS detection\n//       RainReport.kt         <- Data model\n//       ReportManager.kt      <- Firebase write/read\n//       MapManager.kt         <- Map markers\n//       NotificationService.kt<- Push alerts\n//     assets/\n//     res/values/strings.xml\n//   AndroidManifest.xml       <- App permissions\n//   build.gradle              <- Dependencies",
+          "lineExplanations": {
+            "3": {
+              "en": "Kotlin: Google's official Android language since 2017 — concise and null-safe",
+              "vn": "Kotlin: ngôn ngữ Android chính thức của Google từ 2017 — ngắn gọn và null-safe"
+            },
+            "4": {
+              "en": "Compose: write UI as Kotlin functions — no more XML files needed",
+              "vn": "Compose: viết UI bằng hàm Kotlin — không cần file XML nữa"
+            },
+            "5": {
+              "en": "Firebase: Google's cloud platform — stores all rain reports and syncs instantly",
+              "vn": "Firebase: nền tảng cloud của Google — lưu tất cả báo cáo mưa và đồng bộ ngay lập tức"
+            },
+            "11": {
+              "en": "MainActivity.kt: the first screen that appears when the app opens",
+              "vn": "MainActivity.kt: màn hình đầu tiên hiện ra khi mở app"
+            },
+            "12": {
+              "en": "LocationManager.kt: gets the user's GPS position and converts to district name",
+              "vn": "LocationManager.kt: lấy vị trí GPS của người dùng và chuyển thành tên quận"
+            },
+            "17": {
+              "en": "AndroidManifest.xml: tells Android what permissions the app needs (GPS, internet, notifications)",
+              "vn": "AndroidManifest.xml: cho Android biết ứng dụng cần những quyền gì (GPS, internet, thông báo)"
+            }
+          }
+        }
+      ],
+      "clawdExplanation": {
+        "en": "Nice — you just started a real app project the way pros do. They don't open a code editor first. They DESCRIBE what they want and let the AI ask the right questions. Next: picking a language. Don't worry, you don't need to know what one is yet — you'll ask `Claude` to recommend.",
+        "vn": "Tuyệt — bạn vừa khởi đầu một dự án app thật theo cách dân chuyên dùng. Họ không mở trình soạn code trước. Họ MÔ TẢ thứ họ muốn và để AI hỏi câu đúng. Tiếp: chọn ngôn ngữ. Không lo, bạn chưa cần biết nó là gì — bạn sẽ nhờ `Claude` đề xuất."
+      },
+      "answerChoices": [
+        {
+          "en": "Android only, free, anonymous users",
+          "vn": "Chỉ Android, miễn phí, người dùng ẩn danh"
+        }
+      ],
+      "vocabTerms": [
+        {
+          "term": "Kotlin",
+          "color": "#60A5FA",
+          "explanation": {
+            "en": "The programming language we chose — modern, concise, official for Android since 2017",
+            "vn": "Ngôn ngữ lập trình chúng ta chọn — hiện đại, ngắn gọn, chính thức cho Android từ 2017"
+          }
+        },
+        {
+          "term": "Firebase",
+          "color": "#FBBF24",
+          "explanation": {
+            "en": "Google's cloud platform — stores rain reports online and syncs across all phones instantly",
+            "vn": "Nền tảng cloud của Google — lưu báo cáo mưa trực tuyến và đồng bộ qua tất cả điện thoại ngay lập tức"
+          }
+        },
+        {
+          "term": "FCM",
+          "color": "#A78BFA",
+          "explanation": {
+            "en": "Firebase Cloud Messaging — the system that sends push notifications to users' phones",
+            "vn": "Firebase Cloud Messaging — hệ thống gửi thông báo đẩy đến điện thoại người dùng"
+          }
+        },
+        {
+          "term": "GPS",
+          "color": "#10B981",
+          "explanation": {
+            "en": "Global Positioning System — detects the user's exact location so we know which district is reporting rain",
+            "vn": "Hệ thống định vị toàn cầu — phát hiện vị trí chính xác của người dùng để biết quận nào đang báo mưa"
+          }
+        }
+      ],
+      "codeExplainer": {
+        "en": "You described an app idea in plain English and the AI broke it down into real technical decisions. The project structure you see lists every file the app will need — MainActivity.kt is the front door, LocationManager.kt handles GPS, and Firebase is the cloud brain that stores rain reports and sends alerts to other phones.",
+        "vn": "Bạn mô tả ý tưởng app bằng lời thường và AI chia thành các quyết định kỹ thuật thực sự. Cấu trúc dự án liệt kê mọi file app cần — MainActivity.kt là cửa vào, LocationManager.kt xử lý GPS, Firebase là bộ não đám mây lưu báo cáo mưa và gửi cảnh báo đến điện thoại khác."
+      }
+    },
+    {
+      "stepNumber": 2,
+      "type": "lesson",
+      "title": {
+        "en": "Pick a programming language",
+        "vn": "Chọn một ngôn ngữ lập trình"
+      },
+      "instruction": {
+        "en": "A programming language is the words you use to tell the computer what to do — like English vs Vietnamese, but for machines. Different languages do similar jobs but read differently. The AI is asking which one we want. We don't know yet — so we ASK the AI to recommend one, with reasons.",
+        "vn": "Ngôn ngữ lập trình là từ ngữ bạn dùng để bảo máy tính làm gì — như tiếng Anh vs tiếng Việt, nhưng cho máy. Các ngôn ngữ làm việc tương tự nhưng đọc khác nhau. AI hỏi ta muốn dùng ngôn ngữ nào. Ta chưa biết — nên NHỜ AI đề xuất, kèm lý do."
+      },
+      "promptText": {
+        "en": "I want it on Android phones only. I don't know any programming languages at all. Which language should we use, and why? Please explain in simple words, like I'm completely new.",
+        "vn": "Tôi muốn làm app trên điện thoại Android thôi. Tôi không biết bất kỳ ngôn ngữ lập trình nào cả. Nên dùng ngôn ngữ nào, và tại sao? Hãy giải thích bằng lời đơn giản, như thể tôi là người hoàn toàn mới bắt đầu."
+      },
+      "promptRationale": {
+        "en": "Never pretend you know something. Ask the AI to recommend AND explain WHY. The 'why' is the part that teaches you.",
+        "vn": "Đừng bao giờ giả vờ biết. Nhờ AI đề xuất VÀ giải thích VÌ SAO. Phần 'vì sao' là phần dạy bạn."
+      },
+      "aiResponse": {
+        "en": "Good question. For Android, there are two main languages:\n\n• **Java** — older, used in lots of legacy apps, more wordy.\n• **Kotlin** — modern (2011), what Google officially recommends since 2019.\n\nFor a first app I strongly suggest **Kotlin** because:\n(1) Needs about 40% less code than Java to do the same job — less typing, less reading.\n(2) Catches a whole class of crashes (called 'null pointer exceptions') before you even run the app.\n(3) Most new Android apps use it: Pinterest, Trello, Square, Duolingo.\n\nWant me to set up a Kotlin project?",
+        "vn": "Câu hỏi tốt. Cho Android có hai ngôn ngữ chính:\n\n• **Java** — cũ hơn, dùng trong nhiều app cũ, dài dòng hơn.\n• **Kotlin** — hiện đại (2011), được Google khuyến nghị chính thức từ 2019.\n\nCho app đầu tay tôi đề xuất **Kotlin** vì:\n(1) Cần ít hơn ~40% code so với Java — gõ ít, đọc ít.\n(2) Bắt được cả lớp crash (gọi là 'null pointer exception') trước khi chạy.\n(3) Hầu hết app Android mới đều dùng: Pinterest, Trello, Square, Duolingo.\n\nBạn muốn tôi tạo project Kotlin chứ?"
+      },
+      "codeSnippets": [
+        {
+          "fileName": "KotlinBasics.kt",
+          "code": "// 1. DATA CLASS — auto-generates equals(), copy(), toString()\ndata class RainReport(\n    val district: String,\n    val timestamp: Long,\n    val intensity: String\n)\n\n// 2. FUNCTIONS & LAMBDAS\nfun formatTime(ms: Long, onResult: (String) -> Unit) {\n    val minutes = (System.currentTimeMillis() - ms) / 60000\n    onResult(\"$minutes phút trước\")\n}\n\n// 3. NULL SAFETY — the ? means this could be null\nvar location: Location? = null\nval latitude = location?.latitude ?: 0.0  // safe: returns 0.0 if null\n\n// 4. COROUTINES — async without blocking the UI\nviewModelScope.launch {\n    val report = database.getReportAsync()  // waits here\n    updateUI(report)                         // then runs this\n}",
+          "lineExplanations": {
+            "2": {
+              "en": "data class: with one keyword Kotlin creates equals(), hashCode(), copy() and toString() automatically",
+              "vn": "data class: với một từ khóa, Kotlin tự tạo equals(), hashCode(), copy() và toString()"
+            },
+            "9": {
+              "en": "(onResult: (String) -> Unit): this parameter IS a function — called a lambda or callback",
+              "vn": "(onResult: (String) -> Unit): tham số này LÀ một hàm — gọi là lambda hoặc callback"
+            },
+            "15": {
+              "en": "Location? — the ? means this variable can be null (no crash if null, unlike Java)",
+              "vn": "Location? — dấu ? nghĩa là biến này có thể null (không crash nếu null, khác Java)"
+            },
+            "16": {
+              "en": "?. is safe call: only accesses .latitude if location is not null. ?: 0.0 is the fallback value",
+              "vn": "?. là lệnh gọi an toàn: chỉ truy cập .latitude nếu location khác null. ?: 0.0 là giá trị dự phòng"
+            },
+            "19": {
+              "en": "viewModelScope.launch: starts a coroutine — runs async code sequentially without blocking the main thread",
+              "vn": "viewModelScope.launch: khởi chạy coroutine — chạy code bất đồng bộ tuần tự mà không chặn main thread"
+            }
+          }
+        }
+      ],
+      "clawdExplanation": {
+        "en": "You picked `Kotlin`. Notice you didn't pick it because you knew what it was. You picked it because the AI gave you reasons that made sense. That's how real developers choose tools every day. Next: how the AI will actually DRAW the screens you'll see in the app.",
+        "vn": "Bạn chọn `Kotlin`. Chú ý: bạn không chọn vì biết nó là gì. Bạn chọn vì AI cho lý do hợp lý. Dev thật chọn công cụ kiểu này hàng ngày. Tiếp: AI sẽ VẼ những màn hình bạn thấy trong app thế nào."
+      },
+      "answerChoices": [
+        {
+          "en": "Yes — let's use Kotlin",
+          "vn": "Đồng ý — dùng Kotlin"
+        }
+      ],
+      "vocabTerms": [
+        {
+          "term": "data class",
+          "color": "#60A5FA",
+          "explanation": {
+            "en": "One keyword that auto-creates equals(), copy(), and toString() — saves writing dozens of lines",
+            "vn": "Một từ khóa tự tạo equals(), copy() và toString() — tiết kiệm hàng chục dòng code"
+          }
+        },
+        {
+          "term": "val",
+          "color": "#A78BFA",
+          "explanation": {
+            "en": "Declares a read-only variable — once set it cannot be changed (like a permanent label)",
+            "vn": "Khai báo biến chỉ đọc — một khi đặt không thể thay đổi (như nhãn cố định)"
+          }
+        },
+        {
+          "term": "lambda",
+          "color": "#FBBF24",
+          "explanation": {
+            "en": "A function passed as a value — lets you hand a block of code to another function to call later",
+            "vn": "Hàm được truyền như một giá trị — cho phép truyền khối code cho hàm khác để gọi sau"
+          }
+        },
+        {
+          "term": "coroutine",
+          "color": "#10B981",
+          "explanation": {
+            "en": "Runs async code without freezing the UI — like pausing a task and resuming it later without blocking",
+            "vn": "Chạy code bất đồng bộ mà không đóng băng UI — như tạm dừng công việc và tiếp tục sau mà không chặn"
+          }
+        }
+      ],
+      "codeExplainer": {
+        "en": "The code shows four key Kotlin ideas. A 'data class' is a container that holds information about one rain report. 'val' and 'var' are two ways to store a value — val is locked, var can change. A lambda is a mini-function you pass around like a note. A coroutine lets the app fetch data from the internet without freezing the screen while it waits.",
+        "vn": "Code cho thấy bốn ý tưởng Kotlin chính. 'data class' là hộp chứa thông tin về một báo cáo mưa. 'val' và 'var' là hai cách lưu giá trị — val bị khóa, var có thể thay đổi. Lambda là hàm nhỏ bạn truyền đi như tờ giấy nhắn. Coroutine cho app lấy dữ liệu từ internet mà không làm đóng băng màn hình khi chờ."
+      }
+    },
+    {
+      "stepNumber": 3,
+      "type": "lesson",
+      "title": {
+        "en": "Pick a way to build the screens",
+        "vn": "Chọn cách xây dựng màn hình"
+      },
+      "instruction": {
+        "en": "An app has screens — the things you tap and look at. Developers can either DRAW them in separate layout files (the old way) or DESCRIBE them inside the code (the new way). Two approaches with different trade-offs. Let's ask the AI to compare.",
+        "vn": "App có màn hình — thứ bạn chạm vào và nhìn vào. Dev có thể VẼ chúng trong file layout riêng (cách cũ) hoặc MÔ TẢ chúng trong code (cách mới). Hai cách, đánh đổi khác nhau. Hỏi AI so sánh."
+      },
+      "promptText": {
+        "en": "Great — Kotlin it is. Now, how do we build the screens that users will see? What are my options and what do you recommend for a beginner?",
+        "vn": "Tuyệt — dùng Kotlin nhé. Bây giờ, làm thế nào để xây dựng các màn hình mà người dùng sẽ nhìn thấy? Tôi có những lựa chọn nào và bạn đề xuất gì cho người mới bắt đầu?"
+      },
+      "promptRationale": {
+        "en": "Same trick as the last step: ask for options + recommendation. The AI's job is to weigh trade-offs for you so you can decide.",
+        "vn": "Cùng mẹo như bước trước: hỏi tùy chọn + đề xuất. Việc của AI là cân đánh đổi để bạn quyết định."
+      },
+      "aiResponse": {
+        "en": "Two ways:\n\n(1) **XML layouts** — the old way. You write a separate file (XML) that describes how the screen looks, then connect it to your Kotlin code. Two languages, two files per screen.\n\n(2) **Jetpack Compose** — Google's new way (since 2021). You describe screens INSIDE your Kotlin code, using regular function calls. One language. Live preview as you type.\n\nI strongly recommend **Compose**:\n• Less to learn (just Kotlin, no XML)\n• ~30% less code than XML\n• It's the future — Google switched all their new apps to it.\n\nReady to write your first screen?",
+        "vn": "Hai cách:\n\n(1) **XML layouts** — cách cũ. Bạn viết file XML riêng mô tả màn hình, rồi nối với code Kotlin. Hai ngôn ngữ, hai file mỗi màn hình.\n\n(2) **Jetpack Compose** — cách mới của Google (từ 2021). Mô tả màn hình NGAY TRONG code Kotlin, gọi function thông thường. Một ngôn ngữ. Live preview khi gõ.\n\nTôi đề xuất **Compose**:\n• Ít phải học hơn (chỉ Kotlin, bỏ XML)\n• Ít code hơn ~30% so với XML\n• Là tương lai — Google đã chuyển tất cả app mới sang.\n\nSẵn sàng viết màn hình đầu tiên chưa?"
+      },
+      "codeSnippets": [
+        {
+          "fileName": "AndroidManifest.xml",
+          "code": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\"\n    package=\"com.example.rainalert\">\n\n    <uses-permission android:name=\"android.permission.ACCESS_FINE_LOCATION\"/>\n    <uses-permission android:name=\"android.permission.ACCESS_COARSE_LOCATION\"/>\n    <uses-permission android:name=\"android.permission.POST_NOTIFICATIONS\"/>\n    <uses-permission android:name=\"android.permission.INTERNET\"/>\n\n    <application\n        android:allowBackup=\"true\"\n        android:label=\"@string/app_name\"\n        android:theme=\"@style/Theme.RainAlert\">\n        <activity\n            android:name=\".MainActivity\"\n            android:exported=\"true\">\n            <intent-filter>\n                <action android:name=\"android.intent.action.MAIN\" />\n                <category android:name=\"android.intent.category.LAUNCHER\" />\n            </intent-filter>\n        </activity>\n    </application>\n</manifest>",
+          "lineExplanations": {
+            "5": {
+              "en": "ACCESS_FINE_LOCATION: uses GPS for precise district-level location (within 10 metres)",
+              "vn": "ACCESS_FINE_LOCATION: dùng GPS để xác định vị trí chính xác cấp quận (trong vòng 10 mét)"
+            },
+            "6": {
+              "en": "ACCESS_COARSE_LOCATION: fallback using cell towers/WiFi when GPS is unavailable — less accurate but faster",
+              "vn": "ACCESS_COARSE_LOCATION: dự phòng dùng tháp di động/WiFi khi GPS không khả dụng — kém chính xác hơn nhưng nhanh hơn"
+            },
+            "7": {
+              "en": "POST_NOTIFICATIONS: mandatory on Android 13+ — without this the app cannot show rain alerts",
+              "vn": "POST_NOTIFICATIONS: bắt buộc trên Android 13+ — thiếu quyền này app không thể hiển thị cảnh báo mưa"
+            },
+            "8": {
+              "en": "INTERNET: required for Firebase database sync and FCM push notifications — without this, no cloud features work",
+              "vn": "INTERNET: cần cho đồng bộ Firebase và thông báo đẩy FCM — thiếu quyền này, mọi tính năng cloud đều không hoạt động"
+            },
+            "18": {
+              "en": "android.intent.action.MAIN + LAUNCHER: marks MainActivity as the app's entry point (icon on home screen)",
+              "vn": "android.intent.action.MAIN + LAUNCHER: đánh dấu MainActivity là điểm khởi đầu của app (biểu tượng trên màn hình chính)"
+            }
+          }
+        },
+        {
+          "fileName": "build.gradle (app)",
+          "code": "android {\n    compileSdk 34\n    defaultConfig {\n        applicationId \"com.example.rainalert\"\n        minSdk 24\n        targetSdk 34\n    }\n    buildFeatures { compose true }\n    composeOptions {\n        kotlinCompilerExtensionVersion '1.5.11'\n    }\n}\n\ndependencies {\n    // Jetpack Compose UI toolkit\n    implementation platform('androidx.compose:compose-bom:2024.05.00')\n    implementation 'androidx.compose.ui:ui'\n    implementation 'androidx.compose.material3:material3'\n\n    // Google Location Services — FusedLocationProvider\n    implementation 'com.google.android.gms:play-services-location:21.1.0'\n\n    // Google Maps\n    implementation 'com.google.android.gms:play-services-maps:18.2.0'\n\n    // Firebase — real-time database + push notifications\n    implementation platform('com.google.firebase:firebase-bom:32.7.0')\n    implementation 'com.google.firebase:firebase-database-ktx'\n    implementation 'com.google.firebase:firebase-messaging-ktx'\n}",
+          "lineExplanations": {
+            "5": {
+              "en": "minSdk 24 = Android 7.0: covers 95%+ of active Android devices worldwide",
+              "vn": "minSdk 24 = Android 7.0: bao phủ hơn 95% thiết bị Android đang hoạt động trên toàn thế giới"
+            },
+            "8": {
+              "en": "compose true: enables Jetpack Compose — changes how the Kotlin compiler processes @Composable functions",
+              "vn": "compose true: bật Jetpack Compose — thay đổi cách trình biên dịch Kotlin xử lý các hàm @Composable"
+            },
+            "15": {
+              "en": "BOM (Bill of Materials): manages all Compose library versions together — prevents version conflicts",
+              "vn": "BOM (Bill of Materials): quản lý tất cả phiên bản thư viện Compose — ngăn chặn xung đột phiên bản"
+            },
+            "19": {
+              "en": "play-services-location: Google's battery-efficient location API — combines GPS, WiFi, and cell towers intelligently",
+              "vn": "play-services-location: API vị trí tiết kiệm pin của Google — kết hợp GPS, WiFi và tháp di động một cách thông minh"
+            },
+            "25": {
+              "en": "firebase-bom: ensures all Firebase libraries use compatible versions with each other",
+              "vn": "firebase-bom: đảm bảo tất cả thư viện Firebase sử dụng các phiên bản tương thích với nhau"
+            },
+            "26": {
+              "en": "firebase-database-ktx: Kotlin extensions for Realtime Database — allows coroutine-based async calls",
+              "vn": "firebase-database-ktx: phần mở rộng Kotlin cho Realtime Database — cho phép gọi bất đồng bộ dựa trên coroutine"
+            }
+          }
+        }
+      ],
+      "clawdExplanation": {
+        "en": "Same recipe — you asked, AI weighed options, AI recommended with reasons, YOU decided. You now have a plan: Android + `Kotlin` + `Compose`. You don't need to know what those are technically. You know WHY they were chosen. Next: writing the actual first piece of code.",
+        "vn": "Cùng công thức — bạn hỏi, AI cân nhắc, AI đề xuất có lý do, BẠN quyết. Giờ bạn có kế hoạch: Android + `Kotlin` + `Compose`. Bạn không cần biết kỹ thuật chúng là gì. Bạn biết VÌ SAO chọn. Tiếp: viết miếng code đầu tiên."
+      },
+      "answerChoices": [
+        {
+          "en": "Yes — let's use Jetpack Compose",
+          "vn": "Đồng ý — dùng Jetpack Compose"
+        }
+      ],
+      "vocabTerms": [
+        {
+          "term": "@Composable",
+          "color": "#DA7756",
+          "explanation": {
+            "en": "A tag on a function meaning \"this draws part of the screen\" — Compose's most important annotation",
+            "vn": "Nhãn trên hàm có nghĩa là \"cái này vẽ một phần màn hình\" — annotation quan trọng nhất của Compose"
+          }
+        },
+        {
+          "term": "permission",
+          "color": "#FBBF24",
+          "explanation": {
+            "en": "A line in AndroidManifest.xml that asks Android for access to GPS, internet, or notifications",
+            "vn": "Dòng trong AndroidManifest.xml yêu cầu Android cấp quyền truy cập GPS, internet hoặc thông báo"
+          }
+        },
+        {
+          "term": "BOM",
+          "color": "#10B981",
+          "explanation": {
+            "en": "Bill of Materials — a list that pins all library versions so they don't conflict with each other",
+            "vn": "Danh sách vật liệu — danh sách ghim tất cả phiên bản thư viện để chúng không xung đột"
+          }
+        },
+        {
+          "term": "minSdk",
+          "color": "#60A5FA",
+          "explanation": {
+            "en": "The oldest Android version the app supports — minSdk 24 covers 95%+ of active phones worldwide",
+            "vn": "Phiên bản Android cũ nhất mà app hỗ trợ — minSdk 24 bao phủ hơn 95% điện thoại đang hoạt động"
+          }
+        }
+      ],
+      "codeExplainer": {
+        "en": "Two files were created. AndroidManifest.xml is like a permission slip — it tells Android what the app is allowed to do (use GPS, send notifications, access the internet). build.gradle is the shopping list — it tells Android Studio which code libraries to download, like Compose for drawing screens and Firebase for the cloud.",
+        "vn": "Hai file được tạo. AndroidManifest.xml như giấy xin phép — nó nói Android app được làm gì (dùng GPS, gửi thông báo, truy cập internet). build.gradle là danh sách mua sắm — nói Android Studio tải thư viện code nào, như Compose để vẽ màn hình và Firebase cho đám mây."
+      }
+    },
+    {
+      "stepNumber": 4,
+      "type": "lesson",
+      "title": {
+        "en": "Make the first screen",
+        "vn": "Tạo màn hình đầu tiên"
+      },
+      "instruction": {
+        "en": "Now we tell the AI exactly what the first screen should look like, in plain English. The AI writes the code. Don't worry about reading every line — the line-by-line notes on the right will explain each piece as it appears.",
+        "vn": "Giờ ta nói AI chính xác màn hình đầu tiên trông thế nào, bằng tiếng Anh thường. AI viết code. Đừng lo đọc từng dòng — chú thích bên phải sẽ giải thích từng phần khi nó xuất hiện."
+      },
+      "promptText": {
+        "en": "Let's build the main screen. It should have:\n1. A big title at the top saying 'Rain Alert Vietnam'\n2. A short subtitle saying 'Tap the button if you see rain'\n3. One large orange button below saying \"It's Raining Here\"\n\nWrite the Kotlin Compose code and explain every single line. Pretend I've never seen code before.",
+        "vn": "Hãy xây dựng màn hình chính. Màn hình cần có:\n1. Tiêu đề lớn ở trên cùng: 'Rain Alert Vietnam'\n2. Phụ đề ngắn: 'Nhấn nút nếu bạn thấy trời mưa'\n3. Một nút lớn màu cam bên dưới: \"Đang Mưa ửe Đây\"\n\nHãy viết code Kotlin Compose và giải thích từng dòng một. Coi như tôi chưa bao giờ nhìn thấy code trước đây."
+      },
+      "promptRationale": {
+        "en": "Be specific. Title text? Yes. Subtitle? Yes. Colour? Yes. Asking the AI to explain EVERY LINE turns a code dump into a lesson.",
+        "vn": "Cụ thể. Tiêu đề? Có. Phụ đề? Có. Màu? Có. Nhờ AI giải thích MỖI DÒNG biến code thành bài học."
+      },
+      "aiResponse": {
+        "en": "Here's your main screen. A few words to know:\n\n• `@Composable` — a tag that says 'this function draws part of a screen'\n• `fun` — short for 'function', a reusable block of code\n• `Text(...)` — draws text on screen\n• `Button(...)` — draws a tappable button\n• `Column` — stacks things on top of each other vertically\n• `Modifier` — controls size, padding, colour, like CSS for the web\n\nRead it once, then look at the line notes on the right to see what each line does. Don't try to memorise it — you'll never have to type this by hand.",
+        "vn": "Đây là màn hình chính của bạn. Vài từ cần biết:\n\n• `@Composable` — nhãn nói \"function này vẽ một phần màn hình\"\n• `fun` — viết tắt của 'function', khối code tái sử dụng được\n• `Text(...)` — vẽ chữ trên màn hình\n• `Button(...)` — vẽ nút bấm được\n• `Column` — xếp các thứ chồng dọc lên nhau\n• `Modifier` — điều chỉnh kích thước, padding, màu — như CSS web\n\nĐọc một lần, rồi xem chú thích dòng bên phải. Đừng cố thuộc — bạn sẽ không bao giờ phải tự gõ lại."
+      },
+      "codeSnippets": [
+        {
+          "fileName": "ComposeDemo.kt",
+          "code": "// @Composable — this function DESCRIBES the UI, doesn't draw it\n@Composable\nfun WeatherCard(district: String, condition: String) {\n    Card(\n        modifier = Modifier.fillMaxWidth().padding(16.dp),\n        elevation = CardDefaults.cardElevation(4.dp)\n    ) {\n        Row(modifier = Modifier.padding(16.dp)) {\n            Text(text = district, fontWeight = FontWeight.Bold)\n            Spacer(modifier = Modifier.width(8.dp))\n            Text(text = condition, color = Color.Gray)\n        }\n    }\n}\n\n// STATE — when this changes, Compose redraws the card automatically\n@Composable\nfun MainScreen() {\n    var district by remember { mutableStateOf(\"Đang tải...\") }\n\n    // When location is detected, just update the state\n    LaunchedEffect(Unit) {\n        district = detectUserDistrict()  // GPS lookup\n    }\n\n    // Compose automatically reruns WeatherCard with the new value\n    WeatherCard(district = district, condition = \"Trời nắng\")\n}",
+          "lineExplanations": {
+            "2": {
+              "en": "@Composable: tells Kotlin compiler this function describes UI — it can be called from other @Composable functions",
+              "vn": "@Composable: báo cho trình biên dịch Kotlin biết hàm này mô tả UI — có thể gọi từ các hàm @Composable khác"
+            },
+            "4": {
+              "en": "Card: a Material Design surface with rounded corners and elevation (shadow) — just call it like a function",
+              "vn": "Card: bề mặt Material Design với góc bo tròn và elevation (bóng) — chỉ cần gọi như một hàm"
+            },
+            "5": {
+              "en": "Modifier.fillMaxWidth().padding(): Compose uses method chaining to build layout rules — reads left to right",
+              "vn": "Modifier.fillMaxWidth().padding(): Compose dùng chuỗi phương thức để xây dựng quy tắc layout — đọc từ trái sang phải"
+            },
+            "18": {
+              "en": "remember { mutableStateOf() }: creates reactive state — Compose watches this variable and redraws when it changes",
+              "vn": "remember { mutableStateOf() }: tạo state reactive — Compose theo dõi biến này và vẽ lại khi nó thay đổi"
+            },
+            "21": {
+              "en": "LaunchedEffect(Unit): runs a coroutine once when the composable first appears — perfect for loading data",
+              "vn": "LaunchedEffect(Unit): chạy coroutine một lần khi composable xuất hiện lần đầu — hoàn hảo để tải dữ liệu"
+            },
+            "25": {
+              "en": "When district changes on line 23, Compose automatically reruns this line with the new value — no manual update needed",
+              "vn": "Khi district thay đổi ở dòng 23, Compose tự động chạy lại dòng này với giá trị mới — không cần cập nhật thủ công"
+            }
+          }
+        }
+      ],
+      "clawdExplanation": {
+        "en": "🎉 You just wrote your first code — well, the AI did, you described it. Each line has one job. `@Composable` is a stamp saying \"this is a screen part.\" `Text()` and `Button()` are Lego blocks — call them, they appear. You're not memorising. You're learning to READ. Next: how the app remembers things — variables.",
+        "vn": "🎉 Bạn vừa viết code đầu tiên — đúng ra là AI viết, bạn mô tả. Mỗi dòng có một việc. `@Composable` là con dấu nói \"đây là một phần màn hình.\" `Text()` và `Button()` là viên Lego — gọi, chúng xuất hiện. Bạn không thuộc lòng. Bạn học cách ĐỌC. Tiếp: app ghi nhớ thông tin thế nào — variables."
+      },
+      "answerChoices": [],
+      "vocabTerms": [
+        {
+          "term": "@Composable",
+          "color": "#DA7756",
+          "explanation": {
+            "en": "Marks a function as a UI builder — only @Composable functions can call other @Composable functions",
+            "vn": "Đánh dấu hàm là bộ xây dựng UI — chỉ hàm @Composable mới có thể gọi hàm @Composable khác"
+          }
+        },
+        {
+          "term": "remember",
+          "color": "#A78BFA",
+          "explanation": {
+            "en": "Stores a value across recompositions — without it, state resets every time the screen redraws",
+            "vn": "Lưu trữ giá trị qua các lần recompose — nếu thiếu, state bị đặt lại mỗi khi màn hình vẽ lại"
+          }
+        },
+        {
+          "term": "Modifier",
+          "color": "#60A5FA",
+          "explanation": {
+            "en": "A chain of layout rules — controls size, padding, colour and click behaviour, read left to right",
+            "vn": "Chuỗi quy tắc layout — kiểm soát kích thước, padding, màu và hành vi nhấp, đọc từ trái sang phải"
+          }
+        },
+        {
+          "term": "LaunchedEffect",
+          "color": "#10B981",
+          "explanation": {
+            "en": "Runs a coroutine once when the composable first appears — perfect for loading data on screen open",
+            "vn": "Chạy coroutine một lần khi composable xuất hiện lần đầu — hoàn hảo để tải dữ liệu khi mở màn hình"
+          }
+        }
+      ],
+      "codeExplainer": {
+        "en": "You wrote your first screen using Jetpack Compose. Every piece of the screen is a function — @Composable marks it as a screen builder. 'Card' draws a white box with a shadow. 'remember { mutableStateOf() }' creates a live variable — when it changes, Compose automatically redraws that part of the screen. LaunchedEffect runs code once when the screen first opens, like loading the user's location.",
+        "vn": "Bạn viết màn hình đầu tiên bằng Jetpack Compose. Mỗi phần màn hình là một hàm — @Composable đánh dấu nó là bộ xây dựng màn hình. 'Card' vẽ hộp trắng có bóng. 'remember { mutableStateOf() }' tạo biến sống — khi thay đổi, Compose tự vẽ lại phần đó. LaunchedEffect chạy code một lần khi màn hình mở lần đầu, như tải vị trí người dùng."
+      }
+    },
+    {
+      "stepNumber": 5,
+      "type": "lesson",
+      "title": {
+        "en": "How the app remembers things — variables",
+        "vn": "Cách app ghi nhớ — variables"
+      },
+      "instruction": {
+        "en": "An app constantly needs to remember things — the time of a rain report, whether the user tapped the button, how many reports exist. We store information in VARIABLES. Two kinds in Kotlin:\n\n• `val` — a sticky note you write once and never change\n• `var` — a sticky note where you can cross out the old value and write a new one",
+        "vn": "App liên tục cần nhớ — thời gian báo mưa, user đã nhấn nút chưa, có bao nhiêu báo cáo. Ta lưu thông tin vào VARIABLES. Hai loại trong Kotlin:\n\n• `val` — tờ giấy ghi chú viết một lần, không sửa\n• `var` — tờ giấy có thể gạch giá trị cũ và viết giá trị mới"
+      },
+      "promptText": {
+        "en": "I want the app to remember two things:\n1. The exact time when the user tapped the report button — this won't change after it's set.\n2. Whether the user has already reported rain today — this starts as false, becomes true when they tap.\n\nShow me the Kotlin code, and please explain the difference between `val` and `var` like I'm five.",
+        "vn": "Tôi muốn app ghi nhớ hai thứ:\n1. Thời gian chính xác khi người dùng nhấn nút báo mưa — thứ này sẽ không thay đổi sau khi được lưu.\n2. Liệu người dùng đã báo mưa hôm nay chưa — bắt đầu là false, trở thành true khi họ nhấn nút.\n\nHãy chỉ cho tôi code Kotlin và giải thích sự khác biệt giữa `val` và `var` như thể tôi 5 tuổi."
+      },
+      "promptRationale": {
+        "en": "Describe both things you want to store AND ask the AI to explain the underlying concept. \"Explain like I'm five\" is a legit prompt — it tells the AI to drop the jargon.",
+        "vn": "Mô tả cả hai thứ cần lưu VÀ nhờ AI giải thích khái niệm. \"Giải thích như tôi 5 tuổi\" là prompt hợp lệ — bảo AI bỏ thuật ngữ."
+      },
+      "aiResponse": {
+        "en": "Sticky notes!\n\nImagine your fridge. You stick two notes on it:\n• Note A: \"My birthday: March 14\" — you'll never change this. That's a `val`. Write once, read forever.\n• Note B: \"My current mood: 😐\" — you might cross it out tomorrow and write \"😊\". That's a `var`. Can be rewritten.\n\nFor your app:\n• `val reportTime = System.currentTimeMillis()` → the moment they tapped, frozen forever.\n• `var hasReported = false` → starts false, becomes true on tap.\n\nRule of thumb: use `val` everywhere you can. Only use `var` if you REALLY need to change the value later. Less change = fewer bugs.",
+        "vn": "Tờ giấy ghi chú!\n\nTưởng tượng tủ lạnh. Bạn dán hai tờ giấy:\n• Giấy A: \"Sinh nhật: 14/3\" — không bao giờ đổi. Đó là `val`. Viết một lần, đọc mãi.\n• Giấy B: \"Tâm trạng hiện tại: 😐\" — mai bạn có thể gạch và viết \"😊\". Đó là `var`. Đổi được.\n\nCho app:\n• `val reportTime = System.currentTimeMillis()` → khoảnh khắc họ nhấn, đóng băng mãi mãi.\n• `var hasReported = false` → bắt đầu false, thành true khi nhấn.\n\nQuy tắc: dùng `val` ở đâu được thì dùng. Chỉ dùng `var` khi THẬT SỰ cần đổi sau. Ít đổi = ít bug."
+      },
+      "codeSnippets": [
+        {
+          "fileName": "MainActivity.kt",
+          "code": "class MainActivity : ComponentActivity() {\n    override fun onCreate(savedInstanceState: Bundle?) {\n        super.onCreate(savedInstanceState)\n        setContent {\n            RainAlertTheme {\n                MainScreen()\n            }\n        }\n    }\n}\n\n@Composable\nfun MainScreen() {\n    Scaffold(\n        topBar = {\n            TopAppBar(title = { Text(\"Rain Alert VN\") })\n        },\n        floatingActionButton = {\n            ExtendedFloatingActionButton(\n                onClick = { /* show report dialog */ },\n                icon = { Text(\"🌧️\") },\n                text = { Text(\"Báo cáo mưa\") }\n            )\n        }\n    ) { padding ->\n        Column(Modifier.fillMaxSize().padding(padding)) {\n            WeatherStatusCard()\n            GoogleMapView(Modifier.weight(1f))\n            RecentReportsList()\n        }\n    }\n}",
+          "lineExplanations": {
+            "4": {
+              "en": "setContent{}: Compose entry point — everything inside uses the new UI system (replaces old setContentView(R.layout.main))",
+              "vn": "setContent{}: điểm vào Compose — mọi thứ bên trong dùng hệ thống UI mới (thay thế setContentView(R.layout.main) cũ)"
+            },
+            "5": {
+              "en": "RainAlertTheme: applies your app's color palette and typography to all child components automatically",
+              "vn": "RainAlertTheme: áp dụng bảng màu và kiểu chữ của app cho tất cả thành phần con tự động"
+            },
+            "13": {
+              "en": "Scaffold: the Material3 screen skeleton — handles StatusBar padding, TopBar, FAB placement and snackbars",
+              "vn": "Scaffold: khung xương màn hình Material3 — xử lý padding StatusBar, TopBar, vị trí FAB và snackbar"
+            },
+            "18": {
+              "en": "ExtendedFloatingActionButton: wide FAB with text — most visible way to expose the app's primary action",
+              "vn": "ExtendedFloatingActionButton: FAB rộng có text — cách hiển thị rõ ràng nhất hành động chính của app"
+            },
+            "24": {
+              "en": "padding parameter from Scaffold: avoids content hiding behind TopBar or FAB — always use this!",
+              "vn": "tham số padding từ Scaffold: tránh nội dung bị ẩn sau TopBar hoặc FAB — luôn dùng cái này!"
+            },
+            "26": {
+              "en": "weight(1f): the map gets ALL remaining vertical space — number doesn't matter, 1 out of 1 = 100%",
+              "vn": "weight(1f): bản đồ nhận TOÀN BỘ không gian dọc còn lại — số không quan trọng, 1 trên 1 = 100%"
+            }
+          }
+        },
+        {
+          "fileName": "WeatherStatusCard.kt",
+          "code": "@Composable\nfun WeatherStatusCard(district: String = \"Quận 1\") {\n    Card(\n        modifier = Modifier.fillMaxWidth().padding(12.dp),\n        elevation = CardDefaults.cardElevation(4.dp),\n        colors = CardDefaults.cardColors(\n            containerColor = MaterialTheme.colorScheme.primaryContainer\n        )\n    ) {\n        Row(\n            modifier = Modifier.padding(16.dp),\n            verticalAlignment = Alignment.CenterVertically\n        ) {\n            Text(text = \"☀️\", fontSize = 40.sp)\n            Spacer(modifier = Modifier.width(16.dp))\n            Column {\n                Text(\n                    text = district,\n                    style = MaterialTheme.typography.titleMedium,\n                    fontWeight = FontWeight.Bold\n                )\n                Text(\"Trời nắng • 32°C\",\n                    style = MaterialTheme.typography.bodyMedium)\n                Text(\"Cập nhật 5 phút trước\",\n                    style = MaterialTheme.typography.bodySmall,\n                    color = MaterialTheme.colorScheme.outline)\n            }\n        }\n    }\n}",
+          "lineExplanations": {
+            "6": {
+              "en": "primaryContainer: a lighter shade of your primary color — perfect for info cards that should stand out but not dominate",
+              "vn": "primaryContainer: sắc tố nhạt hơn của màu chính — hoàn hảo cho thẻ thông tin nên nổi bật nhưng không lấn át"
+            },
+            "14": {
+              "en": "Text(\"☀️\"): emoji works as an icon in Compose — no need to import icon libraries for simple icons",
+              "vn": "Text(\"☀️\"): emoji hoạt động như icon trong Compose — không cần nhập thư viện icon cho các icon đơn giản"
+            },
+            "18": {
+              "en": "district variable: this comes from GPS — when location updates, Compose redraws this card automatically",
+              "vn": "biến district: đến từ GPS — khi vị trí cập nhật, Compose tự động vẽ lại thẻ này"
+            },
+            "19": {
+              "en": "typography.titleMedium: Material3 text style — consistent sizing across the whole app without hardcoding sp values",
+              "vn": "typography.titleMedium: kiểu text Material3 — kích thước nhất quán trên toàn app mà không hardcode giá trị sp"
+            }
+          }
+        }
+      ],
+      "clawdExplanation": {
+        "en": "Variables are the app's memory. `val` = write once. `var` = re-writable. That's it. Real developers use 80% `val` because most things shouldn't change. Less change = fewer bugs. Next: a weird one — what happens when info just isn't there yet? The dreaded `null`.",
+        "vn": "Variables = bộ nhớ của app. `val` = viết một lần. `var` = sửa được. Hết. Dev thật dùng 80% là `val` vì hầu hết thứ không nên đổi. Ít đổi = ít bug. Tiếp: kỳ lạ — chuyện gì xảy ra khi chưa có thông tin? `null` đáng sợ."
+      },
+      "answerChoices": [],
+      "vocabTerms": [
+        {
+          "term": "val",
+          "color": "#60A5FA",
+          "explanation": {
+            "en": "Write-once variable — set it and it never changes, like carving into stone",
+            "vn": "Biến ghi một lần — đặt xong không bao giờ thay đổi, như khắc vào đá"
+          }
+        },
+        {
+          "term": "var",
+          "color": "#FBBF24",
+          "explanation": {
+            "en": "Re-writable variable — can be updated any time, like a whiteboard you erase and rewrite",
+            "vn": "Biến có thể sửa — có thể cập nhật bất kỳ lúc nào, như bảng trắng bạn xóa rồi viết lại"
+          }
+        },
+        {
+          "term": "Scaffold",
+          "color": "#A78BFA",
+          "explanation": {
+            "en": "Material3's screen skeleton — positions the top bar, FAB and content area so you don't have to",
+            "vn": "Khung xương màn hình Material3 — đặt vị trí thanh trên, FAB và vùng nội dung cho bạn"
+          }
+        },
+        {
+          "term": "FAB",
+          "color": "#10B981",
+          "explanation": {
+            "en": "Floating Action Button — the large round button for the app's most important action (reporting rain)",
+            "vn": "Nút hành động nổi — nút tròn lớn cho hành động quan trọng nhất của app (báo mưa)"
+          }
+        }
+      ],
+      "codeExplainer": {
+        "en": "The main screen is now fully structured. Scaffold acts like a room blueprint — it places the top bar at the top, the FAB button at the bottom-right, and the content in between. Inside the content area there are three stacked sections: a weather status card, a full-screen Google Map, and a list of recent reports. The padding parameter from Scaffold stops the content hiding behind the bars.",
+        "vn": "Màn hình chính đã có cấu trúc đầy đủ. Scaffold như bản thiết kế phòng — đặt thanh trên ở trên cùng, nút FAB ở dưới-phải, nội dung ở giữa. Trong vùng nội dung có ba phần xếp chồng: thẻ trạng thái thời tiết, Google Map toàn màn hình và danh sách báo cáo gần đây. Tham số padding từ Scaffold ngăn nội dung bị ẩn sau các thanh."
+      }
+    },
+    {
+      "stepNumber": 6,
+      "type": "lesson",
+      "title": {
+        "en": "What if there's nothing? — null",
+        "vn": "Nếu chưa có gì thì sao? — null"
+      },
+      "instruction": {
+        "en": "Sometimes the app expects information but it isn't there yet. Example: the user's GPS location — until they grant permission AND the satellite fix happens, there's no location. In code, this \"nothing\" is called `null`. Think of it as an empty box.\n\nTHE DANGER: if the app tries to USE an empty box (like 'read the latitude from this empty location'), it crashes. Kotlin has special punctuation (`?`) to handle this safely.",
+        "vn": "Đôi khi app cần thông tin nhưng chưa có. Ví dụ: vị trí GPS — trước khi user cấp quyền VÀ vệ tinh khóa được vị trí, không có dữ liệu. Trong code, \"không có gì\" gọi là `null`. Hãy nghĩ như cái hộp rỗng.\n\nNGUY HIỂM: nếu app cố MỞ hộp rỗng (như \"đọc kinh độ từ vị trí rỗng này\"), app crash. Kotlin có ký hiệu đặc biệt (`?`) xử lý an toàn."
+      },
+      "promptText": {
+        "en": "Sometimes the user's location won't be available yet — maybe they haven't granted permission, or GPS hasn't found them. How do I store the location safely so the app doesn't crash if it's not there yet? Explain what `null` means and the safe way to handle it.",
+        "vn": "Đôi khi vị trí của người dùng chưa có — có thể họ chưa cấp quyền, hoặc GPS chưa định vị được. Làm thế nào để lưu vị trí một cách an toàn để app không bị crash? Giải thích `null` là gì và cách xử lý an toàn."
+      },
+      "promptRationale": {
+        "en": "Describe the REAL scenario (\"location not available yet\") and ask for safety. The AI introduces `null` and `?` naturally because they answer your scenario.",
+        "vn": "Mô tả tình huống THẬT (\"vị trí chưa có\") và hỏi cách an toàn. AI giới thiệu `null` và `?` tự nhiên vì đó là câu trả lời."
+      },
+      "aiResponse": {
+        "en": "`null` literally means \"nothing here.\" An empty box.\n\nIn Kotlin, if you declare a variable as `Location`, it MUST have a value — Kotlin guarantees it. But if you write `Location?` (with the question mark), you're saying \"this might be empty.\"\n\nThen, before you USE the value, you check:\n• `currentLocation?.latitude` — the `?.` is a SAFE CALL. It means \"if it's not null, get the latitude. If it IS null, give me null back instead of crashing.\"\n• `if (currentLocation != null) { … }` — old-school explicit check.\n\nBoth work. `?.` is shorter and what most Kotlin code uses today.",
+        "vn": "`null` nghĩa đen là \"không có gì.\" Cái hộp rỗng.\n\nTrong Kotlin, nếu khai biến là `Location`, nó BUỘC PHẢI có giá trị. Nhưng nếu viết `Location?` (có dấu hỏi), bạn nói \"có thể rỗng.\"\n\nRồi trước khi DÙNG, kiểm tra:\n• `currentLocation?.latitude` — `?.` là SAFE CALL. Nghĩa là \"nếu khác null, lấy latitude. Nếu LÀ null, trả null thay vì crash.\"\n• `if (currentLocation != null) { … }` — kiểm tra rõ ràng kiểu cũ.\n\nCả hai đều hoạt động. `?.` ngắn gọn và hầu hết Kotlin hiện đại dùng."
+      },
+      "codeSnippets": [
+        {
+          "fileName": "LocationManager.kt",
+          "code": "class LocationManager(private val context: Context) {\n\n    private val fusedLocationClient =\n        LocationServices.getFusedLocationProviderClient(context)\n\n    fun getCurrentDistrict(\n        onResult: (String) -> Unit,\n        onPermissionDenied: () -> Unit\n    ) {\n        // Step 1: Check if permission was granted\n        val hasPermission = ContextCompat.checkSelfPermission(\n            context, Manifest.permission.ACCESS_FINE_LOCATION\n        ) == PackageManager.PERMISSION_GRANTED\n\n        if (!hasPermission) {\n            onPermissionDenied()  // let caller handle it\n            return\n        }\n\n        // Step 2: Get location (async — uses callback)\n        fusedLocationClient.lastLocation\n            .addOnSuccessListener { location ->\n                if (location != null) {\n                    val district = reverseGeocode(\n                        location.latitude,\n                        location.longitude\n                    )\n                    onResult(district ?: \"Quận 1\")\n                } else {\n                    onResult(\"Quận 1\")  // default if no cached location\n                }\n            }\n            .addOnFailureListener { onResult(\"Quận 1\") }\n    }\n\n    private fun reverseGeocode(lat: Double, lng: Double): String? {\n        return try {\n            val geocoder = Geocoder(context, Locale(\"vi\", \"VN\"))\n            val addresses = geocoder.getFromLocation(lat, lng, 1)\n            addresses?.firstOrNull()?.subAdminArea\n        } catch (e: Exception) { null }\n    }\n}",
+          "lineExplanations": {
+            "3": {
+              "en": "getFusedLocationProviderClient: factory method that returns the location service — fuses GPS + WiFi + cell towers",
+              "vn": "getFusedLocationProviderClient: phương thức factory trả về dịch vụ vị trí — kết hợp GPS + WiFi + tháp di động"
+            },
+            "11": {
+              "en": "checkSelfPermission: checks current permission status — must do this EVERY TIME before accessing location, not just once",
+              "vn": "checkSelfPermission: kiểm tra trạng thái quyền hiện tại — phải làm điều này MỖI LẦN trước khi truy cập vị trí, không chỉ một lần"
+            },
+            "20": {
+              "en": "lastLocation: returns the most recently cached location — fast (< 1ms) and battery-free, but may be seconds old",
+              "vn": "lastLocation: trả về vị trí cache gần nhất — nhanh (< 1ms) và không tốn pin, nhưng có thể cũ vài giây"
+            },
+            "21": {
+              "en": "addOnSuccessListener: this runs when location is ready — it's a callback, NOT sequential code",
+              "vn": "addOnSuccessListener: chạy khi vị trí sẵn sàng — đây là callback, KHÔNG phải code tuần tự"
+            },
+            "22": {
+              "en": "location != null check: lastLocation CAN return null if the device has never gotten a fix — always handle this!",
+              "vn": "kiểm tra location != null: lastLocation CÓ THỂ trả về null nếu thiết bị chưa bao giờ lấy được vị trí — luôn xử lý điều này!"
+            },
+            "27": {
+              "en": "?: \"Quận 1\": Elvis operator — if reverseGeocode returns null, use 'Quận 1' as the safe default district",
+              "vn": "?: \"Quận 1\": toán tử Elvis — nếu reverseGeocode trả về null, dùng 'Quận 1' làm quận mặc định an toàn"
+            },
+            "37": {
+              "en": "Locale(\"vi\", \"VN\"): tells Geocoder to return Vietnamese-formatted addresses with Vietnamese district names",
+              "vn": "Locale(\"vi\", \"VN\"): báo cho Geocoder trả về địa chỉ định dạng tiếng Việt với tên quận tiếng Việt"
+            },
+            "39": {
+              "en": "subAdminArea: the Android field that contains district/county name — for TP.HCM this gives 'Quận 1', 'Quận 7', etc.",
+              "vn": "subAdminArea: trường Android chứa tên quận/huyện — với TP.HCM cho ra 'Quận 1', 'Quận 7', v.v."
+            }
+          }
+        }
+      ],
+      "clawdExplanation": {
+        "en": "`null` = empty box. The `?` after a type is Kotlin saying \"I know this might be empty, I'll be careful.\" This is literally the reason Kotlin exists — `Java` didn't have it, and that caused billions of crashes. You just dodged the most common bug in app history. Next: how the app politely asks the phone for things (permissions).",
+        "vn": "`null` = hộp rỗng. Dấu `?` sau type là Kotlin nói \"tôi biết có thể rỗng, tôi sẽ cẩn thận.\" Đây CHÍNH LÀ lý do Kotlin tồn tại — `Java` không có, gây hàng tỷ crash. Bạn vừa né được bug phổ biến nhất lịch sử app. Tiếp: app xin quyền điện thoại lịch sự (permissions)."
+      },
+      "answerChoices": [],
+      "vocabTerms": [
+        {
+          "term": "null",
+          "color": "#EF4444",
+          "explanation": {
+            "en": "The absence of a value — the most common cause of app crashes in languages that don't handle it",
+            "vn": "Sự vắng mặt của một giá trị — nguyên nhân crash phổ biến nhất trong ngôn ngữ không xử lý nó"
+          }
+        },
+        {
+          "term": "?",
+          "color": "#FBBF24",
+          "explanation": {
+            "en": "Marks a type as nullable — Location? means the variable might be null and Kotlin forces you to check",
+            "vn": "Đánh dấu kiểu là nullable — Location? nghĩa là biến có thể null và Kotlin bắt bạn phải kiểm tra"
+          }
+        },
+        {
+          "term": "?.",
+          "color": "#60A5FA",
+          "explanation": {
+            "en": "Safe call operator — only runs the code if the value is not null, otherwise returns null silently",
+            "vn": "Toán tử gọi an toàn — chỉ chạy code nếu giá trị khác null, ngược lại trả về null im lặng"
+          }
+        },
+        {
+          "term": "?:",
+          "color": "#10B981",
+          "explanation": {
+            "en": "Elvis operator — provides a fallback value if the left side is null, e.g. location?.lat ?: 0.0",
+            "vn": "Toán tử Elvis — cung cấp giá trị dự phòng nếu vế trái là null, ví dụ location?.lat ?: 0.0"
+          }
+        }
+      ],
+      "codeExplainer": {
+        "en": "Kotlin has a built-in safety system for missing values called null safety. The '?' after a type (like Location?) means that variable might be empty. The '?.' operator checks if it's empty before using it — if empty, it skips that line instead of crashing. The '?:' gives a backup value if the left side is empty. This system prevents the most common type of app crash.",
+        "vn": "Kotlin có hệ thống an toàn tích hợp cho giá trị thiếu gọi là null safety. Dấu '?' sau kiểu (như Location?) nghĩa là biến đó có thể rỗng. Toán tử '?.' kiểm tra xem có rỗng không trước khi dùng — nếu rỗng, bỏ qua dòng đó thay vì crash. '?:' cho giá trị dự phòng nếu vế trái rỗng. Hệ thống này ngăn loại crash phổ biến nhất."
+      }
+    },
+    {
+      "stepNumber": 7,
+      "type": "lesson",
+      "title": {
+        "en": "Politely asking for permission",
+        "vn": "Lịch sự xin quyền"
+      },
+      "instruction": {
+        "en": "An app can't just grab the user's location, camera, or microphone. It has to ASK, and the user can say yes or no. This needs two things:\n\n(1) The app DECLARES upfront what it might want (in a special file called AndroidManifest.xml — like a permission slip you hand the phone when installing).\n(2) At the right moment, the app POPS UP a dialog asking the user.\n\nForget either half and the app crashes or silently fails.",
+        "vn": "App không thể tự lấy vị trí, camera, micro. Phải XIN, user trả lời đồng ý/từ chối. Cần hai thứ:\n\n(1) App KHAI BÁO trước những gì có thể cần (trong file đặc biệt tên AndroidManifest.xml — như tờ đơn xin gửi điện thoại khi cài).\n(2) Đúng lúc, app HIỆN popup hỏi user.\n\nQuên nửa nào cũng làm app crash hoặc lỗi im lặng."
+      },
+      "promptText": {
+        "en": "Add code so the app can use the user's location. Show me BOTH parts: the manifest declaration AND the popup that asks the user the first time. Explain why both are needed.",
+        "vn": "Thêm code để app có thể dùng vị trí của người dùng. Chỉ cho tôi CẢ HAI phần: khai báo trong file manifest VÀ hộp thoại xin quyền lần đầu tiên. Giải thích tại sao cần cả hai."
+      },
+      "promptRationale": {
+        "en": "We explicitly ask for BOTH halves. If you only ask for one, the AI might give you only one. Specificity beats wishful thinking.",
+        "vn": "Ta xin RÕ RÀNG cả hai nửa. Nếu chỉ xin một, AI có thể chỉ cho một. Cụ thể thắng mong đợi."
+      },
+      "aiResponse": {
+        "en": "Two halves, like you said:\n\n(1) **AndroidManifest.xml** — add `<uses-permission android:name=\"android.permission.ACCESS_FINE_LOCATION\"/>`. Think of this as the app saying \"hi, I may want fine location at some point.\" Without this, the phone outright refuses, no matter what the user clicks.\n\n(2) **Runtime request** — modern Android (6.0+) requires you to actually ask the user in a popup the FIRST time you need it. They tap Allow or Deny. If they deny, your app must handle it gracefully (don't crash, show a friendly message).\n\nWhy both? The manifest is the legal notice. The popup is the user's choice. The OS enforces both.",
+        "vn": "Hai nửa, đúng như bạn nói:\n\n(1) **AndroidManifest.xml** — thêm `<uses-permission android:name=\"android.permission.ACCESS_FINE_LOCATION\"/>`. Nghĩ như app nói \"chào, có thể tôi sẽ cần vị trí chính xác.\" Không có dòng này, điện thoại từ chối thẳng, dù user click gì.\n\n(2) **Runtime request** — Android hiện đại (6.0+) yêu cầu thật sự hỏi user qua popup LẦN ĐẦU cần. Họ chọn Allow hay Deny. Nếu từ chối, app phải xử lý nhẹ nhàng (không crash, hiện thông báo thân thiện).\n\nVì sao cả hai? Manifest là thông báo pháp lý. Popup là lựa chọn của user. Hệ điều hành ép cả hai."
+      },
+      "codeSnippets": [
+        {
+          "fileName": "firebase-structure.json",
+          "code": "// Firebase Realtime Database tree structure:\n{\n  \"rain_reports\": {\n    \"quan-1\": {\n      \"-NxAbc123\": {\n        \"district\": \"Quận 1\",\n        \"timestamp\": 1716105600000,\n        \"intensity\": \"HEAVY\",\n        \"reporterCount\": 3\n      },\n      \"-NxDef456\": {\n        \"district\": \"Quận 1\",\n        \"timestamp\": 1716105000000,\n        \"intensity\": \"LIGHT\",\n        \"reporterCount\": 1\n      }\n    },\n    \"quan-7\": {\n      \"-NxGhi789\": {\n        \"district\": \"Quận 7\",\n        \"timestamp\": 1716104800000,\n        \"intensity\": \"MEDIUM\",\n        \"reporterCount\": 5\n      }\n    }\n  }\n}\n\n// Database security rules (database.rules.json):\n{\n  \"rules\": {\n    \"rain_reports\": {\n      \".read\": true,\n      \".write\": \"auth != null\"\n    }\n  }\n}",
+          "lineExplanations": {
+            "3": {
+              "en": "rain_reports: top-level node — all rain data lives here, organized by district for efficient querying",
+              "vn": "rain_reports: node cấp cao nhất — tất cả dữ liệu mưa ở đây, tổ chức theo quận để truy vấn hiệu quả"
+            },
+            "4": {
+              "en": "quan-1: district key — querying this path only downloads Quận 1 data, not the whole database",
+              "vn": "quan-1: key quận — truy vấn đường dẫn này chỉ tải dữ liệu Quận 1, không phải toàn bộ database"
+            },
+            "5": {
+              "en": "-NxAbc123: auto-generated push() key — contains timestamp, so reports are automatically chronologically ordered",
+              "vn": "-NxAbc123: key push() tự động tạo — chứa timestamp, nên báo cáo tự động được sắp xếp theo thứ tự thời gian"
+            },
+            "7": {
+              "en": "timestamp: Unix time in milliseconds — used to calculate '5 phút trước' and to expire old reports after 2 hours",
+              "vn": "timestamp: thời gian Unix tính bằng millisecond — dùng để tính '5 phút trước' và xóa báo cáo cũ sau 2 giờ"
+            },
+            "31": {
+              "en": "\".read\": true — anyone (even unauthenticated) can read rain reports — public data",
+              "vn": "\".read\": true — ai cũng (kể cả chưa đăng nhập) có thể đọc báo cáo mưa — dữ liệu công khai"
+            },
+            "32": {
+              "en": "\".write\": \"auth != null\" — only logged-in users can submit reports — prevents spam from bots",
+              "vn": "\".write\": \"auth != null\" — chỉ người dùng đã đăng nhập mới có thể gửi báo cáo — ngăn spam từ bot"
+            }
+          }
+        }
+      ],
+      "clawdExplanation": {
+        "en": "Two-step ritual: DECLARE in manifest (legal notice) + ASK the user (politeness). Skip the manifest → security crash. Skip the popup → user never agrees. Real apps always do both. Next: how the app makes decisions — `if` / `else`.",
+        "vn": "Hai bước: KHAI BÁO trong manifest (pháp lý) + HỎI user (lịch sự). Bỏ manifest → security crash. Bỏ popup → user không đồng ý. App thật luôn làm cả hai. Tiếp: app ra quyết định — `if` / `else`."
+      },
+      "answerChoices": [],
+      "vocabTerms": [
+        {
+          "term": "suspend",
+          "color": "#A78BFA",
+          "explanation": {
+            "en": "Marks a function that can pause and resume — only callable from inside a coroutine or another suspend fun",
+            "vn": "Đánh dấu hàm có thể tạm dừng và tiếp tục — chỉ gọi được từ coroutine hoặc hàm suspend khác"
+          }
+        },
+        {
+          "term": "launch",
+          "color": "#60A5FA",
+          "explanation": {
+            "en": "Starts a new coroutine — fire-and-forget, doesn't return a result, good for side effects like saving data",
+            "vn": "Khởi động coroutine mới — bắn và quên, không trả về kết quả, tốt cho tác dụng phụ như lưu dữ liệu"
+          }
+        },
+        {
+          "term": "Flow",
+          "color": "#10B981",
+          "explanation": {
+            "en": "A stream of values over time — like a river of data your UI can collect and react to",
+            "vn": "Luồng giá trị theo thời gian — như dòng sông dữ liệu mà UI có thể thu thập và phản ứng"
+          }
+        },
+        {
+          "term": "StateFlow",
+          "color": "#FBBF24",
+          "explanation": {
+            "en": "A Flow that always holds the latest value — perfect for UI state since Compose can observe it directly",
+            "vn": "Flow luôn giữ giá trị mới nhất — hoàn hảo cho state UI vì Compose có thể quan sát trực tiếp"
+          }
+        }
+      ],
+      "codeExplainer": {
+        "en": "The app now uses a ViewModel — a special class that keeps data alive when you rotate the screen. Inside it, StateFlow is a live data stream that the screen listens to. When the ViewModel updates the flow (e.g. new rain reports arrive), the screen automatically redraws the new data. 'suspend' functions can pause and wait for slow things like network calls without freezing the UI.",
+        "vn": "App giờ dùng ViewModel — lớp đặc biệt giữ dữ liệu sống khi xoay màn hình. Bên trong, StateFlow là luồng dữ liệu sống mà màn hình lắng nghe. Khi ViewModel cập nhật luồng (ví dụ báo cáo mưa mới đến), màn hình tự vẽ lại dữ liệu mới. Hàm 'suspend' có thể tạm dừng và chờ những thứ chậm như gọi mạng mà không đóng băng UI."
+      }
+    },
+    {
+      "stepNumber": 8,
+      "type": "lesson",
+      "title": {
+        "en": "Making decisions in code — if / else",
+        "vn": "Đưa ra quyết định trong code — if / else"
+      },
+      "instruction": {
+        "en": "Apps constantly make decisions. \"IF the user granted location, do X. OTHERWISE, do Y.\" In code, this is `if` and `else`. It reads like English. The condition goes in (parentheses). The action goes in {curly braces}.",
+        "vn": "App liên tục ra quyết định. \"NẾU user cho phép vị trí, làm X. NGƯỢC LẠI, làm Y.\" Trong code, đó là `if` và `else`. Đọc như tiếng Anh. Điều kiện trong (ngoặc đơn). Hành động trong {ngoặc nhọn}."
+      },
+      "promptText": {
+        "en": "If the user granted location permission, save their current GPS position so we can send a rain report. If they denied permission, show a text box asking them to type their neighbourhood name manually. Write this in Kotlin and explain how `if`/`else` works.",
+        "vn": "Nếu người dùng đã cấp quyền vị trí, hãy lưu vị trí GPS hiện tại để có thể gửi báo cáo mưa. Nếu họ từ chối quyền, hiển thị ô nhập văn bản để họ gõ tên khu phố bằng tay. Viết code Kotlin này và giải thích cách `if`/`else` hoạt động."
+      },
+      "promptRationale": {
+        "en": "Describe BOTH paths the app might take. The AI's `if/else` block matches your description one-to-one — that's why describing both halves matters.",
+        "vn": "Mô tả CẢ HAI đường app có thể đi. Khối `if/else` của AI khớp mô tả 1-1 — đó là lý do mô tả đủ cả hai nửa quan trọng."
+      },
+      "aiResponse": {
+        "en": "Code = a recipe with forks. Here's the pattern:\n\n```\nif (someCondition) {\n    // runs when condition is TRUE\n} else {\n    // runs when condition is FALSE\n}\n```\n\nFor your case: `if (hasLocationPermission) { saveGpsPosition() } else { showManualEntry() }`. One branch runs, the other doesn't. Never both. The app picks based on what's true RIGHT NOW.\n\nYou can chain them: `if … else if … else if … else`. But usually two branches is enough.",
+        "vn": "Code = công thức nấu ăn có ngã rẽ. Khuôn mẫu:\n\n```\nif (điềuKiện) {\n    // chạy khi điều kiện ĐÚNG\n} else {\n    // chạy khi điều kiện SAI\n}\n```\n\nTrường hợp bạn: `if (hasLocationPermission) { saveGpsPosition() } else { showManualEntry() }`. Một nhánh chạy, nhánh kia không. Không bao giờ cả hai. App chọn dựa trên cái gì đúng NGAY BÂY GIỜ.\n\nBạn có thể nối: `if … else if … else if … else`. Nhưng thường hai nhánh là đủ."
+      },
+      "codeSnippets": [
+        {
+          "fileName": "RainReport.kt",
+          "code": "// Data model for a single rain report\ndata class RainReport(\n    val id: String = \"\",\n    val district: String = \"\",\n    val timestamp: Long = 0L,\n    val intensity: String = \"MEDIUM\",\n    val reporterCount: Int = 1\n)\n\n// Enum ensures only valid intensity values are used\nenum class RainIntensity {\n    LIGHT, MEDIUM, HEAVY;\n\n    fun toVietnamese() = when (this) {\n        LIGHT  -> \"Mưa nhẹ\"\n        MEDIUM -> \"Mưa vừa\"\n        HEAVY  -> \"Mưa lớn\"\n    }\n\n    fun markerColor() = when (this) {\n        LIGHT  -> 0xFF60A5FA  // blue\n        MEDIUM -> 0xFF3B82F6  // darker blue\n        HEAVY  -> 0xFFEF4444  // red\n    }\n}",
+          "lineExplanations": {
+            "2": {
+              "en": "data class with default values: allows Gson/Firebase to deserialize without specifying all fields — crucial for database reads",
+              "vn": "data class với giá trị mặc định: cho phép Gson/Firebase deserialize mà không cần chỉ định tất cả trường — quan trọng để đọc database"
+            },
+            "3": {
+              "en": "id: starts empty, filled in by Firebase push() key when saved — keeps the object self-contained after insert",
+              "vn": "id: bắt đầu rỗng, được điền bởi key push() Firebase khi lưu — giữ đối tượng tự chứa sau khi chèn"
+            },
+            "5": {
+              "en": "timestamp as Long (milliseconds): easy math — (now - timestamp) / 60000 = minutes ago",
+              "vn": "timestamp là Long (millisecond): toán học đơn giản — (now - timestamp) / 60000 = số phút trước"
+            },
+            "11": {
+              "en": "enum instead of String: LIGHT/MEDIUM/HEAVY cannot be misspelled — compiler catches typos before runtime",
+              "vn": "enum thay vì String: LIGHT/MEDIUM/HEAVY không thể viết sai — trình biên dịch bắt lỗi trước khi chạy"
+            },
+            "13": {
+              "en": "when expression: Kotlin's switch — exhaustive (compiler forces you to handle all enum cases)",
+              "vn": "biểu thức when: switch của Kotlin — toàn diện (trình biên dịch buộc xử lý tất cả trường hợp enum)"
+            },
+            "20": {
+              "en": "markerColor(): colors encode rain intensity visually — blue for light, red for heavy — intuitive for users",
+              "vn": "markerColor(): màu sắc mã hóa cường độ mưa trực quan — xanh nhạt cho mưa nhẹ, đỏ cho mưa to — trực quan với người dùng"
+            }
+          }
+        },
+        {
+          "fileName": "ReportManager.kt",
+          "code": "class ReportManager {\n    private val db = Firebase.database.reference\n\n    fun submitReport(report: RainReport, onDone: () -> Unit) {\n        val districtKey = report.district\n            .lowercase()\n            .replace(\" \", \"-\")\n\n        val key = db.child(\"rain_reports\")\n            .child(districtKey)\n            .push().key ?: return\n\n        val reportWithId = report.copy(id = key)\n\n        db.child(\"rain_reports\")\n            .child(districtKey)\n            .child(key)\n            .setValue(reportWithId)\n            .addOnSuccessListener { onDone() }\n    }\n\n    fun listenToDistrict(\n        district: String,\n        onUpdate: (List<RainReport>) -> Unit\n    ) {\n        val key = district.lowercase().replace(\" \", \"-\")\n        db.child(\"rain_reports\").child(key)\n            .orderByChild(\"timestamp\")\n            .limitToLast(20)\n            .addValueEventListener(object : ValueEventListener {\n                override fun onDataChange(snapshot: DataSnapshot) {\n                    val list = snapshot.children.mapNotNull {\n                        it.getValue(RainReport::class.java)\n                    }.sortedByDescending { it.timestamp }\n                    onUpdate(list)\n                }\n                override fun onCancelled(error: DatabaseError) {}\n            })\n    }\n}",
+          "lineExplanations": {
+            "2": {
+              "en": "Firebase.database.reference: the root of the database tree — all read/write paths start from here",
+              "vn": "Firebase.database.reference: gốc của cây database — tất cả đường dẫn đọc/ghi bắt đầu từ đây"
+            },
+            "9": {
+              "en": "push(): creates a child with a unique key that encodes the current timestamp — ensures chronological order in Firebase",
+              "vn": "push(): tạo child với key duy nhất mã hóa timestamp hiện tại — đảm bảo thứ tự thời gian trong Firebase"
+            },
+            "11": {
+              "en": "?: return: safe — if push() fails (offline), key is null and we exit early instead of crashing",
+              "vn": "?: return: an toàn — nếu push() thất bại (offline), key là null và chúng ta thoát sớm thay vì crash"
+            },
+            "13": {
+              "en": "report.copy(id = key): Kotlin data class copy() creates a new object with just the id field changed",
+              "vn": "report.copy(id = key): copy() của data class Kotlin tạo đối tượng mới chỉ thay đổi trường id"
+            },
+            "17": {
+              "en": "setValue(): serializes the RainReport object to JSON and uploads — Firebase handles the network request",
+              "vn": "setValue(): chuyển đổi đối tượng RainReport thành JSON và tải lên — Firebase xử lý yêu cầu mạng"
+            },
+            "27": {
+              "en": "limitToLast(20): only downloads the 20 most recent reports per district — prevents loading thousands of old reports",
+              "vn": "limitToLast(20): chỉ tải 20 báo cáo gần nhất mỗi quận — ngăn tải hàng nghìn báo cáo cũ"
+            },
+            "28": {
+              "en": "addValueEventListener: fires IMMEDIATELY with current data, then fires again for every future change — this is real-time",
+              "vn": "addValueEventListener: kích hoạt NGAY LẬP TỨC với dữ liệu hiện tại, rồi kích hoạt lại cho mỗi thay đổi — đây là thời gian thực"
+            }
+          }
+        }
+      ],
+      "clawdExplanation": {
+        "en": "Code = a recipe with forks. `if` runs one branch, `else` runs the other. You just thought through BOTH paths your app might take — that's what real developers do BEFORE writing code. Plan the branches, then write. Next: where shared data lives — the cloud.",
+        "vn": "Code = công thức có ngã rẽ. `if` chạy một nhánh, `else` chạy nhánh kia. Bạn vừa nghĩ qua CẢ HAI hướng app có thể đi — dev thật làm thế TRƯỚC khi viết code. Lập kế nhánh, rồi viết. Tiếp: data chung sống ở đâu — trên mây."
+      },
+      "answerChoices": [],
+      "vocabTerms": [
+        {
+          "term": "ViewModel",
+          "color": "#A78BFA",
+          "explanation": {
+            "en": "Survives screen rotations — keeps your data alive when the screen is destroyed and recreated",
+            "vn": "Tồn tại qua xoay màn hình — giữ dữ liệu sống khi màn hình bị hủy và tạo lại"
+          }
+        },
+        {
+          "term": "MutableStateFlow",
+          "color": "#60A5FA",
+          "explanation": {
+            "en": "A StateFlow you can change — the ViewModel writes to it, the UI reads from it (one-way data flow)",
+            "vn": "StateFlow có thể thay đổi — ViewModel ghi vào, UI đọc ra (luồng dữ liệu một chiều)"
+          }
+        },
+        {
+          "term": "collectAsState",
+          "color": "#10B981",
+          "explanation": {
+            "en": "Converts a Flow into Compose state — the UI automatically redraws whenever the Flow emits a new value",
+            "vn": "Chuyển đổi Flow thành state Compose — UI tự động vẽ lại mỗi khi Flow phát giá trị mới"
+          }
+        },
+        {
+          "term": "class",
+          "color": "#FBBF24",
+          "explanation": {
+            "en": "A blueprint for creating objects — defines what data and functions a type of thing has",
+            "vn": "Bản thiết kế để tạo đối tượng — định nghĩa dữ liệu và hàm mà một loại thứ có"
+          }
+        }
+      ],
+      "codeExplainer": {
+        "en": "The ViewModel now manages all the app's live state using MutableStateFlow. Think of it as a control panel — one number for the report count, one for the user's district, one boolean for whether it's currently raining. The screen observes all of these with 'collectAsState()' and redraws automatically whenever any value changes. This keeps data and display completely separate.",
+        "vn": "ViewModel giờ quản lý toàn bộ state sống của app bằng MutableStateFlow. Hình dung như bảng điều khiển — một số cho số báo cáo, một cho quận người dùng, một boolean xem có đang mưa không. Màn hình quan sát tất cả bằng 'collectAsState()' và tự vẽ lại khi bất kỳ giá trị nào thay đổi. Điều này giữ dữ liệu và hiển thị hoàn toàn tách biệt."
+      }
+    },
+    {
+      "stepNumber": 9,
+      "type": "lesson",
+      "title": {
+        "en": "Sharing data in the cloud — Firebase",
+        "vn": "Chia sẻ data trên mây — Firebase"
+      },
+      "instruction": {
+        "en": "When one user reports rain, ALL users need to see it. The data can't live on just one phone — it has to live somewhere everyone can read.\n\nThat place is called a CLOUD DATABASE. We'll use Firebase, Google's free one. Think of it as a shared notebook on the internet — every phone writes to and reads from the same notebook.",
+        "vn": "Khi một user báo mưa, TẤT CẢ user cần thấy. Data không thể chỉ sống trên một điện thoại — phải ở nơi mọi người đọc được.\n\nNơi đó gọi là CLOUD DATABASE. Ta dùng Firebase — của Google, miễn phí. Nghĩ như cuốn sổ tay chung trên internet — mọi điện thoại viết và đọc cùng một cuốn sổ."
+      },
+      "promptText": {
+        "en": "Set up Firebase Realtime Database for this app. When a user taps the rain button, send their location and the timestamp to Firebase. Walk me through the full setup, including the website steps and the Kotlin code. Explain what Firebase is in simple terms.",
+        "vn": "Cài đặt Firebase Realtime Database cho app này. Khi người dùng nhấn nút báo mưa, gửi vị trí và thời gian của họ lên Firebase. Hướng dẫn tôi toàn bộ quá trình, bao gồm cả các bước trên website và code Kotlin. Giải thích Firebase là gì bằng lời đơn giản."
+      },
+      "promptRationale": {
+        "en": "Firebase has setup steps OUTSIDE the code (creating a project on the Firebase website, downloading a config file). Asking the AI for the FULL walkthrough including the website steps prevents the \"I did the code but it doesn't work\" trap.",
+        "vn": "Firebase có bước setup NGOÀI code (tạo project trên web Firebase, tải file cấu hình). Nhờ AI hướng dẫn TOÀN BỘ kể cả bước trên web giúp tránh bẫy \"code xong mà không chạy.\""
+      },
+      "aiResponse": {
+        "en": "Firebase = a free database hosted by Google. Picture a shared Google Doc that any app can read/write to in real time. Setup:\n\n(1) Go to console.firebase.google.com → create a new project.\n(2) Add an Android app to the project → enter your app's package name → download the `google-services.json` file → drop it in your `app/` folder.\n(3) Add Firebase lines to your `build.gradle` files (the AI will give you these).\n(4) In your Kotlin code, call `FirebaseDatabase.getInstance().getReference(\"reports\").push().setValue(yourReport)`. Done — that one line sends data to the cloud.\n\nReads work the same: `.addValueEventListener { … }` and Firebase calls you back whenever new data arrives.",
+        "vn": "Firebase = database miễn phí của Google. Hãy hình dung Google Doc chung mà bất kỳ app nào cũng đọc/ghi real-time. Setup:\n\n(1) Vào console.firebase.google.com → tạo project mới.\n(2) Thêm app Android → nhập package name → tải file `google-services.json` → đặt vào thư mục `app/`.\n(3) Thêm dòng Firebase vào file `build.gradle` (AI sẽ đưa).\n(4) Trong code Kotlin: `FirebaseDatabase.getInstance().getReference(\"reports\").push().setValue(yourReport)`. Xong — một dòng gửi data lên mây.\n\nĐọc tương tự: `.addValueEventListener { … }`, Firebase gọi lại bạn mỗi khi có data mới."
+      },
+      "codeSnippets": [
+        {
+          "fileName": "RainNotificationService.kt",
+          "code": "class RainNotificationService : FirebaseMessagingService() {\n\n    override fun onMessageReceived(message: RemoteMessage) {\n        val district = message.data[\"district\"] ?: return\n        val intensity = message.data[\"intensity\"] ?: \"Mưa vừa\"\n        val timeAgo = message.data[\"time\"] ?: \"Vừa xong\"\n        showRainNotification(district, intensity, timeAgo)\n    }\n\n    private fun showRainNotification(\n        district: String, intensity: String, time: String\n    ) {\n        createNotificationChannel()\n\n        val tapIntent = Intent(this, MainActivity::class.java).apply {\n            flags = Intent.FLAG_ACTIVITY_NEW_TASK or\n                    Intent.FLAG_ACTIVITY_CLEAR_TASK\n            putExtra(\"district\", district)\n        }\n        val pendingIntent = PendingIntent.getActivity(\n            this, 0, tapIntent,\n            PendingIntent.FLAG_UPDATE_CURRENT or\n            PendingIntent.FLAG_IMMUTABLE\n        )\n\n        val notification = NotificationCompat.Builder(this, CHANNEL_ID)\n            .setSmallIcon(R.drawable.ic_rain)\n            .setContentTitle(\"Cảnh báo mưa tại $district!\")\n            .setContentText(\"$intensity • $time\")\n            .setPriority(NotificationCompat.PRIORITY_HIGH)\n            .setContentIntent(pendingIntent)\n            .setAutoCancel(true)\n            .build()\n\n        NotificationManagerCompat.from(this)\n            .notify(district.hashCode(), notification)\n    }\n\n    private fun createNotificationChannel() {\n        val channel = NotificationChannel(\n            CHANNEL_ID, \"Cảnh báo mưa\",\n            NotificationManager.IMPORTANCE_HIGH\n        )\n        getSystemService(NotificationManager::class.java)\n            .createNotificationChannel(channel)\n    }\n\n    companion object { const val CHANNEL_ID = \"rain_alerts\" }\n}",
+          "lineExplanations": {
+            "1": {
+              "en": "FirebaseMessagingService: Android service that FCM calls when a message arrives — runs even when the app is closed",
+              "vn": "FirebaseMessagingService: dịch vụ Android mà FCM gọi khi nhận tin nhắn — chạy ngay cả khi app đã đóng"
+            },
+            "4": {
+              "en": "message.data[\"district\"]: FCM data payload (not notification payload) — arrives even if app is in foreground",
+              "vn": "message.data[\"district\"]: payload data FCM (không phải notification payload) — đến ngay cả khi app đang ở foreground"
+            },
+            "15": {
+              "en": "FLAG_ACTIVITY_CLEAR_TASK: clears the back stack — tapping notification shows Rain Alert fresh, not buried in history",
+              "vn": "FLAG_ACTIVITY_CLEAR_TASK: xóa back stack — nhấn thông báo hiển thị Rain Alert mới, không bị chôn vùi trong lịch sử"
+            },
+            "18": {
+              "en": "putExtra(\"district\"): passes the district name to MainActivity so it can highlight the right area on the map",
+              "vn": "putExtra(\"district\"): truyền tên quận đến MainActivity để nó có thể làm nổi bật khu vực đúng trên bản đồ"
+            },
+            "23": {
+              "en": "FLAG_IMMUTABLE: required on Android 12+ — makes the PendingIntent unmodifiable for security (prevents intent hijacking)",
+              "vn": "FLAG_IMMUTABLE: bắt buộc trên Android 12+ — làm PendingIntent không thể sửa đổi vì bảo mật (ngăn chặn chiếm đoạt intent)"
+            },
+            "30": {
+              "en": "PRIORITY_HIGH: shows as a heads-up notification (banner at top) — user sees it without unlocking the phone",
+              "vn": "PRIORITY_HIGH: hiển thị dưới dạng thông báo heads-up (banner ở trên) — người dùng thấy mà không cần mở khóa điện thoại"
+            },
+            "32": {
+              "en": "setAutoCancel(true): notification disappears from the shade when the user taps it — good UX practice",
+              "vn": "setAutoCancel(true): thông báo biến mất khỏi ngăn kéo khi người dùng nhấn vào — thực hành UX tốt"
+            },
+            "35": {
+              "en": "district.hashCode(): uses the district string as notification ID — updating same district replaces the old notification",
+              "vn": "district.hashCode(): dùng chuỗi quận làm ID thông báo — cập nhật cùng quận thay thế thông báo cũ"
+            }
+          }
+        }
+      ],
+      "clawdExplanation": {
+        "en": "Firebase = shared notebook in the cloud. Every user reads from and writes to the same notebook. This is how every app you use works: `WhatsApp` messages, `Instagram` photos, `Spotify` playlists — all in similar cloud databases, not on your phone. Next: how the app handles MANY rain reports at once — lists.",
+        "vn": "Firebase = sổ tay chung trên mây. Mỗi user đọc và viết cùng sổ. Mọi app bạn dùng đều thế: tin nhắn `WhatsApp`, ảnh `Instagram`, playlist `Spotify` — đều ở cloud database tương tự, không nằm trên điện thoại bạn. Tiếp: app xử lý NHIỀU báo cáo mưa cùng lúc — lists."
+      },
+      "answerChoices": [],
+      "vocabTerms": [
+        {
+          "term": "FusedLocationProvider",
+          "color": "#10B981",
+          "explanation": {
+            "en": "Google's smart location API — picks the best signal (GPS, WiFi, cell) while saving battery",
+            "vn": "API vị trí thông minh của Google — chọn tín hiệu tốt nhất (GPS, WiFi, tháp) trong khi tiết kiệm pin"
+          }
+        },
+        {
+          "term": "Geocoder",
+          "color": "#60A5FA",
+          "explanation": {
+            "en": "Converts GPS coordinates (lat/lng) into a human-readable address like a district name",
+            "vn": "Chuyển đổi tọa độ GPS (lat/lng) thành địa chỉ dễ đọc như tên quận"
+          }
+        },
+        {
+          "term": "callback",
+          "color": "#A78BFA",
+          "explanation": {
+            "en": "A function you give to another function to call when it's done — the result arrives later, not immediately",
+            "vn": "Hàm bạn truyền cho hàm khác để gọi khi hoàn thành — kết quả đến sau, không phải ngay lập tức"
+          }
+        },
+        {
+          "term": "permission",
+          "color": "#FBBF24",
+          "explanation": {
+            "en": "A runtime dialog asking the user to allow GPS access — must be granted before location calls work",
+            "vn": "Hộp thoại yêu cầu người dùng cho phép truy cập GPS — phải được cấp trước khi gọi vị trí"
+          }
+        }
+      ],
+      "codeExplainer": {
+        "en": "GPS is now wired up. The FusedLocationProvider is Google's smart system that picks the best signal available (GPS satellite, nearby WiFi, or phone towers) to find the user's location while using as little battery as possible. Once it gets coordinates (two numbers: latitude and longitude), the Geocoder converts them into a readable district name. The app then asks the user's permission before any of this runs.",
+        "vn": "GPS giờ đã được kết nối. FusedLocationProvider là hệ thống thông minh của Google chọn tín hiệu tốt nhất (vệ tinh GPS, WiFi gần đó hoặc tháp điện thoại) để tìm vị trí người dùng trong khi tiêu thụ ít pin nhất có thể. Khi có tọa độ (hai số: vĩ độ và kinh độ), Geocoder chuyển chúng thành tên quận đọc được. App xin phép người dùng trước khi bất kỳ thứ gì này chạy."
+      }
+    },
+    {
+      "stepNumber": 10,
+      "type": "lesson",
+      "title": {
+        "en": "Working with many items — lists",
+        "vn": "Làm việc với nhiều thứ — lists"
+      },
+      "instruction": {
+        "en": "When 50 users have reported rain, the app holds 50 reports. We store collections of things in a LIST. A list is exactly what it sounds like — items in order. In Kotlin we write `List<RainReport>` which reads as \"a list of rain reports.\"",
+        "vn": "Khi 50 user đã báo mưa, app giữ 50 báo cáo. Ta lưu nhóm thứ trong LIST. List đúng như tên gọi — các mục theo thứ tự. Trong Kotlin viết `List<RainReport>` đọc là \"một list các báo cáo mưa.\""
+      },
+      "promptText": {
+        "en": "Now that reports stream in from Firebase, store them in a list and show the 10 most recent on the screen. Each row should show the location name and how long ago it was reported (e.g. \"5 minutes ago\"). Use a scrollable view.",
+        "vn": "Bây giờ dữ liệu báo mưa được nhận từ Firebase, hãy lưu chúng vào một danh sách và hiển thị 10 báo cáo mới nhất trên màn hình. Mỗi hàng nên hiển thị tên địa điểm và báo cáo cách đây bao lâu (ví dụ: \"5 phút trước\"). Dùng chế độ xem có thể cuộn."
+      },
+      "promptRationale": {
+        "en": "Specifying the data shape (10 most recent), the row contents (location + relative time), and the behaviour (scrollable) means the AI builds exactly what you pictured, not its best guess.",
+        "vn": "Chỉ định hình dạng data (10 mới nhất), nội dung hàng (vị trí + thời gian tương đối), hành vi (cuộn) khiến AI xây đúng thứ bạn hình dung, không phải đoán mò."
+      },
+      "aiResponse": {
+        "en": "Lists in Kotlin: `List<RainReport>`. The angle brackets say \"a list of THIS type.\" Examples:\n\n• `List<String>` — a list of strings (words)\n• `List<Int>` — a list of integers (whole numbers)\n• `List<RainReport>` — a list of rain reports\n\nTo show a long scrollable list in Compose, we use `LazyColumn`. Why \"lazy\"? Because if you have 10,000 items, it only draws the ones actually on screen right now — much faster. Inside, you write `items(reports) { report → … }` and the function runs once per report to draw a row.",
+        "vn": "List trong Kotlin: `List<RainReport>`. Dấu ngoặc nhọn nói \"list kiểu NÀY.\" Ví dụ:\n\n• `List<String>` — list các chuỗi (từ)\n• `List<Int>` — list số nguyên\n• `List<RainReport>` — list báo cáo mưa\n\nHiện list cuộn dài trong Compose dùng `LazyColumn`. Vì sao \"lazy\"? Vì với 10.000 mục, nó chỉ vẽ những mục đang trên màn hình — nhanh hơn. Bên trong, viết `items(reports) { report → … }` và function chạy một lần mỗi report để vẽ một hàng."
+      },
+      "codeSnippets": [
+        {
+          "fileName": "MapManager.kt",
+          "code": "class MapManager(\n    private val googleMap: GoogleMap,\n    private val database: DatabaseReference\n) {\n    // Track active markers by report ID to enable updates/removal\n    private val activeMarkers = mutableMapOf<String, Marker>()\n\n    fun startListening() {\n        database.child(\"rain_reports\")\n            .addChildEventListener(object : ChildEventListener {\n                override fun onChildAdded(\n                    snapshot: DataSnapshot, previousKey: String?\n                ) {\n                    snapshot.children.forEach { reportSnap ->\n                        val r = reportSnap.getValue(RainReport::class.java)\n                        if (r != null && !isExpired(r)) addMarker(r)\n                    }\n                }\n                override fun onChildChanged(\n                    snapshot: DataSnapshot, previousKey: String?\n                ) {\n                    snapshot.children.forEach { reportSnap ->\n                        val r = reportSnap.getValue(RainReport::class.java)\n                        if (r != null) {\n                            if (isExpired(r)) removeMarker(r.id)\n                            else addMarker(r)\n                        }\n                    }\n                }\n                override fun onChildRemoved(s: DataSnapshot) {}\n                override fun onChildMoved(s: DataSnapshot, p: String?) {}\n                override fun onCancelled(e: DatabaseError) {}\n            })\n    }\n\n    private fun addMarker(report: RainReport) {\n        val latLng = districtToLatLng(report.district) ?: return\n        val hue = when (report.intensity) {\n            \"LIGHT\"  -> BitmapDescriptorFactory.HUE_AZURE\n            \"HEAVY\"  -> BitmapDescriptorFactory.HUE_RED\n            else     -> BitmapDescriptorFactory.HUE_BLUE\n        }\n        val options = MarkerOptions()\n            .position(latLng)\n            .title(report.district)\n            .snippet(\"${report.intensity} • ${timeAgo(report.timestamp)}\")\n            .icon(BitmapDescriptorFactory.defaultMarker(hue))\n\n        activeMarkers[report.id]?.remove()        // remove old if exists\n        activeMarkers[report.id] = googleMap.addMarker(options)!!\n    }\n\n    private fun isExpired(r: RainReport): Boolean {\n        val twoHours = 2 * 60 * 60 * 1000L\n        return System.currentTimeMillis() - r.timestamp > twoHours\n    }\n\n    private fun timeAgo(ts: Long): String {\n        val diff = (System.currentTimeMillis() - ts) / 60000\n        return when {\n            diff < 1  -> \"Vừa xong\"\n            diff < 60 -> \"$diff phút trước\"\n            else      -> \"${diff / 60} giờ trước\"\n        }\n    }\n\n    private fun removeMarker(id: String) {\n        activeMarkers.remove(id)?.remove()\n    }\n}",
+          "lineExplanations": {
+            "6": {
+              "en": "mutableMapOf<String, Marker>: dictionary mapping report ID → map marker — enables updating/removing specific markers",
+              "vn": "mutableMapOf<String, Marker>: từ điển ánh xạ ID báo cáo → marker bản đồ — cho phép cập nhật/xóa marker cụ thể"
+            },
+            "9": {
+              "en": "addChildEventListener: more efficient than ValueEventListener — only receives the changed child, not the whole district branch",
+              "vn": "addChildEventListener: hiệu quả hơn ValueEventListener — chỉ nhận child đã thay đổi, không phải toàn bộ nhánh quận"
+            },
+            "15": {
+              "en": "isExpired(r): rain reports older than 2 hours are irrelevant — rain moves fast and old data misleads users",
+              "vn": "isExpired(r): báo cáo mưa cũ hơn 2 giờ không còn liên quan — mưa di chuyển nhanh và dữ liệu cũ gây hiểu lầm"
+            },
+            "37": {
+              "en": "HUE_AZURE/HUE_BLUE/HUE_RED: Google Maps predefined hue values — AZURE (light blue) for light rain, RED for heavy rain",
+              "vn": "HUE_AZURE/HUE_BLUE/HUE_RED: giá trị hue định sẵn Google Maps — AZURE (xanh nhạt) cho mưa nhẹ, RED cho mưa to"
+            },
+            "43": {
+              "en": "snippet: second line in the marker's info window when tapped — shows intensity and time ago in Vietnamese",
+              "vn": "snippet: dòng thứ hai trong cửa sổ thông tin của marker khi nhấn — hiển thị cường độ và thời gian bằng tiếng Việt"
+            },
+            "46": {
+              "en": "activeMarkers[report.id]?.remove(): removes the old marker before adding updated one — prevents duplicate markers",
+              "vn": "activeMarkers[report.id]?.remove(): xóa marker cũ trước khi thêm cái cập nhật — ngăn marker trùng lặp"
+            },
+            "52": {
+              "en": "2 * 60 * 60 * 1000L: 2 hours in milliseconds — written this way to make the math readable, Kotlin computes it at compile time",
+              "vn": "2 * 60 * 60 * 1000L: 2 giờ tính bằng millisecond — viết theo cách này để toán học dễ đọc, Kotlin tính lúc biên dịch"
+            }
+          }
+        }
+      ],
+      "clawdExplanation": {
+        "en": "Lists hold many things at once. `List<RainReport>` = \"a list of rain reports.\" Almost every screen you've ever scrolled — `Instagram` feed, `WhatsApp` chats, contacts — is a `LazyColumn` (or its iOS cousin). Same pattern everywhere. Next: instead of a boring list, let's put the reports on a real map.",
+        "vn": "List chứa nhiều thứ cùng lúc. `List<RainReport>` = \"list các báo cáo mưa.\" Gần như mọi màn hình bạn từng cuộn — feed `Instagram`, chat `WhatsApp`, danh bạ — đều là `LazyColumn` (hoặc anh em iOS). Cùng khuôn mẫu khắp nơi. Tiếp: thay vì list nhàm, đặt báo cáo lên map thật."
+      },
+      "answerChoices": [],
+      "vocabTerms": [
+        {
+          "term": "Firebase",
+          "color": "#FBBF24",
+          "explanation": {
+            "en": "Google's cloud database — stores data online and pushes updates to all connected phones in milliseconds",
+            "vn": "Cơ sở dữ liệu cloud của Google — lưu dữ liệu trực tuyến và đẩy cập nhật đến tất cả điện thoại kết nối trong mili giây"
+          }
+        },
+        {
+          "term": "push()",
+          "color": "#60A5FA",
+          "explanation": {
+            "en": "Writes a new record with a unique auto-generated key — the safe way to add items to a list in Firebase",
+            "vn": "Ghi bản ghi mới với khóa duy nhất tự tạo — cách an toàn để thêm mục vào danh sách trong Firebase"
+          }
+        },
+        {
+          "term": "setValue",
+          "color": "#10B981",
+          "explanation": {
+            "en": "Writes data to a specific path in the database — overwrites whatever was there before",
+            "vn": "Ghi dữ liệu vào đường dẫn cụ thể trong cơ sở dữ liệu — ghi đè bất cứ thứ gì có trước đó"
+          }
+        },
+        {
+          "term": "snapshot",
+          "color": "#A78BFA",
+          "explanation": {
+            "en": "A frozen copy of the database at one moment — you read from it to get the current data without it changing mid-read",
+            "vn": "Bản sao đóng băng của cơ sở dữ liệu tại một thời điểm — đọc từ nó để lấy dữ liệu hiện tại mà không thay đổi giữa chừng"
+          }
+        }
+      ],
+      "codeExplainer": {
+        "en": "Rain reports are now saved to Firebase — Google's cloud database. When a user taps the report button, the app packages the data (district, time, intensity) into an object and calls push() to write it to the cloud with a unique auto-generated ID. Other phones that are listening with addValueEventListener get notified instantly and receive the new data — no server code needed.",
+        "vn": "Báo cáo mưa giờ được lưu vào Firebase — cơ sở dữ liệu đám mây của Google. Khi người dùng nhấn nút báo cáo, app đóng gói dữ liệu (quận, thời gian, cường độ) thành đối tượng và gọi push() để ghi lên đám mây với ID duy nhất tự tạo. Điện thoại khác đang lắng nghe với addValueEventListener được thông báo ngay lập tức và nhận dữ liệu mới — không cần code server."
+      }
+    },
+    {
+      "stepNumber": 11,
+      "type": "lesson",
+      "title": {
+        "en": "Putting reports on a map",
+        "vn": "Đặt báo cáo lên bản đồ"
+      },
+      "instruction": {
+        "en": "Coordinates by themselves are boring. Let's show each rain report as a pin on Google Maps. Users immediately see WHERE rain is being reported around them. Same data we already have — different way of showing it.",
+        "vn": "Toạ độ trơ thì nhàm. Hiện mỗi báo cáo mưa như cây ghim trên Google Maps. User thấy ngay CHỖ NÀO đang được báo mưa quanh họ. Cùng data — cách hiện khác."
+      },
+      "promptText": {
+        "en": "Replace the list view with a Google Map. Show each rain report as a blue pin at its latitude/longitude. When the user taps a pin, show a small popup with the time of the report (e.g. \"reported 12 minutes ago\"). Centre the map on the user's current location.",
+        "vn": "Thay thế chế độ xem danh sách bằng Google Map. Hiển thị mỗi báo cáo mưa bằng một ghim xanh tại tọa độ của nó. Khi người dùng nhấn vào ghim, hiện một popup nhỏ với thời gian báo cáo (ví dụ: \"báo cáo 12 phút trước\"). Căn giữa bản đồ tại vị trí hiện tại của người dùng."
+      },
+      "promptRationale": {
+        "en": "Specify pin colour (blue), interaction (tap → popup with time), and the initial map position (user's location). Three concrete details = three things the AI won't guess wrong.",
+        "vn": "Chỉ định màu ghim (xanh), tương tác (chạm → popup thời gian), vị trí ban đầu (vị trí user). Ba chi tiết cụ thể = ba thứ AI không đoán sai."
+      },
+      "aiResponse": {
+        "en": "Google Maps inside Compose uses the `GoogleMap` composable from the Maps SDK. For each report, you drop a `Marker` at its lat/lng. Markers have an `onClick` parameter — point it at a function that shows your popup.\n\nSetup: like Firebase, Maps needs a website step — go to Google Cloud Console, enable the Maps SDK, get an API key, paste it in your manifest. The AI will paste a copy-ready snippet for each step.",
+        "vn": "Google Maps trong Compose dùng `GoogleMap` composable từ Maps SDK. Mỗi báo cáo, thả `Marker` ở lat/lng. Marker có `onClick` — trỏ vào function hiện popup.\n\nSetup: như Firebase, Maps cần bước trên web — vào Google Cloud Console, bật Maps SDK, lấy API key, dán vào manifest. AI sẽ dán snippet sẵn sàng copy cho mỗi bước."
+      },
+      "codeSnippets": [
+        {
+          "fileName": "MainViewModel.kt",
+          "code": "class MainViewModel(application: Application) : AndroidViewModel(application) {\n\n    private val locationMgr = LocationManager(application)\n    private val reportMgr = ReportManager()\n\n    // StateFlows — UI observes these and redraws when they change\n    private val _district = MutableStateFlow(\"Đang xác định vị trí...\")\n    val district = _district.asStateFlow()\n\n    private val _reports = MutableStateFlow<List<RainReport>>(emptyList())\n    val reports = _reports.asStateFlow()\n\n    private val _isSubmitting = MutableStateFlow(false)\n    val isSubmitting = _isSubmitting.asStateFlow()\n\n    init {\n        detectLocation()  // runs once when ViewModel is first created\n    }\n\n    private fun detectLocation() {\n        locationMgr.getCurrentDistrict(\n            onResult = { district ->\n                _district.value = district\n                subscribeToDistrict(district)\n                // Subscribe to FCM topic for this district\n                val topicKey = district.lowercase().replace(\" \", \"-\")\n                FirebaseMessaging.getInstance()\n                    .subscribeToTopic(\"rain-alerts-$topicKey\")\n            },\n            onPermissionDenied = {\n                _district.value = \"Chọn quận thủ công\"\n            }\n        )\n    }\n\n    private fun subscribeToDistrict(district: String) {\n        reportMgr.listenToDistrict(district) { newReports ->\n            _reports.value = newReports\n        }\n    }\n\n    fun submitRainReport(intensity: RainIntensity) {\n        val currentDistrict = _district.value\n        if (currentDistrict.startsWith(\"Đang\")) return\n\n        _isSubmitting.value = true\n        val report = RainReport(\n            district = currentDistrict,\n            timestamp = System.currentTimeMillis(),\n            intensity = intensity.name\n        )\n        reportMgr.submitReport(report) {\n            _isSubmitting.value = false\n        }\n    }\n}",
+          "lineExplanations": {
+            "7": {
+              "en": "MutableStateFlow: the writable version — only the ViewModel changes it. The UI gets the read-only asStateFlow() version",
+              "vn": "MutableStateFlow: phiên bản có thể ghi — chỉ ViewModel thay đổi nó. UI nhận phiên bản chỉ đọc asStateFlow()"
+            },
+            "16": {
+              "en": "init{}: runs once when the ViewModel is created — perfect for one-time setup like location detection",
+              "vn": "init{}: chạy một lần khi ViewModel được tạo — hoàn hảo cho thiết lập một lần như phát hiện vị trí"
+            },
+            "24": {
+              "en": "district.lowercase().replace(' ', '-'): converts 'Quận 1' → 'quận-1' for use as Firebase key and FCM topic name",
+              "vn": "district.lowercase().replace(' ', '-'): chuyển 'Quận 1' → 'quận-1' dùng làm key Firebase và tên topic FCM"
+            },
+            "26": {
+              "en": "subscribeToTopic(): registers this device for FCM broadcasts to that topic — persists across app restarts",
+              "vn": "subscribeToTopic(): đăng ký thiết bị này nhận FCM broadcast đến topic đó — tồn tại sau khi khởi động lại app"
+            },
+            "37": {
+              "en": "listenToDistrict callback: every time Firebase data changes, this lambda runs and updates _reports.value",
+              "vn": "callback listenToDistrict: mỗi khi dữ liệu Firebase thay đổi, lambda này chạy và cập nhật _reports.value"
+            },
+            "43": {
+              "en": "startsWith(\"Đang\"): guards against submitting while location is still loading — simple but effective check",
+              "vn": "startsWith(\"Đang\"): bảo vệ khỏi gửi báo cáo khi vị trí vẫn đang tải — kiểm tra đơn giản nhưng hiệu quả"
+            }
+          }
+        }
+      ],
+      "clawdExplanation": {
+        "en": "Same recipe — describe in plain English, AI translates to code. The map is just a fancier display of the same list. Data lives in Firebase. The screen just READS and shows it. Next: how to buzz OTHER users' phones when rain is reported nearby — push notifications.",
+        "vn": "Cùng công thức — mô tả tiếng Anh thường, AI dịch ra code. Bản đồ chỉ là cách hiện bóng bẩy hơn của cùng list. Data ở Firebase. Màn hình chỉ ĐỌC và hiện. Tiếp: cách ping điện thoại NGƯỜI KHÁC khi có mưa gần đó — push notifications."
+      },
+      "answerChoices": [],
+      "vocabTerms": [
+        {
+          "term": "Marker",
+          "color": "#10B981",
+          "explanation": {
+            "en": "A pin on a Google Map — placed at lat/lng coordinates to show where rain was reported",
+            "vn": "Ghim trên Google Map — đặt tại tọa độ lat/lng để hiển thị nơi báo mưa"
+          }
+        },
+        {
+          "term": "LatLng",
+          "color": "#60A5FA",
+          "explanation": {
+            "en": "A pair of numbers (latitude, longitude) that pinpoints any location on Earth to centimetre accuracy",
+            "vn": "Cặp số (vĩ độ, kinh độ) xác định bất kỳ vị trí nào trên Trái Đất với độ chính xác đến centimet"
+          }
+        },
+        {
+          "term": "CameraPosition",
+          "color": "#A78BFA",
+          "explanation": {
+            "en": "Controls what the map is looking at — sets the centre point, zoom level, and tilt angle",
+            "vn": "Kiểm soát những gì bản đồ đang nhìn vào — đặt điểm trung tâm, mức thu phóng và góc nghiêng"
+          }
+        },
+        {
+          "term": "GoogleMap",
+          "color": "#FBBF24",
+          "explanation": {
+            "en": "The Compose component that renders a full interactive Google Map inside your screen",
+            "vn": "Thành phần Compose hiển thị Google Map tương tác đầy đủ trong màn hình của bạn"
+          }
+        }
+      ],
+      "codeExplainer": {
+        "en": "Google Maps is now embedded in the screen. Each rain report in Firebase becomes a Marker — a pin dropped at the exact GPS coordinates where rain was reported. The map's camera position (zoom level and centre point) is controlled in code. When new reports arrive from Firebase, the map automatically updates its pins without the user doing anything.",
+        "vn": "Google Maps giờ được nhúng trong màn hình. Mỗi báo cáo mưa trong Firebase trở thành Marker — ghim được thả tại tọa độ GPS chính xác nơi báo mưa. Vị trí camera của bản đồ (mức zoom và điểm trung tâm) được điều khiển trong code. Khi báo cáo mới đến từ Firebase, bản đồ tự cập nhật ghim mà người dùng không cần làm gì."
+      }
+    },
+    {
+      "stepNumber": 12,
+      "type": "lesson",
+      "title": {
+        "en": "Alerting nearby users — push notifications",
+        "vn": "Cảnh báo user gần đó — push notifications"
+      },
+      "instruction": {
+        "en": "When one user reports rain, we want OTHER phones nearby to buzz with an alert — even if their app is closed. This is a PUSH NOTIFICATION. We'll use Firebase Cloud Messaging (FCM) — Google's free notification postman service.",
+        "vn": "Khi một user báo mưa, ta muốn điện thoại NGƯỜI KHÁC gần đó kêu cảnh báo — dù app đóng. Đó là PUSH NOTIFICATION. Ta dùng Firebase Cloud Messaging (FCM) — dịch vụ đưa thư thông báo miễn phí của Google."
+      },
+      "promptText": {
+        "en": "When a user taps the rain button, send a push notification using Firebase Cloud Messaging to all users within 5km of that location. The notification title should be \"Rain reported nearby ☔\" and the body should say something like \"Someone reported rain 2km away\". Tapping the notification should open the map view. Walk me through the setup.",
+        "vn": "Khi người dùng nhấn nút báo mưa, gửi thông báo đẩy dùng Firebase Cloud Messaging đến tất cả người dùng trong vòng 5km. Tiêu đề thông báo là \"Có mưa gần đây ☂️\" và nội dung là \"Ai đó vừa báo mưa cách 2km\". Nhấn vào thông báo sẽ mở chế độ xem bản đồ. Hướng dẫn tôi cách thiết lập."
+      },
+      "promptRationale": {
+        "en": "Specify the trigger (rain button tap), the audience (within 5km), the exact title and body text, and the tap behaviour. The clearer you are, the less the AI has to guess.",
+        "vn": "Chỉ định kích hoạt (nhấn nút mưa), đối tượng (trong 5km), chính xác tiêu đề và nội dung, hành vi khi chạm. Rõ ràng hơn → AI ít đoán hơn."
+      },
+      "aiResponse": {
+        "en": "FCM = Google's free postman. It can deliver tiny messages to phones even when your app is closed. Pipeline:\n\n(1) When a new rain report is written to Firebase, a tiny server called a \"Cloud Function\" wakes up.\n(2) It looks at all users (also stored in Firebase) and finds the ones within 5km of the new report.\n(3) It sends each of them an FCM message.\n(4) The phones receive it, show the notification, and on tap open the map screen.\n\nYou'll write the Cloud Function in JavaScript (Firebase makes you), but it's only ~15 lines. The AI will write it.",
+        "vn": "FCM = bưu tá miễn phí của Google. Gửi tin nhỏ tới điện thoại kể cả khi app đóng. Pipeline:\n\n(1) Khi báo cáo mưa mới ghi vào Firebase, một server nhỏ tên \"Cloud Function\" thức dậy.\n(2) Nó xem tất cả user (cũng lưu trong Firebase) và tìm những người trong 5km quanh báo cáo mới.\n(3) Gửi mỗi người một tin FCM.\n(4) Điện thoại nhận, hiện thông báo, chạm vào mở màn hình bản đồ.\n\nBạn sẽ viết Cloud Function bằng JavaScript (Firebase bắt thế), nhưng chỉ ~15 dòng. AI sẽ viết."
+      },
+      "codeSnippets": [
+        {
+          "fileName": "Architecture Summary",
+          "code": "// MVVM Architecture — Rain Alert Vietnam\n//\n// VIEW (Compose UI)\n//   MainScreen.kt\n//     ↕ observes StateFlow\n// VIEWMODEL\n//   MainViewModel.kt\n//     ↕ calls                ↕ calls\n// MODEL                  SERVICES\n//   RainReport.kt          LocationManager.kt\n//   ReportManager.kt       RainNotificationService.kt\n//     ↕ Firebase SDK\n// CLOUD\n//   Firebase Realtime DB   (stores reports)\n//   Firebase Cloud Msg     (pushes notifications)\n//   Google Maps SDK        (displays markers)\n//\n// USER ACTION FLOW:\n// 1. App opens → init{} → LocationManager.getCurrentDistrict()\n// 2. Location found → subscribeToDistrict() → live data begins\n// 3. User sees rain → taps FAB → submitRainReport(HEAVY)\n// 4. Firebase write → Cloud Function → FCM to topic\n// 5. Neighbor's phone → onMessageReceived → notification shown\n// 6. Neighbor taps → app opens → MapManager shows marker\n//\n// WHY EACH TECH:\n// Kotlin:    safe (no NPE), concise (-40% code vs Java)\n// Compose:   reactive UI, no manual view updates\n// Firebase:  real-time sync + offline support built-in\n// FCM:       battery-efficient push (one connection for all apps)\n// FusedLoc:  intelligent GPS/WiFi/cell fusion, battery-safe",
+          "lineExplanations": {
+            "3": {
+              "en": "VIEW layer: only displays data, never fetches it. If you can't see it on screen, it doesn't belong in Compose",
+              "vn": "Lớp VIEW: chỉ hiển thị dữ liệu, không bao giờ lấy dữ liệu. Nếu không thấy trên màn hình, không nên ở trong Compose"
+            },
+            "6": {
+              "en": "VIEWMODEL: the mediator — survives rotation, holds state, contains all business logic. No Android imports in Model!",
+              "vn": "VIEWMODEL: người trung gian — tồn tại sau xoay, giữ state, chứa tất cả logic nghiệp vụ. Không import Android trong Model!"
+            },
+            "9": {
+              "en": "MODEL: pure Kotlin data classes — no Android dependencies. This makes them easy to unit test",
+              "vn": "MODEL: data class Kotlin thuần — không phụ thuộc Android. Điều này làm chúng dễ unit test"
+            },
+            "25": {
+              "en": "Kotlin null safety eliminated the #1 Android crash type — NullPointerException — which Java couldn't prevent",
+              "vn": "Null safety Kotlin loại bỏ loại crash Android #1 — NullPointerException — mà Java không thể ngăn chặn"
+            },
+            "27": {
+              "en": "FCM uses a single persistent connection per device for ALL apps — far more battery-efficient than each app polling separately",
+              "vn": "FCM dùng một kết nối liên tục duy nhất mỗi thiết bị cho TẤT CẢ app — tiết kiệm pin hơn nhiều so với mỗi app tự polling"
+            }
+          }
+        }
+      ],
+      "clawdExplanation": {
+        "en": "Push notifications = the postman. Even with your app shut, `FCM` delivers. This is what makes `WhatsApp` and `Messenger` feel alive. Notice you didn't write one line of networking code — Firebase handles all the plumbing. Real devs don't reinvent wheels; they ASK for the right tools. Next: your first bug. Don't panic.",
+        "vn": "Push notification = bưu tá. Dù app đóng, `FCM` vẫn giao. Đó là thứ làm `WhatsApp` và `Messenger` cảm thấy sống động. Chú ý: bạn không viết một dòng code mạng nào — Firebase lo hết phần ống nước. Dev thật không phát minh lại bánh xe; họ HỎI công cụ đúng. Tiếp: bug đầu tiên. Đừng hoảng."
+      },
+      "answerChoices": [],
+      "vocabTerms": [
+        {
+          "term": "FCM",
+          "color": "#A78BFA",
+          "explanation": {
+            "en": "Firebase Cloud Messaging — Google's free service for sending push notifications to Android and iOS",
+            "vn": "Firebase Cloud Messaging — dịch vụ miễn phí của Google để gửi thông báo đẩy đến Android và iOS"
+          }
+        },
+        {
+          "term": "token",
+          "color": "#60A5FA",
+          "explanation": {
+            "en": "A unique ID for each device — Firebase uses it to know exactly which phone to deliver the notification to",
+            "vn": "ID duy nhất cho mỗi thiết bị — Firebase dùng nó để biết chính xác điện thoại nào cần giao thông báo"
+          }
+        },
+        {
+          "term": "Service",
+          "color": "#FBBF24",
+          "explanation": {
+            "en": "An Android component that runs in the background with no UI — used to receive and display notifications",
+            "vn": "Thành phần Android chạy ở nền không có UI — dùng để nhận và hiển thị thông báo"
+          }
+        },
+        {
+          "term": "NotificationChannel",
+          "color": "#10B981",
+          "explanation": {
+            "en": "Required on Android 8+ — groups notifications by category so users can silence one type without blocking all",
+            "vn": "Bắt buộc trên Android 8+ — nhóm thông báo theo danh mục để người dùng tắt một loại mà không chặn tất cả"
+          }
+        }
+      ],
+      "codeExplainer": {
+        "en": "Push notifications are now set up using Firebase Cloud Messaging (FCM). Each phone gets a unique token — like a postal address — when the app starts. When rain is reported in a district, the app sends that token plus a message to Firebase, which delivers the notification to the right phones even when the app is closed. The NotificationChannel groups your alerts so users can control them in phone settings.",
+        "vn": "Thông báo đẩy giờ được thiết lập bằng Firebase Cloud Messaging (FCM). Mỗi điện thoại nhận token duy nhất — như địa chỉ bưu điện — khi app khởi động. Khi có mưa ở một quận, app gửi token đó cùng tin nhắn đến Firebase, Firebase giao thông báo đến đúng điện thoại dù app đang đóng. NotificationChannel nhóm cảnh báo để người dùng kiểm soát trong cài đặt điện thoại."
+      }
+    },
+    {
+      "stepNumber": 13,
+      "type": "bug",
+      "bugNumber": 1,
+      "title": {
+        "en": "Bug #1: SecurityException (missing permission)",
+        "vn": "Bug #1: SecurityException (thiếu quyền)"
+      },
+      "instruction": {
+        "en": "Your app just crashed with a long red error called `SecurityException`. DON'T PANIC — this is normal. Real developers spend most of their time debugging.\n\nThe trick: copy the ENTIRE error and paste it to the AI. The error tells you exactly what went wrong if you read it. AI reads it faster than you ever will.",
+        "vn": "App vừa crash với lỗi đỏ dài tên `SecurityException`. ĐỪNG HOẢNG — đây là chuyện thường. Dev thật dành phần lớn thời gian debug.\n\nMẹo: copy TOÀN BỘ lỗi, dán cho AI. Lỗi nói chính xác sai chỗ nào nếu đọc kỹ. AI đọc nhanh hơn bạn nhiều."
+      },
+      "promptText": {
+        "en": "FATAL EXCEPTION: main\nProcess: com.example.rainalert, PID: 8472\njava.lang.SecurityException: Permission denied (missing INTERNET permission?)\n\tat com.google.firebase.database.core.Repo$PersistentConnectionCallback.onReady(Repo.java:314)\n\tat com.google.firebase.database.connection.PersistentConnection.lambda$onHandshakeResponse$3(PersistentConnection.java:631)\n\tat com.google.firebase.database.connection.PersistentConnection$$Lambda$12.run(Unknown Source:0)\n\tat android.os.Handler.handleCallback(Handler.java:942)\n\tat android.os.Handler.dispatchMessage(Handler.java:99)\n\tat android.os.Looper.loopOnce(Looper.java:201)\n\tat android.os.Looper.loop(Looper.java:288)\n\tat android.app.ActivityThread.main(ActivityThread.java:7898)",
+        "vn": "FATAL EXCEPTION: main\nProcess: com.example.rainalert, PID: 8472\njava.lang.SecurityException: Permission denied (missing INTERNET permission?)\n\tat com.google.firebase.database.core.Repo$PersistentConnectionCallback.onReady(Repo.java:314)\n\tat com.google.firebase.database.connection.PersistentConnection.lambda$onHandshakeResponse$3(PersistentConnection.java:631)\n\tat com.google.firebase.database.connection.PersistentConnection$$Lambda$12.run(Unknown Source:0)\n\tat android.os.Handler.handleCallback(Handler.java:942)\n\tat android.os.Handler.dispatchMessage(Handler.java:99)\n\tat android.os.Looper.loopOnce(Looper.java:201)\n\tat android.os.Looper.loop(Looper.java:288)\n\tat android.app.ActivityThread.main(ActivityThread.java:7898)"
+      },
+      "promptRationale": {
+        "en": "Paste the WHOLE crash — error type, message, every line of the stack trace. The AI reads through it all and spots the problem. Never summarise — give it everything.",
+        "vn": "Dán TOÀN BỘ crash — loại lỗi, thông điệp, từng dòng stack trace. AI đọc hết và phát hiện vấn đề. Đừng tóm tắt — cho hết cả."
+      },
+      "aiResponse": {
+        "en": "Read the second line: \"permission denied for missing ACCESS_FINE_LOCATION.\" Your runtime popup might have worked, but you forgot the manifest declaration — the OTHER half of the permission ritual.\n\nAdd this line to AndroidManifest.xml between the `<manifest>` tags:\n`<uses-permission android:name=\"android.permission.ACCESS_FINE_LOCATION\"/>`\n\nRebuild and try again. The crash will be gone.",
+        "vn": "Đọc dòng thứ hai: \"permission denied for missing ACCESS_FINE_LOCATION.\" Popup runtime có thể đã chạy, nhưng bạn quên khai báo trong manifest — NỬA KIA của nghi thức quyền.\n\nThêm dòng này vào AndroidManifest.xml giữa thẻ `<manifest>`:\n`<uses-permission android:name=\"android.permission.ACCESS_FINE_LOCATION\"/>`\n\nBuild lại và thử. Crash sẽ biến mất."
+      },
+      "codeSnippets": [
+        {
+          "fileName": "AndroidManifest.xml",
+          "code": "<!-- BEFORE (broken — typo in permission name) -->\n<uses-permission android:name=\"android.permission.INERNET\"/>\n\n<!-- AFTER (fixed — correct spelling) -->\n<uses-permission android:name=\"android.permission.INTERNET\"/>\n\n<!-- WHY THIS HAPPENS: -->\n<!-- Android silently ignores unrecognised permission names -->\n<!-- No compile error, no lint warning — only crashes at runtime -->\n<!-- Always copy permission names from developer.android.com -->\n\n<!-- COMPLETE PERMISSIONS for Rain Alert: -->\n<uses-permission android:name=\"android.permission.INTERNET\"/>\n<uses-permission android:name=\"android.permission.ACCESS_FINE_LOCATION\"/>\n<uses-permission android:name=\"android.permission.ACCESS_COARSE_LOCATION\"/>\n<uses-permission android:name=\"android.permission.POST_NOTIFICATIONS\"/>",
+          "lineExplanations": {
+            "2": {
+              "en": "INERNET ← typo! The missing T causes Firebase to be completely blocked from the network — instant crash on init",
+              "vn": "INERNET ← lỗi đánh máy! Chữ T bị thiếu khiến Firebase bị chặn hoàn toàn khỏi mạng — crash ngay khi khởi động"
+            },
+            "5": {
+              "en": "INTERNET ← correct. One letter difference, completely different behaviour. Copy from docs!",
+              "vn": "INTERNET ← đúng. Khác một chữ, hành vi hoàn toàn khác. Sao chép từ tài liệu!"
+            },
+            "8": {
+              "en": "Android silently ignores unknown permissions — this is intentional (forward compatibility) but creates sneaky bugs",
+              "vn": "Android âm thầm bỏ qua các quyền không xác định — đây là cố ý (tương thích tiến) nhưng tạo ra lỗi khó phát hiện"
+            },
+            "13": {
+              "en": "Always declare INTERNET if your app uses any network calls — Firebase, APIs, image loading all need it",
+              "vn": "Luôn khai báo INTERNET nếu app thực hiện bất kỳ lệnh gọi mạng nào — Firebase, API, tải ảnh đều cần nó"
+            }
+          }
+        }
+      ],
+      "clawdExplanation": {
+        "en": "Crashed → copy → paste → fixed. That's the LOOP. Real developers do this dozens of times per day. The AI reads errors better than you ever will. You just have to do the copy-paste. Next bug: `NullPointerException` — the most famous crash in coding history.",
+        "vn": "Crash → copy → dán → sửa. Đó là VÒNG LẶP. Dev thật làm thế hàng chục lần mỗi ngày. AI đọc lỗi giỏi hơn bạn nhiều. Bạn chỉ cần copy-paste. Bug tiếp: `NullPointerException` — crash nổi tiếng nhất lịch sử code."
+      },
+      "answerChoices": [],
+      "vocabTerms": [
+        {
+          "term": "NullPointerException",
+          "color": "#EF4444",
+          "explanation": {
+            "en": "The most common Android crash — happens when code tries to use a variable that is null (empty)",
+            "vn": "Crash Android phổ biến nhất — xảy ra khi code cố dùng biến đang null (rỗng)"
+          }
+        },
+        {
+          "term": "stack trace",
+          "color": "#FBBF24",
+          "explanation": {
+            "en": "The crash log showing exactly which line of code failed and the chain of calls that led there",
+            "vn": "Nhật ký crash hiển thị chính xác dòng code nào thất bại và chuỗi lệnh gọi dẫn đến đó"
+          }
+        },
+        {
+          "term": "?.let",
+          "color": "#60A5FA",
+          "explanation": {
+            "en": "A safe way to run a block only if the value is not null — replaces an if-not-null check elegantly",
+            "vn": "Cách an toàn để chạy khối lệnh chỉ khi giá trị khác null — thay thế kiểm tra if-not-null một cách thanh lịch"
+          }
+        }
+      ],
+      "codeExplainer": {
+        "en": "This step fixed a NullPointerException crash — the most common crash in Android apps. It happened because the code tried to use a location object before GPS had found one, so the variable was null (empty). The fix wraps the risky code in '?.let { }' which only runs if the location actually exists. The stack trace in the error log showed exactly which line caused the crash.",
+        "vn": "Bước này sửa crash NullPointerException — crash phổ biến nhất trong app Android. Nó xảy ra vì code cố dùng đối tượng vị trí trước khi GPS tìm được, nên biến là null (rỗng). Cách sửa bọc code rủi ro trong '?.let { }' chỉ chạy nếu vị trí thực sự tồn tại. Stack trace trong nhật ký lỗi chỉ chính xác dòng nào gây crash."
+      }
+    },
+    {
+      "stepNumber": 14,
+      "type": "bug",
+      "bugNumber": 2,
+      "title": {
+        "en": "Bug #2: NullPointerException (the empty box bites back)",
+        "vn": "Bug #2: NullPointerException (hộp rỗng cắn lại)"
+      },
+      "instruction": {
+        "en": "Another crash, this time `NullPointerException`. Remember `null` from Step 6 — the empty box? This is what happens when the app tries to OPEN one. Somewhere we forgot the safe-call `?`. Paste the error.",
+        "vn": "Crash khác, lần này `NullPointerException`. Nhớ `null` từ Bước 6 — hộp rỗng? Đây là chuyện app cố MỞ nó. Đâu đó ta quên safe-call `?`. Dán lỗi."
+      },
+      "promptText": {
+        "en": "FATAL EXCEPTION: main\nProcess: com.example.rainalert, PID: 12847\njava.lang.NullPointerException: Attempt to invoke virtual method 'double android.location.Location.getLatitude()' on a null object reference\n\tat com.example.rainalert.LocationManager.reverseGeocode(LocationManager.kt:31)\n\tat com.example.rainalert.LocationManager$getCurrentDistrict$1.onSuccess(LocationManager.kt:24)\n\tat com.google.android.gms.tasks.zzj.run(Unknown Source:4)\n\tat android.os.Handler.handleCallback(Handler.java:942)\n\tat android.os.Looper.loopOnce(Looper.java:201)",
+        "vn": "FATAL EXCEPTION: main\nProcess: com.example.rainalert, PID: 12847\njava.lang.NullPointerException: Attempt to invoke virtual method 'double android.location.Location.getLatitude()' on a null object reference\n\tat com.example.rainalert.LocationManager.reverseGeocode(LocationManager.kt:31)\n\tat com.example.rainalert.LocationManager$getCurrentDistrict$1.onSuccess(LocationManager.kt:24)\n\tat com.google.android.gms.tasks.zzj.run(Unknown Source:4)\n\tat android.os.Handler.handleCallback(Handler.java:942)\n\tat android.os.Looper.loopOnce(Looper.java:201)"
+      },
+      "promptRationale": {
+        "en": "Same recipe as bug #1: paste the entire crash. The stack trace tells the AI exactly which file and line had the problem.",
+        "vn": "Cùng công thức bug #1: dán cả crash. Stack trace nói AI chính xác file và dòng nào lỗi."
+      },
+      "aiResponse": {
+        "en": "Reading the stack trace — `LocationManager.kt` line 47, your code tries to read `.latitude` on a `Location` that came back null (GPS fix failed). You need either:\n\n• `currentLocation?.latitude` — the safe-call from Step 6. Returns null gracefully if the location is null.\n• Or an explicit check: `if (currentLocation != null) { … }` before reading.\n\nEither works. The safe-call is shorter.",
+        "vn": "Đọc stack trace — `LocationManager.kt` dòng 47, code cố đọc `.latitude` trên một `Location` trả về null (GPS chưa khoá). Bạn cần:\n\n• `currentLocation?.latitude` — safe-call từ Bước 6. Trả null nhẹ nhàng nếu vị trí null.\n• Hoặc kiểm tra rõ: `if (currentLocation != null) { … }` trước khi đọc.\n\nCả hai đều được. Safe-call ngắn hơn."
+      },
+      "codeSnippets": [
+        {
+          "fileName": "LocationManager.kt",
+          "code": "// BEFORE (crashes when location is null)\nfusedLocationClient.lastLocation\n    .addOnSuccessListener { location ->\n        val district = reverseGeocode(  // CRASH: location can be null!\n            location.latitude,          // NullPointerException here\n            location.longitude\n        )\n        onResult(district ?: \"Quận 1\")\n    }\n\n// AFTER (safe — null check before using location)\nfusedLocationClient.lastLocation\n    .addOnSuccessListener { location ->\n        if (location != null) {\n            // Safe to use location here\n            val district = reverseGeocode(\n                location.latitude,\n                location.longitude\n            )\n            onResult(district ?: \"Quận 1\")\n        } else {\n            // No cached location — device hasn't gotten a fix yet\n            // Option 1: use default district\n            onResult(\"Quận 1\")\n            // Option 2: request fresh location update\n            // requestFreshLocation(onResult)\n        }\n    }\n    .addOnFailureListener {\n        onResult(\"Quận 1\")  // also handle network/service errors\n    }",
+          "lineExplanations": {
+            "4": {
+              "en": "BUG: location parameter in addOnSuccessListener IS nullable — the callback fires with null on devices with no cached position",
+              "vn": "BUG: tham số location trong addOnSuccessListener CÓ THỂ null — callback kích hoạt với null trên thiết bị không có vị trí cache"
+            },
+            "5": {
+              "en": "NullPointerException: calling .latitude on null — Kotlin would have caught this if typed as Location? but here it's untyped",
+              "vn": "NullPointerException: gọi .latitude trên null — Kotlin sẽ bắt được nếu khai báo kiểu Location? nhưng ở đây không có kiểu"
+            },
+            "14": {
+              "en": "if (location != null): the fix — Kotlin smart casts location to Location (non-null) inside this block automatically",
+              "vn": "if (location != null): cách sửa — Kotlin tự động smart cast location thành Location (không null) bên trong khối này"
+            },
+            "21": {
+              "en": "Null case: lastLocation is null on new devices or after factory reset — always provide a sensible fallback",
+              "vn": "Trường hợp null: lastLocation là null trên thiết bị mới hoặc sau reset nhà máy — luôn cung cấp dự phòng hợp lý"
+            },
+            "29": {
+              "en": "addOnFailureListener: handles cases where location service is unavailable (airplane mode, GPS disabled) — never skip this!",
+              "vn": "addOnFailureListener: xử lý trường hợp dịch vụ vị trí không khả dụng (chế độ máy bay, GPS tắt) — đừng bao giờ bỏ qua!"
+            }
+          }
+        }
+      ],
+      "clawdExplanation": {
+        "en": "`NullPointerException` = the #1 most common crash in app history (literally billions of times). You met it AND fixed it. The cause matches Step 6: null = empty box. The fix is one extra character: `?`. Next bug: Android 12 changed notification rules and broke our alerts.",
+        "vn": "`NullPointerException` = crash #1 phổ biến nhất lịch sử app (hàng tỷ lần thật sự). Bạn gặp VÀ sửa. Nguyên nhân khớp Bước 6: null = hộp rỗng. Sửa là thêm một ký tự: `?`. Bug tiếp: Android 12 đổi luật thông báo, làm cảnh báo ta hỏng."
+      },
+      "answerChoices": [],
+      "vocabTerms": [
+        {
+          "term": "SecurityException",
+          "color": "#EF4444",
+          "explanation": {
+            "en": "Thrown when the app tries to use a feature (like GPS) without the user granting permission first",
+            "vn": "Ném ra khi app cố dùng tính năng (như GPS) mà người dùng chưa cấp quyền trước"
+          }
+        },
+        {
+          "term": "try/catch",
+          "color": "#FBBF24",
+          "explanation": {
+            "en": "Wraps risky code — if an exception is thrown inside try, the catch block handles it instead of crashing",
+            "vn": "Bọc code rủi ro — nếu ngoại lệ xảy ra trong try, khối catch xử lý thay vì crash"
+          }
+        },
+        {
+          "term": "ActivityResultLauncher",
+          "color": "#A78BFA",
+          "explanation": {
+            "en": "The modern way to request runtime permissions and handle the user's Yes/No answer",
+            "vn": "Cách hiện đại để yêu cầu quyền runtime và xử lý câu trả lời Có/Không của người dùng"
+          }
+        }
+      ],
+      "codeExplainer": {
+        "en": "This step fixed a SecurityException crash that happened when the app tried to access GPS without the user having granted permission. The fix adds a runtime permission check using ActivityResultLauncher — this shows the standard Android 'Allow / Deny' dialog. If the user says Allow, the GPS code runs. If they say Deny, the app handles it gracefully instead of crashing.",
+        "vn": "Bước này sửa crash SecurityException xảy ra khi app cố truy cập GPS mà người dùng chưa cấp quyền. Cách sửa thêm kiểm tra quyền runtime bằng ActivityResultLauncher — hiện hộp thoại Android tiêu chuẩn 'Cho phép / Từ chối'. Nếu người dùng chọn Cho phép, code GPS chạy. Nếu chọn Từ chối, app xử lý khéo thay vì crash."
+      }
+    },
+    {
+      "stepNumber": 15,
+      "type": "bug",
+      "bugNumber": 3,
+      "title": {
+        "en": "Bug #3: Notifications silent on Android 12+",
+        "vn": "Bug #3: Thông báo im lặng trên Android 12+"
+      },
+      "instruction": {
+        "en": "The app doesn't crash, but on newer phones (Android 13+) notifications never appear. Why? Android changed the rules — now you also need to ASK for notification permission, like with location. Paste the logs.",
+        "vn": "App không crash, nhưng trên điện thoại mới (Android 13+) thông báo không hiện. Vì sao? Android đổi luật — giờ phải XIN quyền thông báo nữa, như với vị trí. Dán log."
+      },
+      "promptText": {
+        "en": "E/AndroidRuntime: FATAL EXCEPTION: Firebase-Messaging-Intent-Handle\nProcess: com.example.rainalert, PID: 9341\njava.lang.IllegalArgumentException: com.example.rainalert: Targeting S+ (version 31 and above) requires that one of FLAG_IMMUTABLE or FLAG_MUTABLE be specified when creating a PendingIntent.\nStrongly consider using FLAG_IMMUTABLE, only use FLAG_MUTABLE if some functionality depends on the PendingIntent being mutable, e.g. if it needs to be used with inline replies or bubbles.\n\tat android.app.PendingIntent.checkFlags(PendingIntent.java:375)\n\tat android.app.PendingIntent.getActivity(PendingIntent.java:502)\n\tat com.example.rainalert.RainNotificationService.showRainNotification(RainNotificationService.kt:22)",
+        "vn": "E/AndroidRuntime: FATAL EXCEPTION: Firebase-Messaging-Intent-Handle\nProcess: com.example.rainalert, PID: 9341\njava.lang.IllegalArgumentException: com.example.rainalert: Targeting S+ (version 31 and above) requires that one of FLAG_IMMUTABLE or FLAG_MUTABLE be specified when creating a PendingIntent.\nStrongly consider using FLAG_IMMUTABLE, only use FLAG_MUTABLE if some functionality depends on the PendingIntent being mutable, e.g. if it needs to be used with inline replies or bubbles.\n\tat android.app.PendingIntent.checkFlags(PendingIntent.java:375)\n\tat android.app.PendingIntent.getActivity(PendingIntent.java:502)\n\tat com.example.rainalert.RainNotificationService.showRainNotification(RainNotificationService.kt:22)"
+      },
+      "promptRationale": {
+        "en": "Not all bugs are crashes. Sometimes the app silently does the wrong thing. Reading the LOGS (the running diary of what happened) is part of the craft — paste them too.",
+        "vn": "Không phải bug nào cũng là crash. Đôi khi app lặng lẽ làm sai. Đọc LOG (nhật ký chạy) là một phần nghề — dán log nữa."
+      },
+      "aiResponse": {
+        "en": "Android 13 added `POST_NOTIFICATIONS` as a new \"dangerous\" permission. Same two-half ritual as location:\n\n(1) Add `<uses-permission android:name=\"android.permission.POST_NOTIFICATIONS\"/>` to AndroidManifest.xml.\n(2) Ask the user at runtime, same launcher pattern as Step 7.\n\nOlder Android (< 13) doesn't need this — notifications were always allowed. Modern Android wants you to ask. That's why your app worked on the emulator but failed on a new phone.",
+        "vn": "Android 13 thêm `POST_NOTIFICATIONS` thành quyền \"nguy hiểm\" mới. Cùng nghi thức hai nửa như vị trí:\n\n(1) Thêm `<uses-permission android:name=\"android.permission.POST_NOTIFICATIONS\"/>` vào AndroidManifest.xml.\n(2) Hỏi user runtime, cùng khuôn mẫu launcher như Bước 7.\n\nAndroid cũ hơn (< 13) không cần — thông báo luôn được phép. Android mới bắt phải xin. Đó là lý do app chạy ở emulator mà fail trên máy mới."
+      },
+      "codeSnippets": [
+        {
+          "fileName": "RainNotificationService.kt",
+          "code": "// BEFORE — crashes on Android 12+ (API 31+)\nval pendingIntent = PendingIntent.getActivity(\n    this,\n    0,\n    tapIntent,\n    PendingIntent.FLAG_UPDATE_CURRENT  // missing required flag!\n)\n\n// AFTER — works on all Android versions\nval pendingIntent = PendingIntent.getActivity(\n    this,\n    0,\n    tapIntent,\n    PendingIntent.FLAG_UPDATE_CURRENT or\n    PendingIntent.FLAG_IMMUTABLE      // required from Android 12+\n)\n\n// WHY FLAG_IMMUTABLE?\n// Security: prevents other apps from intercepting and modifying\n// the intent payload (e.g., changing the 'district' extra)\n//\n// FLAG_UPDATE_CURRENT: if this PendingIntent already exists,\n// update its extras with the new values (important for\n// different rain alert districts)\n//\n// Bitwise OR combines flags:\n// FLAG_UPDATE_CURRENT = 134217728 (binary: 1000...)\n// FLAG_IMMUTABLE      = 67108864  (binary: 0100...)\n// Combined            = 201326592 (binary: 1100...)",
+          "lineExplanations": {
+            "6": {
+              "en": "FLAG_UPDATE_CURRENT only: valid on Android 11 and below, crashes on Android 12+ — the most common notification bug",
+              "vn": "Chỉ FLAG_UPDATE_CURRENT: hợp lệ trên Android 11 trở xuống, crash trên Android 12+ — lỗi thông báo phổ biến nhất"
+            },
+            "13": {
+              "en": "or: Kotlin's bitwise OR operator — combines both flags into one integer value passed to the API",
+              "vn": "or: toán tử OR theo bit của Kotlin — kết hợp cả hai cờ thành một giá trị integer truyền vào API"
+            },
+            "14": {
+              "en": "FLAG_IMMUTABLE: added in API 23, REQUIRED from API 31 — use it always for security best practices",
+              "vn": "FLAG_IMMUTABLE: thêm vào API 23, BẮT BUỘC từ API 31 — luôn dùng vì lý do bảo mật"
+            },
+            "18": {
+              "en": "Intent hijacking: malicious apps could intercept a MUTABLE PendingIntent and change the district extra to redirect users",
+              "vn": "Chiếm đoạt intent: các app độc hại có thể chặn PendingIntent có thể thay đổi và đổi extra quận để chuyển hướng người dùng"
+            },
+            "21": {
+              "en": "FLAG_UPDATE_CURRENT: when a new rain alert arrives for the same district, this updates the existing notification instead of creating a duplicate",
+              "vn": "FLAG_UPDATE_CURRENT: khi cảnh báo mưa mới đến cho cùng quận, cờ này cập nhật thông báo hiện có thay vì tạo bản sao"
+            }
+          }
+        }
+      ],
+      "clawdExplanation": {
+        "en": "Bugs aren't always crashes. Sometimes the app silently does the wrong thing. Reading logs is part of the craft. You've now done three bugs — more debugging than most students do in a whole semester. Real developers debug ALL DAY. Next: you wrap up your first real app.",
+        "vn": "Bug không phải lúc nào cũng là crash. Đôi khi app lặng lẽ làm sai. Đọc log là một phần nghề. Bạn đã làm ba bug — nhiều hơn hầu hết sinh viên cả học kỳ. Dev thật debug CẢ NGÀY. Tiếp: bạn hoàn thành app thật đầu tiên."
+      },
+      "answerChoices": [],
+      "vocabTerms": [
+        {
+          "term": "IndexOutOfBoundsException",
+          "color": "#EF4444",
+          "explanation": {
+            "en": "Crash when accessing list position that doesn't exist — e.g. getting item 5 from a 3-item list",
+            "vn": "Crash khi truy cập vị trí danh sách không tồn tại — ví dụ lấy mục thứ 5 từ danh sách 3 mục"
+          }
+        },
+        {
+          "term": "getOrNull",
+          "color": "#60A5FA",
+          "explanation": {
+            "en": "Safe list access — returns null instead of crashing when the index is out of bounds",
+            "vn": "Truy cập danh sách an toàn — trả về null thay vì crash khi chỉ mục vượt ngoài giới hạn"
+          }
+        },
+        {
+          "term": "isEmpty()",
+          "color": "#10B981",
+          "explanation": {
+            "en": "Returns true if a list has no items — always check this before accessing list[0] to avoid crashes",
+            "vn": "Trả về true nếu danh sách không có mục — luôn kiểm tra trước khi truy cập list[0] để tránh crash"
+          }
+        }
+      ],
+      "codeExplainer": {
+        "en": "This step fixed an IndexOutOfBoundsException that happened when the code tried to read item number 3 from a list that only had 2 items. The fix uses 'getOrNull()' instead of direct index access — it returns null if the index doesn't exist instead of crashing. An isEmpty() check before the loop also prevents trying to process an empty list. These two patterns make list handling crash-proof.",
+        "vn": "Bước này sửa IndexOutOfBoundsException xảy ra khi code cố đọc mục số 3 từ danh sách chỉ có 2 mục. Cách sửa dùng 'getOrNull()' thay vì truy cập chỉ mục trực tiếp — trả về null nếu chỉ mục không tồn tại thay vì crash. Kiểm tra isEmpty() trước vòng lặp cũng ngăn xử lý danh sách rỗng. Hai mẫu này làm xử lý danh sách không thể crash."
+      }
+    },
+    {
+      "stepNumber": 16,
+      "type": "final",
+      "title": {
+        "en": "🎉 You shipped a real app!",
+        "vn": "🎉 Bạn đã ra mắt app thật!"
+      },
+      "instruction": {
+        "en": "That's it. You built a working community rain-alert app:\n\n✓ A screen with a button\n✓ Location permission and GPS\n✓ A cloud database (Firebase)\n✓ A live map of reports\n✓ Push notifications to nearby users\n✓ Three real bugs identified and fixed\n\nYou did this WITHOUT learning Kotlin syntax by heart. You learned to:\n• Describe what you want clearly\n• Ask the AI for options + reasons\n• Read error messages and paste them back\n• Trust the AI for the typing, focus on the thinking\n\nNext project: a multiplayer game / a Tinder-style match app / a personal finance tracker — each one will be bigger and introduce new ideas. See you in the next lesson.",
+        "vn": "Vậy là xong. Bạn vừa xây app cảnh báo mưa cộng đồng:\n\n✓ Màn hình có nút\n✓ Quyền vị trí và GPS\n✓ Database trên mây (Firebase)\n✓ Bản đồ trực tiếp các báo cáo\n✓ Push notification đến user gần đó\n✓ Ba bug thật được tìm và sửa\n\nBạn làm hết mà KHÔNG cần thuộc cú pháp Kotlin. Bạn học được:\n• Mô tả thứ mình muốn rõ ràng\n• Hỏi AI tùy chọn + lý do\n• Đọc thông báo lỗi và dán lại\n• Tin AI gõ code, bạn lo phần suy nghĩ\n\nDự án tiếp theo: game nhiều người / app hẹn hò kiểu Tinder / app quản lý tài chính cá nhân — mỗi cái sẽ lớn hơn, dạy thêm ý mới. Hẹn gặp ở bài sau."
+      },
+      "promptText": {
+        "en": "",
+        "vn": ""
+      },
+      "promptRationale": {
+        "en": "",
+        "vn": ""
+      },
+      "aiResponse": {
+        "en": "",
+        "vn": ""
+      },
+      "codeSnippets": [],
+      "clawdExplanation": {
+        "en": "",
+        "vn": ""
+      },
+      "answerChoices": []
+    }
+  ]
+}

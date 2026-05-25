@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Timesheet</string>
+    <string name="app_title">Teaching Timesheet</string>
+    <string name="app_subtitle">HCMC · 2026</string>
+    <string name="this_month">this month</string>
+    <string name="loading">Loading…</string>
+    <string name="error_network">Could not load data. Check your connection.</string>
+    <string name="retry">Retry</string>
+    <string name="no_sessions">No sessions recorded for this month.</string>
+    <string name="total_hours">Total hours</string>
+    <string name="total_periods">Total periods</string>
+    <string name="earnings">Earnings</string>
+    <string name="monthly_target">Monthly target: 80 hrs</string>
+</resources>

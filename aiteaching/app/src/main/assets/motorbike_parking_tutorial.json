@@ -1,0 +1,985 @@
+{
+  "tutorialId": "motorbike-parking",
+  "title": {
+    "en": "Motorbike Parking Finder",
+    "vn": "Tìm Chỗ Đậu Xe Máy"
+  },
+  "steps": [
+    {
+      "stepNumber": 1,
+      "type": "lesson",
+      "bugNumber": 0,
+      "title": {
+        "en": "Step 1: Build the home screen",
+        "vn": "Bước 1: Xây dựng màn hình chính"
+      },
+      "instruction": {
+        "en": "School parking lots in Vietnam are legendary chaos — hundreds of identical Honda Waves and Visions packed in rows. You park, sit through 4 hours of lectures, come back... Row C or D? Left side or right?\n\nWe're building an app that fixes this. It photos your spot and pins your GPS when you park, so finding your bike is one tap away.\n\nFirst: the home screen. Two big buttons — `Park Here` and `Find My Bike`.",
+        "vn": "Bãi xe ở trường Việt Nam nổi tiếng hỗn loạn — hàng trăm Honda Wave và Vision giống hệt xếp thành hàng. Bạn đậu xe, học 4 tiếng, ra về... Hàng C hay D? Bên trái hay phải?\n\nChúng ta xây app giải quyết điều này. Nó chụp ảnh chỗ đậu và đánh dấu GPS, để tìm xe chỉ cần một chạm.\n\nĐầu tiên: màn hình chính. Hai nút lớn — `Đậu Xe` và `Tìm Xe`."
+      },
+      "promptText": {
+        "en": "I'm building an Android app called 'Find My Xe' — a motorbike parking finder for students. Write MainActivity.kt using Jetpack Compose:\n- Dark background (#0F172A)\n- Title 'Find My Xe', subtitle 'Never lose your bike again'\n- Two full-width buttons: 'Park Here' (blue #3B82F6) and 'Find My Bike' (green #10B981)\n- Buttons don't do anything yet — pass onClick as lambda parameters",
+        "vn": "Tôi đang xây app Android tên 'Find My Xe' — ứng dụng tìm chỗ đậu xe cho sinh viên. Viết MainActivity.kt dùng Jetpack Compose:\n- Nền tối (#0F172A)\n- Tiêu đề 'Find My Xe', phụ đề 'Never lose your bike again'\n- Hai nút chiều ngang: 'Đậu Xe' (xanh #3B82F6) và 'Tìm Xe' (xanh lá #10B981)\n- Các nút chưa làm gì — truyền onClick làm tham số lambda"
+      },
+      "promptRationale": {
+        "en": "Give the AI the hex colors and layout intent upfront. 'Don't do anything yet' stops it over-engineering step 1 with camera code you haven't written.",
+        "vn": "Cung cấp mã màu và ý định bố cục trước. 'Chưa làm gì' ngăn AI thiết kế quá phức tạp ở bước 1 với code camera bạn chưa viết."
+      },
+      "aiResponse": {
+        "en": "Here's your home screen. The `@Composable` annotation is how all Compose UI is built — instead of XML layouts, you write Kotlin functions and Compose draws them.\n\n`Column` stacks children top-to-bottom. `Modifier` is a chain of instructions: `.fillMaxSize()` uses all space, `.background()` sets the color, `.padding()` adds breathing room. You chain them with dots like a sentence.\n\nThe buttons take `onParkHere` and `onFindMyBike` as parameters — good separation of concerns. The screen describes *what it looks like*, and MainActivity will handle *what it does*.",
+        "vn": "Đây là màn hình chính của bạn. Chú thích `@Composable` là cách xây mọi UI trong Compose — thay vì XML, bạn viết hàm Kotlin và Compose vẽ chúng.\n\n`Column` xếp các con từ trên xuống. `Modifier` là chuỗi lệnh: `.fillMaxSize()` dùng hết không gian, `.background()` đặt màu, `.padding()` thêm khoảng thở. Bạn nối chúng bằng dấu chấm.\n\nCác nút nhận `onParkHere` và `onFindMyBike` làm tham số — tách biệt tốt. Màn hình mô tả *trông như thế nào*, và MainActivity xử lý *làm gì*."
+      },
+      "codeSnippets": [
+        {
+          "fileName": "MainActivity.kt",
+          "code": "class MainActivity : ComponentActivity() {\n    override fun onCreate(savedInstanceState: Bundle?) {\n        super.onCreate(savedInstanceState)\n        setContent {\n            ParkingHomeScreen(\n                onParkHere = { /* Step 4: launch camera */ },\n                onFindMyBike = { /* Step 8: open find screen */ }\n            )\n        }\n    }\n}\n\n@Composable\nfun ParkingHomeScreen(\n    onParkHere: () -> Unit,\n    onFindMyBike: () -> Unit\n) {\n    Column(\n        modifier = Modifier\n            .fillMaxSize()\n            .background(Color(0xFF0F172A))\n            .padding(horizontal = 24.dp, vertical = 48.dp),\n        horizontalAlignment = Alignment.CenterHorizontally,\n        verticalArrangement = Arrangement.Center\n    ) {\n        Text(\n            text = \"Find My Xe\",\n            fontSize = 36.sp,\n            fontWeight = FontWeight.Bold,\n            color = Color.White\n        )\n        Spacer(Modifier.height(8.dp))\n        Text(\n            text = \"Never lose your bike again\",\n            fontSize = 14.sp,\n            color = Color(0xFF94A3B8)\n        )\n        Spacer(Modifier.height(64.dp))\n        Button(\n            onClick = onParkHere,\n            modifier = Modifier.fillMaxWidth().height(56.dp),\n            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3B82F6))\n        ) {\n            Text(\"Park Here\", fontSize = 16.sp, fontWeight = FontWeight.Bold)\n        }\n        Spacer(Modifier.height(12.dp))\n        Button(\n            onClick = onFindMyBike,\n            modifier = Modifier.fillMaxWidth().height(56.dp),\n            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF10B981))\n        ) {\n            Text(\"Find My Bike\", fontSize = 16.sp, fontWeight = FontWeight.Bold)\n        }\n    }\n}",
+          "lineExplanations": {
+            "1": {"en": "MainActivity extends ComponentActivity — the Compose-compatible Activity base class", "vn": "MainActivity kế thừa ComponentActivity — lớp Activity cơ sở tương thích Compose"},
+            "4": {"en": "setContent { } replaces setContentView(R.layout.xml) — this is how you launch a Compose UI", "vn": "setContent { } thay thế setContentView(R.layout.xml) — đây là cách khởi chạy UI Compose"},
+            "13": {"en": "@Composable marks this as a UI-building function — Compose calls it to draw and redraw the screen", "vn": "@Composable đánh dấu đây là hàm xây UI — Compose gọi nó để vẽ và vẽ lại màn hình"},
+            "18": {"en": "Column stacks children vertically. The Modifier chain adds dark background color and padding around the edges", "vn": "Column xếp các con theo chiều dọc. Chuỗi Modifier thêm màu nền tối và padding quanh các cạnh"},
+            "37": {"en": "Spacer(Modifier.height(64.dp)) adds 64 density-independent pixels of empty space — like a margin between title and buttons", "vn": "Spacer(Modifier.height(64.dp)) thêm 64 pixel độc lập mật độ khoảng trống — như margin giữa tiêu đề và nút"}
+          }
+        }
+      ],
+      "clawdExplanation": {
+        "en": "A real Android screen with zero XML. Compose replaces layouts entirely — every view you'd drag in a designer is now a function call.\n\nNext: a `data class` to represent one parking spot. What do we need to remember? Photo path, GPS coordinates, and when you parked.",
+        "vn": "Một màn hình Android thực không cần XML. Compose thay thế layout hoàn toàn — mọi view bạn kéo trong designer nay là một lời gọi hàm.\n\nTiếp theo: một `data class` đại diện một chỗ đậu xe. Ta cần nhớ gì? Đường dẫn ảnh, tọa độ GPS, và thời điểm đậu."
+      },
+      "answerChoices": [],
+      "vocabTerms": [
+        {
+          "term": "@Composable",
+          "color": "#60A5FA",
+          "explanation": {"en": "Annotation that turns a Kotlin function into a UI builder — Compose calls it automatically when state changes", "vn": "Chú thích biến hàm Kotlin thành bộ xây UI — Compose gọi tự động khi state thay đổi"}
+        },
+        {
+          "term": "Column",
+          "color": "#A78BFA",
+          "explanation": {"en": "A layout that stacks its children vertically, top to bottom — the Compose equivalent of vertical LinearLayout", "vn": "Layout xếp các con theo chiều dọc, từ trên xuống — tương đương LinearLayout dọc trong Compose"}
+        },
+        {
+          "term": "Modifier",
+          "color": "#34D399",
+          "explanation": {"en": "A chainable set of decoration instructions — size, color, padding, click handling. Dot-chain as many as you need", "vn": "Tập hợp lệnh trang trí có thể nối chuỗi — kích thước, màu, khoảng đệm, xử lý nhấn. Nối bao nhiêu tùy ý"}
+        }
+      ],
+      "codeExplainer": {
+        "en": "This step built the main home screen. MainActivity calls setContent { } to launch a Compose UI — no XML layout file needed. ParkingHomeScreen is marked @Composable so Compose can call it to draw the screen. Inside, a Column stacks the title, subtitle, and two Buttons vertically. Each Button receives its onClick as a lambda parameter so the screen stays separated from the app logic — a clean design pattern.",
+        "vn": "Bước này xây màn hình chính. MainActivity gọi setContent { } để khởi chạy UI Compose — không cần file XML. ParkingHomeScreen được đánh dấu @Composable để Compose có thể gọi vẽ màn hình. Bên trong, Column xếp dọc tiêu đề, phụ đề và hai Button. Mỗi Button nhận onClick làm tham số lambda để màn hình tách biệt khỏi logic app — mẫu thiết kế tốt."
+      }
+    },
+    {
+      "stepNumber": 2,
+      "type": "lesson",
+      "bugNumber": 0,
+      "title": {
+        "en": "Step 2: Define the parking spot",
+        "vn": "Bước 2: Định nghĩa chỗ đậu xe"
+      },
+      "instruction": {
+        "en": "Before we touch the camera or GPS, we need to decide: what information does one parking spot contain?\n\nIn programming, you model real-world things as data. A parking spot has:\n- A photo (the path to the image file on the phone)\n- GPS coordinates (latitude and longitude)\n- A timestamp (when you parked)\n- An optional note\n\nA `data class` in Kotlin is the perfect tool — it's a class whose only job is to hold data.",
+        "vn": "Trước khi dùng camera hay GPS, ta cần quyết định: một chỗ đậu xe chứa thông tin gì?\n\nTrong lập trình, bạn mô hình hóa vật thật thành dữ liệu. Một chỗ đậu xe có:\n- Ảnh (đường dẫn đến file ảnh trên điện thoại)\n- Tọa độ GPS (vĩ độ và kinh độ)\n- Timestamp (lúc đậu)\n- Ghi chú tùy chọn\n\n`data class` trong Kotlin là công cụ hoàn hảo — lớp có nhiệm vụ duy nhất là chứa dữ liệu."
+      },
+      "promptText": {
+        "en": "Create a Kotlin data class called ParkingSpot that holds: photoPath (String, nullable — the user might not take a photo), latitude and longitude (Double), timestamp (Long — milliseconds since epoch), and an optional note (String, default empty string).",
+        "vn": "Tạo data class Kotlin tên ParkingSpot chứa: photoPath (String, nullable — người dùng có thể không chụp), latitude và longitude (Double), timestamp (Long — milliseconds từ epoch), và ghi chú tùy chọn (String, mặc định rỗng)."
+      },
+      "promptRationale": {
+        "en": "List each field with its type and whether it's nullable. The AI follows this spec precisely — vague prompts get vague data models.",
+        "vn": "Liệt kê từng trường với kiểu và nullable hay không. AI theo đặc tả này chính xác — prompt mơ hồ tạo mô hình dữ liệu mơ hồ."
+      },
+      "aiResponse": {
+        "en": "Clean and simple — that's exactly what a data class should be.\n\n`data class` automatically generates `equals()`, `hashCode()`, `toString()`, and `copy()` — four methods you'd have to write manually in Java. That's why Kotlin developers love it for holding data.\n\n`String?` means the photo path can be `null` — the question mark makes it nullable. `Double` holds GPS coordinates precisely. `Long` for the timestamp because `System.currentTimeMillis()` returns a Long.\n\nThe `= \"\"` on note is a default value — callers can skip it and get an empty string automatically.",
+        "vn": "Gọn và đơn giản — đúng như một data class nên có.\n\n`data class` tự động tạo `equals()`, `hashCode()`, `toString()`, và `copy()` — bốn phương thức bạn phải viết thủ công trong Java. Đó là lý do dev Kotlin thích dùng nó để chứa dữ liệu.\n\n`String?` nghĩa là đường dẫn ảnh có thể là `null` — dấu hỏi làm nó nullable. `Double` chứa tọa độ GPS chính xác. `Long` cho timestamp vì `System.currentTimeMillis()` trả về Long.\n\n`= \"\"` trên note là giá trị mặc định — người gọi có thể bỏ qua và tự động nhận chuỗi rỗng."
+      },
+      "codeSnippets": [
+        {
+          "fileName": "ParkingSpot.kt",
+          "code": "data class ParkingSpot(\n    val photoPath: String?,     // full file path, or null if no photo taken\n    val latitude: Double,       // GPS latitude  (e.g. 10.7769 for Ho Chi Minh City)\n    val longitude: Double,      // GPS longitude (e.g. 106.7009)\n    val timestamp: Long,        // System.currentTimeMillis() — ms since Jan 1 1970\n    val note: String = \"\"       // optional user note, empty by default\n)",
+          "lineExplanations": {
+            "1": {"en": "data class auto-generates equals(), hashCode(), toString(), copy() — four methods free", "vn": "data class tự tạo equals(), hashCode(), toString(), copy() — bốn phương thức miễn phí"},
+            "2": {"en": "String? — the ? makes it nullable. photoPath can be null if the user skips the photo", "vn": "String? — dấu ? làm nó nullable. photoPath có thể null nếu người dùng bỏ qua ảnh"},
+            "3": {"en": "Double holds decimal GPS coordinates precisely — latitude ranges from -90 to +90", "vn": "Double chứa tọa độ GPS thập phân chính xác — vĩ độ từ -90 đến +90"},
+            "5": {"en": "Long for timestamp — System.currentTimeMillis() returns milliseconds as a Long (too big for Int)", "vn": "Long cho timestamp — System.currentTimeMillis() trả về mili giây dưới dạng Long (quá lớn cho Int)"},
+            "6": {"en": "= \"\" is a default parameter value — callers can omit 'note' and it automatically gets an empty string", "vn": "= \"\" là giá trị tham số mặc định — người gọi có thể bỏ 'note' và tự động nhận chuỗi rỗng"}
+          }
+        }
+      ],
+      "clawdExplanation": {
+        "en": "One data class, five fields, zero boilerplate. Kotlin is dramatically shorter than Java for the same thing.\n\nNext: `ParkingStorage` — a helper class that saves a `ParkingSpot` to the phone and loads it back. We'll use `SharedPreferences` (Android's built-in key-value store) with JSON to serialize the data.",
+        "vn": "Một data class, năm trường, không boilerplate. Kotlin ngắn hơn Java rất nhiều cho cùng việc đó.\n\nTiếp: `ParkingStorage` — lớp trợ giúp lưu `ParkingSpot` vào điện thoại và đọc lại. Ta dùng `SharedPreferences` (kho key-value tích hợp Android) với JSON để serialize dữ liệu."
+      },
+      "answerChoices": [],
+      "vocabTerms": [
+        {
+          "term": "data class",
+          "color": "#60A5FA",
+          "explanation": {"en": "A class whose purpose is holding data — auto-generates equals, hashCode, toString, copy so you don't have to", "vn": "Lớp có mục đích chứa dữ liệu — tự tạo equals, hashCode, toString, copy để bạn không phải viết"}
+        },
+        {
+          "term": "nullable (?)",
+          "color": "#F87171",
+          "explanation": {"en": "A ? after a type means it can hold null. String? can be a string OR null. String (no ?) can never be null", "vn": "Dấu ? sau kiểu nghĩa là nó có thể chứa null. String? có thể là chuỗi HOẶC null. String (không ?) không bao giờ null"}
+        },
+        {
+          "term": "Long",
+          "color": "#FBBF24",
+          "explanation": {"en": "A 64-bit integer — holds numbers up to 9 quintillion. Used for timestamps because millisecond counts get very large", "vn": "Số nguyên 64-bit — chứa số đến 9 triệu tỷ. Dùng cho timestamp vì đếm mili giây rất lớn"}
+        }
+      ],
+      "codeExplainer": {
+        "en": "This step defined ParkingSpot — the data model for the entire app. It's a Kotlin data class with five fields: photoPath (nullable String for the photo file path), latitude and longitude (Double for GPS precision), timestamp (Long from System.currentTimeMillis()), and note (String with a default value of empty string). The data class keyword automatically generates equals(), hashCode(), toString(), and copy() methods — eliminating the boilerplate you'd need in Java.",
+        "vn": "Bước này định nghĩa ParkingSpot — mô hình dữ liệu cho toàn bộ app. Đây là data class Kotlin với năm trường: photoPath (String nullable cho đường dẫn file ảnh), latitude và longitude (Double cho độ chính xác GPS), timestamp (Long từ System.currentTimeMillis()), và note (String với giá trị mặc định rỗng). Từ khóa data class tự động tạo các phương thức equals(), hashCode(), toString() và copy() — loại bỏ boilerplate cần trong Java."
+      }
+    },
+    {
+      "stepNumber": 3,
+      "type": "lesson",
+      "bugNumber": 0,
+      "title": {
+        "en": "Step 3: Save and load the parking spot",
+        "vn": "Bước 3: Lưu và đọc chỗ đậu xe"
+      },
+      "instruction": {
+        "en": "The phone's memory is wiped every time an app closes. To remember where you parked between sessions, we need to write data to permanent storage.\n\n`SharedPreferences` is Android's built-in key-value store — perfect for saving one current parking spot. We'll convert the `ParkingSpot` to JSON (a text format), save it as a string, and read it back when the app opens.\n\nThis is called **serialization** — turning an object into a format you can store or send.",
+        "vn": "Bộ nhớ điện thoại bị xóa mỗi lần app đóng. Để nhớ chỗ đậu xe giữa các phiên, ta cần ghi dữ liệu vào bộ nhớ vĩnh viễn.\n\n`SharedPreferences` là kho key-value tích hợp Android — hoàn hảo để lưu một chỗ đậu xe hiện tại. Ta chuyển `ParkingSpot` thành JSON (định dạng văn bản), lưu thành chuỗi, và đọc lại khi app mở.\n\nĐây gọi là **serialization** — biến đối tượng thành định dạng có thể lưu hoặc gửi."
+      },
+      "promptText": {
+        "en": "Write a ParkingStorage class for Android that:\n- Takes a Context in the constructor\n- Uses SharedPreferences with the name 'parking_prefs'\n- Has a save(spot: ParkingSpot) function that converts it to JSON and stores it under key 'current_spot'\n- Has a load(): ParkingSpot? function that reads the JSON back and returns null if nothing saved\n- Has a clear() function to erase the saved spot\nUse Gson for JSON conversion.",
+        "vn": "Viết lớp ParkingStorage cho Android:\n- Nhận Context trong constructor\n- Dùng SharedPreferences tên 'parking_prefs'\n- Có hàm save(spot: ParkingSpot) chuyển sang JSON và lưu với key 'current_spot'\n- Có hàm load(): ParkingSpot? đọc JSON lại và trả về null nếu chưa lưu gì\n- Có hàm clear() để xóa chỗ đã lưu\nDùng Gson để chuyển đổi JSON."
+      },
+      "promptRationale": {
+        "en": "Name the SharedPreferences file and the key explicitly — the AI needs these details to write production-quality code, not just a sketch.",
+        "vn": "Đặt tên file SharedPreferences và key rõ ràng — AI cần các chi tiết này để viết code chất lượng, không chỉ phác thảo."
+      },
+      "aiResponse": {
+        "en": "Clean storage layer done. `Gson().toJson(spot)` turns a ParkingSpot object into a JSON string like `{\"photoPath\":\"/storage/...\",\"latitude\":10.77,...}` — that string gets saved to SharedPreferences.\n\nReading it back: `fromJson(json, ParkingSpot::class.java)` recreates the object from that string. Gson does all the heavy lifting.\n\n`prefs.getString('current_spot', null)` returns null if nothing was saved — the `?: return null` handles that gracefully. This pattern — returning null instead of crashing — is Kotlin at its best.",
+        "vn": "Lớp lưu trữ gọn gàng. `Gson().toJson(spot)` chuyển đối tượng ParkingSpot thành chuỗi JSON như `{\"photoPath\":\"/storage/...\",\"latitude\":10.77,...}` — chuỗi đó được lưu vào SharedPreferences.\n\nĐọc lại: `fromJson(json, ParkingSpot::class.java)` tái tạo đối tượng từ chuỗi đó. Gson làm hết phần nặng.\n\n`prefs.getString('current_spot', null)` trả null nếu chưa lưu gì — `?: return null` xử lý điều đó nhẹ nhàng. Mẫu này — trả null thay vì crash — là Kotlin tốt nhất."
+      },
+      "codeSnippets": [
+        {
+          "fileName": "ParkingStorage.kt",
+          "code": "class ParkingStorage(context: Context) {\n\n    private val prefs = context.getSharedPreferences(\n        \"parking_prefs\", Context.MODE_PRIVATE\n    )\n    private val gson = Gson()\n\n    fun save(spot: ParkingSpot) {\n        val json = gson.toJson(spot)           // object → JSON string\n        prefs.edit().putString(\"current_spot\", json).apply()\n    }\n\n    fun load(): ParkingSpot? {\n        val json = prefs.getString(\"current_spot\", null)\n            ?: return null                     // nothing saved yet\n        return gson.fromJson(json, ParkingSpot::class.java)\n    }\n\n    fun clear() {\n        prefs.edit().remove(\"current_spot\").apply()\n    }\n}",
+          "lineExplanations": {
+            "3": {"en": "getSharedPreferences creates (or opens) a named key-value file — MODE_PRIVATE means only this app can read it", "vn": "getSharedPreferences tạo (hoặc mở) file key-value có tên — MODE_PRIVATE nghĩa là chỉ app này đọc được"},
+            "6": {"en": "Gson is a Google library that converts between Kotlin/Java objects and JSON strings in one line", "vn": "Gson là thư viện Google chuyển đổi giữa đối tượng Kotlin/Java và chuỗi JSON trong một dòng"},
+            "8": {"en": "gson.toJson(spot) serializes the entire ParkingSpot object into one JSON string automatically", "vn": "gson.toJson(spot) serialize toàn bộ đối tượng ParkingSpot thành một chuỗi JSON tự động"},
+            "9": {"en": ".edit().putString().apply() — edit() opens a transaction, putString stores the value, apply() saves it asynchronously", "vn": ".edit().putString().apply() — edit() mở giao dịch, putString lưu giá trị, apply() lưu bất đồng bộ"},
+            "14": {"en": "?: return null — the Elvis operator. If getString returns null (nothing saved), immediately return null from load()", "vn": "?: return null — toán tử Elvis. Nếu getString trả null (chưa lưu gì), trả null ngay từ load()"},
+            "15": {"en": "gson.fromJson deserializes the JSON string back into a ParkingSpot object — the reverse of toJson", "vn": "gson.fromJson deserialize chuỗi JSON trở lại thành đối tượng ParkingSpot — ngược lại của toJson"}
+          }
+        }
+      ],
+      "clawdExplanation": {
+        "en": "Save → JSON string → SharedPreferences. Load → SharedPreferences → JSON string → object. That loop is how almost every app persists data locally.\n\nNext: asking the user for camera permission. Android requires you to ask at runtime — the user can say yes or no, and your code has to handle both.",
+        "vn": "Lưu → chuỗi JSON → SharedPreferences. Đọc → SharedPreferences → chuỗi JSON → đối tượng. Vòng lặp đó là cách hầu hết app lưu dữ liệu cục bộ.\n\nTiếp: xin quyền camera từ người dùng. Android yêu cầu hỏi lúc chạy — người dùng có thể đồng ý hoặc từ chối, và code của bạn phải xử lý cả hai."
+      },
+      "answerChoices": [],
+      "vocabTerms": [
+        {
+          "term": "SharedPreferences",
+          "color": "#FBBF24",
+          "explanation": {"en": "Android's built-in key-value storage — persists between app restarts. Good for small data like settings or one saved spot", "vn": "Bộ lưu trữ key-value tích hợp Android — tồn tại qua các lần khởi động lại app. Tốt cho dữ liệu nhỏ như cài đặt"}
+        },
+        {
+          "term": "Gson",
+          "color": "#34D399",
+          "explanation": {"en": "A Google library that converts objects to JSON strings and back — toJson() serializes, fromJson() deserializes", "vn": "Thư viện Google chuyển đổi đối tượng thành chuỗi JSON và ngược lại — toJson() serialize, fromJson() deserialize"}
+        },
+        {
+          "term": "?: (Elvis)",
+          "color": "#F87171",
+          "explanation": {"en": "The Elvis operator — if the left side is null, use the right side instead. x ?: y means 'x, or y if x is null'", "vn": "Toán tử Elvis — nếu vế trái null, dùng vế phải thay thế. x ?: y nghĩa là 'x, hoặc y nếu x null'"}
+        }
+      ],
+      "codeExplainer": {
+        "en": "ParkingStorage wraps SharedPreferences with three simple functions. save() uses Gson to convert the ParkingSpot object into a JSON string, then writes it to SharedPreferences with the key 'current_spot'. load() reads that string back and uses Gson to reconstruct the ParkingSpot — returning null if nothing was ever saved. clear() deletes the saved key. The .edit().putString().apply() pattern is Android's standard way to write to SharedPreferences — edit() opens a transaction and apply() saves it asynchronously.",
+        "vn": "ParkingStorage bọc SharedPreferences với ba hàm đơn giản. save() dùng Gson chuyển đối tượng ParkingSpot thành chuỗi JSON rồi ghi vào SharedPreferences với key 'current_spot'. load() đọc chuỗi đó và dùng Gson tái tạo ParkingSpot — trả null nếu chưa lưu gì. clear() xóa key đã lưu. Mẫu .edit().putString().apply() là cách Android chuẩn ghi SharedPreferences — edit() mở giao dịch và apply() lưu bất đồng bộ."
+      }
+    },
+    {
+      "stepNumber": 4,
+      "type": "lesson",
+      "bugNumber": 0,
+      "title": {
+        "en": "Step 4: Ask for camera permission",
+        "vn": "Bước 4: Xin quyền camera"
+      },
+      "instruction": {
+        "en": "Android has a two-layer permission system:\n1. You declare what permissions the app *might* need in `AndroidManifest.xml`\n2. You ask the user at runtime — they can say yes or no\n\nSince Android 6.0 (2015), dangerous permissions like CAMERA and LOCATION must be requested at runtime. The user sees a popup. If they say no, your app must handle that gracefully — no crashes.\n\nWe'll use `ActivityResultLauncher` — the modern, crash-safe way to request permissions.",
+        "vn": "Android có hệ thống quyền hai lớp:\n1. Khai báo quyền app *có thể* cần trong `AndroidManifest.xml`\n2. Hỏi người dùng lúc chạy — họ có thể đồng ý hoặc từ chối\n\nTừ Android 6.0 (2015), quyền nguy hiểm như CAMERA và LOCATION phải xin lúc chạy. Người dùng thấy popup. Nếu họ từ chối, app phải xử lý nhẹ nhàng — không crash.\n\nTa dùng `ActivityResultLauncher` — cách hiện đại, an toàn để xin quyền."
+      },
+      "promptText": {
+        "en": "Add camera permission handling to MainActivity. I need:\n- A registerForActivityResult launcher using RequestPermission contract for CAMERA\n- If granted: call openCamera() (we'll write that next step)\n- If denied: show a Toast 'Camera permission needed to photo your spot'\n- A checkAndOpenCamera() function that first checks if permission is already granted, and either opens camera directly or launches the permission request",
+        "vn": "Thêm xử lý quyền camera vào MainActivity. Tôi cần:\n- Launcher registerForActivityResult dùng contract RequestPermission cho CAMERA\n- Nếu được cấp: gọi openCamera() (sẽ viết bước sau)\n- Nếu từ chối: hiện Toast 'Cần quyền camera để chụp chỗ đậu'\n- Hàm checkAndOpenCamera() kiểm tra xem quyền đã được cấp chưa, rồi mở camera trực tiếp hoặc khởi chạy yêu cầu quyền"
+      },
+      "promptRationale": {
+        "en": "Describe both the granted AND denied cases explicitly. Apps that only handle the happy path crash for real users who tap 'Deny'.",
+        "vn": "Mô tả rõ cả trường hợp được cấp VÀ từ chối. App chỉ xử lý trường hợp tốt sẽ crash với người dùng thực nhấn 'Từ chối'."
+      },
+      "aiResponse": {
+        "en": "Permission handling done. `ActivityResultLauncher` is the modern replacement for the old `onRequestPermissionsResult` callback — which was famously error-prone.\n\n`ContextCompat.checkSelfPermission()` returns `PERMISSION_GRANTED` or `PERMISSION_DENIED`. Check this BEFORE launching the request — if the user already granted it in a previous session, you can skip the popup entirely.\n\nThe `when` block in `checkAndOpenCamera()` is Kotlin's switch statement — cleaner than Java's if-else chain for multi-branch logic.",
+        "vn": "Xong xử lý quyền. `ActivityResultLauncher` là thay thế hiện đại cho callback `onRequestPermissionsResult` cũ — vốn nổi tiếng dễ lỗi.\n\n`ContextCompat.checkSelfPermission()` trả về `PERMISSION_GRANTED` hoặc `PERMISSION_DENIED`. Kiểm tra TRƯỚC khi khởi chạy yêu cầu — nếu người dùng đã cấp ở phiên trước, bạn có thể bỏ qua popup.\n\nKhối `when` trong `checkAndOpenCamera()` là câu lệnh switch của Kotlin — gọn hơn chuỗi if-else của Java cho logic nhiều nhánh."
+      },
+      "codeSnippets": [
+        {
+          "fileName": "MainActivity.kt",
+          "code": "\n// ── Camera permission ────────────────────────────────────────────────────────\n\nprivate val requestCameraPermission =\n    registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->\n        if (granted) {\n            openCamera()\n        } else {\n            Toast.makeText(\n                this,\n                \"Camera permission needed to photo your spot\",\n                Toast.LENGTH_SHORT\n            ).show()\n        }\n    }\n\nprivate fun checkAndOpenCamera() {\n    when {\n        ContextCompat.checkSelfPermission(\n            this, Manifest.permission.CAMERA\n        ) == PackageManager.PERMISSION_GRANTED -> {\n            openCamera()  // already have permission\n        }\n        else -> {\n            requestCameraPermission.launch(Manifest.permission.CAMERA)\n        }\n    }\n}\n\nprivate fun openCamera() {\n    // Step 5: take photo with FileProvider\n}",
+          "lineExplanations": {
+            "3": {"en": "registerForActivityResult sets up a permission launcher — it's called before the Activity is created, not inside a click handler", "vn": "registerForActivityResult tạo launcher quyền — được gọi trước khi Activity tạo, không bên trong click handler"},
+            "4": {"en": "The lambda receives 'granted: Boolean' — true if the user tapped Allow, false if they tapped Deny", "vn": "Lambda nhận 'granted: Boolean' — true nếu người dùng nhấn Cho phép, false nếu nhấn Từ chối"},
+            "16": {"en": "when { } is Kotlin's switch — each branch is a condition, runs the first one that is true", "vn": "when { } là switch của Kotlin — mỗi nhánh là điều kiện, chạy nhánh đầu tiên đúng"},
+            "17": {"en": "checkSelfPermission compares the current permission state — always check before requesting to avoid unnecessary popups", "vn": "checkSelfPermission so sánh trạng thái quyền hiện tại — luôn kiểm tra trước khi yêu cầu để tránh popup không cần thiết"},
+            "22": {"en": "requestCameraPermission.launch() shows the system permission dialog to the user", "vn": "requestCameraPermission.launch() hiển thị dialog quyền hệ thống cho người dùng"}
+          }
+        }
+      ],
+      "clawdExplanation": {
+        "en": "Always check before asking. Always handle the denial. These two rules stop 90% of permission-related crashes.\n\nNext: the actual photo. We'll use `FileProvider` — a security component that lets the camera app write a photo into YOUR app's private folder. It sounds complex but it's a one-time setup.",
+        "vn": "Luôn kiểm tra trước khi hỏi. Luôn xử lý từ chối. Hai quy tắc này ngăn 90% crash liên quan đến quyền.\n\nTiếp: ảnh thực sự. Ta dùng `FileProvider` — thành phần bảo mật cho phép app camera ghi ảnh vào thư mục riêng của APP. Nghe phức tạp nhưng chỉ cần thiết lập một lần."
+      },
+      "answerChoices": [],
+      "vocabTerms": [
+        {
+          "term": "ActivityResultLauncher",
+          "color": "#60A5FA",
+          "explanation": {"en": "Modern API for launching permission requests or other Activities and getting results back safely — replaces old onRequestPermissionsResult", "vn": "API hiện đại để khởi chạy yêu cầu quyền hoặc Activity khác và nhận kết quả an toàn — thay thế onRequestPermissionsResult cũ"}
+        },
+        {
+          "term": "PERMISSION_GRANTED",
+          "color": "#34D399",
+          "explanation": {"en": "The constant returned by checkSelfPermission when the user has already allowed a permission — always check this before requesting", "vn": "Hằng số trả về bởi checkSelfPermission khi người dùng đã cho phép quyền — luôn kiểm tra trước khi yêu cầu"}
+        },
+        {
+          "term": "when { }",
+          "color": "#A78BFA",
+          "explanation": {"en": "Kotlin's switch statement — evaluates branches in order and runs the first one that matches. Cleaner than if-else chains", "vn": "Câu lệnh switch của Kotlin — đánh giá các nhánh theo thứ tự và chạy nhánh đầu tiên khớp. Gọn hơn chuỗi if-else"}
+        }
+      ],
+      "codeExplainer": {
+        "en": "This step added runtime camera permission handling to MainActivity. registerForActivityResult creates a launcher with the RequestPermission contract — its callback lambda receives a Boolean: true if granted, false if denied. checkAndOpenCamera() first checks if permission was already granted (skipping the popup if so), then launches the request if needed. The openCamera() stub is a placeholder that will be filled in the next step with actual photo-capture code.",
+        "vn": "Bước này thêm xử lý quyền camera lúc chạy vào MainActivity. registerForActivityResult tạo launcher với contract RequestPermission — lambda callback nhận Boolean: true nếu được cấp, false nếu từ chối. checkAndOpenCamera() đầu tiên kiểm tra xem quyền đã được cấp chưa (bỏ qua popup nếu có), rồi khởi chạy yêu cầu nếu cần. Stub openCamera() là placeholder sẽ được điền ở bước tiếp theo với code chụp ảnh thực."
+      }
+    },
+    {
+      "stepNumber": 5,
+      "type": "lesson",
+      "bugNumber": 0,
+      "title": {
+        "en": "Step 5: Take a photo with FileProvider",
+        "vn": "Bước 5: Chụp ảnh với FileProvider"
+      },
+      "instruction": {
+        "en": "Taking a photo in Android is surprisingly tricky — not because of the camera itself, but because of **file security**.\n\nWhen your app tells the camera app 'save the photo here', you can't just pass a file path. Since Android 7.0, apps are sandboxed: the camera app can't access your app's private files directly. You need `FileProvider` — a special component that wraps your file path into a secure URI the camera can write to.\n\nThink of it as a secure handoff: FileProvider creates a temporary, revokable permission slip.",
+        "vn": "Chụp ảnh trong Android khá phức tạp — không phải vì camera, mà vì **bảo mật file**.\n\nKhi app của bạn bảo app camera 'lưu ảnh ở đây', bạn không thể chỉ truyền đường dẫn file. Từ Android 7.0, app được sandbox: app camera không thể trực tiếp truy cập file riêng của app bạn. Bạn cần `FileProvider` — thành phần đặc biệt bọc đường dẫn file thành URI bảo mật mà camera có thể ghi.\n\nHãy nghĩ như bàn giao có bảo mật: FileProvider tạo giấy phép tạm thời, có thể thu hồi."
+      },
+      "promptText": {
+        "en": "Fill in the openCamera() function in MainActivity. It should:\n1. Create a File in getExternalFilesDir(DIRECTORY_PICTURES) with name 'parking_TIMESTAMP.jpg'\n2. Convert it to a URI using FileProvider.getUriForFile() with authority '${packageName}.fileprovider'\n3. Store the URI in a private var photoUri\n4. Launch the TakePicture ActivityResult launcher\nAlso add the TakePicture launcher — on success, call saveCurrentSpot() (placeholder). On failure, show a Toast.",
+        "vn": "Điền hàm openCamera() trong MainActivity. Nó cần:\n1. Tạo File trong getExternalFilesDir(DIRECTORY_PICTURES) tên 'parking_TIMESTAMP.jpg'\n2. Chuyển thành URI dùng FileProvider.getUriForFile() với authority '${packageName}.fileprovider'\n3. Lưu URI vào var photoUri riêng\n4. Khởi chạy launcher ActivityResult TakePicture\nThêm launcher TakePicture — khi thành công gọi saveCurrentSpot() (placeholder). Thất bại hiện Toast."
+      },
+      "promptRationale": {
+        "en": "Give the exact authority string — '${packageName}.fileprovider' is a convention, not magic. The AI needs this to write the correct FileProvider call.",
+        "vn": "Cung cấp chuỗi authority chính xác — '${packageName}.fileprovider' là quy ước, không phải ma thuật. AI cần điều này để viết lệnh gọi FileProvider đúng."
+      },
+      "aiResponse": {
+        "en": "Photo capture wired up. `TakePicture()` is a built-in ActivityResult contract — it launches the system camera and returns `true` if the photo was saved successfully.\n\n`FileProvider.getUriForFile()` is the key step. It takes your private File and returns a content:// URI — a secure, indirect reference the camera can write to without ever seeing your app's actual file path.\n\nThe authority string `${packageName}.fileprovider` must match exactly what you declare in AndroidManifest.xml — we'll see that in a later step when we fix a bug caused by a mismatch.\n\nQuick check before we move to GPS — what does FileProvider actually create?",
+        "vn": "Đã kết nối chụp ảnh. `TakePicture()` là contract ActivityResult tích hợp — khởi chạy camera hệ thống và trả về `true` nếu ảnh lưu thành công.\n\n`FileProvider.getUriForFile()` là bước chính. Nó lấy File riêng của bạn và trả về content:// URI — tham chiếu gián tiếp, bảo mật mà camera có thể ghi mà không nhìn thấy đường dẫn file thực của app.\n\nChuỗi authority `${packageName}.fileprovider` phải khớp chính xác với khai báo trong AndroidManifest.xml — ta sẽ thấy điều đó ở bước sau khi sửa bug do không khớp.\n\nKiểm tra nhanh trước khi chuyển sang GPS — FileProvider thực sự tạo ra gì?"
+      },
+      "codeSnippets": [
+        {
+          "fileName": "MainActivity.kt",
+          "code": "\n// ── Photo capture ─────────────────────────────────────────────────────────────\n\nprivate var photoUri: Uri? = null\n\nprivate val takePicture =\n    registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->\n        if (success) {\n            saveCurrentSpot()   // photo saved — now grab GPS and store the spot\n        } else {\n            Toast.makeText(this, \"Photo cancelled\", Toast.LENGTH_SHORT).show()\n        }\n    }\n\nprivate fun openCamera() {\n    val photoFile = File(\n        getExternalFilesDir(Environment.DIRECTORY_PICTURES),\n        \"parking_${System.currentTimeMillis()}.jpg\"\n    )\n    photoUri = FileProvider.getUriForFile(\n        this,\n        \"${packageName}.fileprovider\",   // must match AndroidManifest.xml\n        photoFile\n    )\n    takePicture.launch(photoUri)\n}\n\nprivate fun saveCurrentSpot() {\n    // Step 7: get GPS location + save ParkingSpot\n}",
+          "lineExplanations": {
+            "3": {"en": "photoUri holds a reference to the photo file — we need it later to display the photo in Find My Bike screen", "vn": "photoUri giữ tham chiếu đến file ảnh — cần nó sau để hiển thị ảnh trong màn hình Tìm Xe"},
+            "5": {"en": "TakePicture() is a built-in contract that launches the system camera app and delivers true/false when done", "vn": "TakePicture() là contract tích hợp khởi chạy app camera hệ thống và trả true/false khi hoàn tất"},
+            "13": {"en": "File() creates a file object at the path — getExternalFilesDir gives us a folder that's private to this app but accessible to the camera", "vn": "File() tạo đối tượng file tại đường dẫn — getExternalFilesDir cho thư mục riêng với app nhưng camera có thể truy cập"},
+            "16": {"en": "System.currentTimeMillis() makes each filename unique — parking_1706789123456.jpg. Without this, each photo overwrites the last", "vn": "System.currentTimeMillis() làm mỗi tên file duy nhất — parking_1706789123456.jpg. Không có điều này, mỗi ảnh ghi đè ảnh trước"},
+            "18": {"en": "FileProvider.getUriForFile() wraps the private file path into a secure content:// URI the camera can write to", "vn": "FileProvider.getUriForFile() bọc đường dẫn file riêng thành content:// URI bảo mật mà camera có thể ghi"}
+          }
+        }
+      ],
+      "clawdExplanation": {
+        "en": "FileProvider answered. Camera wired up.\n\nNext: GPS. We'll use `FusedLocationProviderClient` — Google's location API that fuses GPS satellite, WiFi positioning, and cell towers for the fastest, most accurate fix. One request, best available location.",
+        "vn": "FileProvider đã trả lời. Camera đã kết nối.\n\nTiếp: GPS. Ta dùng `FusedLocationProviderClient` — API vị trí của Google kết hợp vệ tinh GPS, định vị WiFi và cell tower cho kết quả nhanh và chính xác nhất. Một yêu cầu, vị trí tốt nhất có thể."
+      },
+      "answerChoices": [
+        {
+          "en": "A secure content:// URI — a temporary, indirect reference that lets the camera write to your private folder without seeing the real file path",
+          "vn": "Một content:// URI bảo mật — tham chiếu tạm thời, gián tiếp cho phép camera ghi vào thư mục riêng mà không thấy đường dẫn file thực"
+        }
+      ],
+      "vocabTerms": [
+        {
+          "term": "FileProvider",
+          "color": "#60A5FA",
+          "explanation": {"en": "A security component that converts private file paths into secure content:// URIs that other apps can temporarily access", "vn": "Thành phần bảo mật chuyển đường dẫn file riêng thành content:// URI bảo mật mà app khác có thể truy cập tạm thời"}
+        },
+        {
+          "term": "URI",
+          "color": "#FBBF24",
+          "explanation": {"en": "Uniform Resource Identifier — a unique address for a resource. content://... is Android's secure way to reference files", "vn": "Uniform Resource Identifier — địa chỉ duy nhất cho tài nguyên. content://... là cách Android tham chiếu file bảo mật"}
+        },
+        {
+          "term": "TakePicture()",
+          "color": "#34D399",
+          "explanation": {"en": "A built-in ActivityResult contract that launches the camera app and returns true if the photo was saved successfully", "vn": "Contract ActivityResult tích hợp khởi chạy app camera và trả true nếu ảnh lưu thành công"}
+        }
+      ],
+      "codeExplainer": {
+        "en": "This step implemented the actual photo capture. openCamera() creates a uniquely-named JPG file in the app's private pictures folder, then uses FileProvider.getUriForFile() to wrap that path into a secure content:// URI. The takePicture launcher sends that URI to the system camera — the camera writes the photo directly to that file and returns true on success. The authority string in getUriForFile must exactly match what will be declared in AndroidManifest.xml — a mismatch causes a crash we'll see in the bug steps.",
+        "vn": "Bước này thực hiện chụp ảnh thực sự. openCamera() tạo file JPG tên duy nhất trong thư mục ảnh riêng của app, rồi dùng FileProvider.getUriForFile() bọc đường dẫn thành content:// URI bảo mật. Launcher takePicture gửi URI đó đến camera hệ thống — camera ghi ảnh trực tiếp vào file đó và trả true khi thành công. Chuỗi authority trong getUriForFile phải khớp chính xác với khai báo trong AndroidManifest.xml — không khớp gây crash ta sẽ thấy ở bước bug."
+      }
+    },
+    {
+      "stepNumber": 6,
+      "type": "lesson",
+      "bugNumber": 0,
+      "title": {
+        "en": "Step 6: Get the GPS location",
+        "vn": "Bước 6: Lấy vị trí GPS"
+      },
+      "instruction": {
+        "en": "After the photo is taken, we need to pin the GPS coordinates — so the app knows exactly where to send the student when they tap 'Find My Bike'.\n\nAndroid's `FusedLocationProviderClient` is the modern location API. It combines GPS satellites, WiFi positioning, and cell tower triangulation to get the best available location as fast as possible.\n\nWe also need location permission — just like camera, it must be requested at runtime.",
+        "vn": "Sau khi chụp ảnh, ta cần ghim tọa độ GPS — để app biết chính xác đâu cần đưa sinh viên khi họ nhấn 'Tìm Xe'.\n\n`FusedLocationProviderClient` của Android là API vị trí hiện đại. Nó kết hợp vệ tinh GPS, định vị WiFi và tam giác cell tower để lấy vị trí tốt nhất nhanh nhất có thể.\n\nTa cũng cần quyền vị trí — giống camera, phải xin lúc chạy."
+      },
+      "promptText": {
+        "en": "Write a LocationHelper class for Android that:\n- Takes a Context in the constructor\n- Uses FusedLocationProviderClient\n- Has a getCurrentLocation(onResult: (Double, Double) -> Unit) function\n- Checks ACCESS_FINE_LOCATION permission before calling getLastLocation()\n- Calls onResult(latitude, longitude) on success\n- Falls back to (0.0, 0.0) if location is null (no cached fix yet)",
+        "vn": "Viết lớp LocationHelper cho Android:\n- Nhận Context trong constructor\n- Dùng FusedLocationProviderClient\n- Có hàm getCurrentLocation(onResult: (Double, Double) -> Unit)\n- Kiểm tra quyền ACCESS_FINE_LOCATION trước khi gọi getLastLocation()\n- Gọi onResult(latitude, longitude) khi thành công\n- Dùng (0.0, 0.0) nếu location null (chưa có fix GPS cache)"
+      },
+      "promptRationale": {
+        "en": "The callback signature (Double, Double) -> Unit is explicit — vague prompts like 'get location' produce interfaces you have to rewrite. Specify exactly how you want the result delivered.",
+        "vn": "Chữ ký callback (Double, Double) -> Unit rõ ràng — prompt mơ hồ như 'lấy vị trí' tạo interface phải viết lại. Chỉ định chính xác cách bạn muốn kết quả được trả."
+      },
+      "aiResponse": {
+        "en": "Location helper ready. A few important things here:\n\n`getLastLocation()` returns the *most recently cached* location — it's fast but may be a few minutes old. For parking, that's fine — you're standing next to your bike.\n\nThe `?.let { location -> }` pattern is Kotlin null-safety in action. `getLastLocation()` can return null (if the device has never gotten a GPS fix). The `?.let` block only runs if the result is non-null — no NullPointerException possible.\n\nThe `addOnSuccessListener` and `addOnFailureListener` are callbacks — the location lookup happens in the background and these are called when it finishes.",
+        "vn": "LocationHelper sẵn sàng. Một số điều quan trọng:\n\n`getLastLocation()` trả về vị trí *cache gần nhất* — nhanh nhưng có thể vài phút cũ. Để đậu xe, ổn thôi — bạn đang đứng cạnh xe.\n\nMẫu `?.let { location -> }` là null-safety Kotlin trong thực tế. `getLastLocation()` có thể trả null (nếu thiết bị chưa bao giờ có GPS fix). Khối `?.let` chỉ chạy nếu kết quả không null — không thể NullPointerException.\n\n`addOnSuccessListener` và `addOnFailureListener` là callback — tra cứu vị trí diễn ra nền và chúng được gọi khi hoàn tất."
+      },
+      "codeSnippets": [
+        {
+          "fileName": "LocationHelper.kt",
+          "code": "class LocationHelper(private val context: Context) {\n\n    private val fusedClient =\n        LocationServices.getFusedLocationProviderClient(context)\n\n    fun getCurrentLocation(onResult: (lat: Double, lng: Double) -> Unit) {\n        if (ContextCompat.checkSelfPermission(\n                context, Manifest.permission.ACCESS_FINE_LOCATION\n            ) != PackageManager.PERMISSION_GRANTED\n        ) {\n            onResult(0.0, 0.0)   // permission not granted — caller should handle\n            return\n        }\n\n        fusedClient.lastLocation\n            .addOnSuccessListener { location ->\n                location?.let {\n                    onResult(it.latitude, it.longitude)\n                } ?: onResult(0.0, 0.0)   // null = no cached fix yet\n            }\n            .addOnFailureListener {\n                onResult(0.0, 0.0)        // GPS service unavailable\n            }\n    }\n}",
+          "lineExplanations": {
+            "3": {"en": "getFusedLocationProviderClient gives us the fused API — it combines GPS, WiFi, and cell towers automatically", "vn": "getFusedLocationProviderClient cho ta API fused — tự động kết hợp GPS, WiFi và cell tower"},
+            "6": {"en": "The callback (lat: Double, lng: Double) -> Unit is a lambda the caller passes in — called with coordinates when ready", "vn": "Callback (lat: Double, lng: Double) -> Unit là lambda người gọi truyền vào — được gọi với tọa độ khi sẵn sàng"},
+            "7": {"en": "Always check permission before calling location APIs — Android throws SecurityException if you forget", "vn": "Luôn kiểm tra quyền trước khi gọi API vị trí — Android ném SecurityException nếu quên"},
+            "15": {"en": "lastLocation is the most recently cached location — fast but may be a few minutes old. Good enough for parking.", "vn": "lastLocation là vị trí cache gần nhất — nhanh nhưng có thể vài phút cũ. Đủ tốt để đậu xe."},
+            "16": {"en": "addOnSuccessListener callback fires when location is ready — location parameter is nullable, so ?.let guards against null", "vn": "addOnSuccessListener callback kích hoạt khi vị trí sẵn sàng — tham số location nullable, nên ?.let bảo vệ khỏi null"},
+            "17": {"en": "?.let { } only runs the block if location is not null — Kotlin's safe way to unwrap a nullable value", "vn": "?.let { } chỉ chạy khối nếu location không null — cách an toàn của Kotlin để unwrap giá trị nullable"}
+          }
+        }
+      ],
+      "clawdExplanation": {
+        "en": "`?.let` just saved you from the most famous crash in Android history — `NullPointerException`. GPS can return null if the phone hasn't gotten a satellite fix yet.\n\nNext: wiring it all together. When the student taps 'Park Here', we'll chain: camera photo → GPS coordinates → save to SharedPreferences. Three steps, one tap.",
+        "vn": "`?.let` vừa cứu bạn khỏi crash nổi tiếng nhất lịch sử Android — `NullPointerException`. GPS có thể trả null nếu điện thoại chưa có fix vệ tinh.\n\nTiếp: kết nối tất cả. Khi sinh viên nhấn 'Đậu Xe', ta nối chuỗi: ảnh camera → tọa độ GPS → lưu vào SharedPreferences. Ba bước, một chạm."
+      },
+      "answerChoices": [],
+      "vocabTerms": [
+        {
+          "term": "FusedLocationProviderClient",
+          "color": "#60A5FA",
+          "explanation": {"en": "Google's location API that combines GPS satellites, WiFi, and cell towers to get the fastest and most accurate position", "vn": "API vị trí của Google kết hợp vệ tinh GPS, WiFi và cell tower để có vị trí nhanh và chính xác nhất"}
+        },
+        {
+          "term": "?.let { }",
+          "color": "#34D399",
+          "explanation": {"en": "Safe call + let — runs the block only if the value is not null. The ultimate null-safety pattern in Kotlin", "vn": "Safe call + let — chỉ chạy khối nếu giá trị không null. Mẫu null-safety tối thượng trong Kotlin"}
+        },
+        {
+          "term": "lastLocation",
+          "color": "#FBBF24",
+          "explanation": {"en": "The most recently cached device location — returns fast but may be null if GPS has never run on this device", "vn": "Vị trí thiết bị được cache gần nhất — trả về nhanh nhưng có thể null nếu GPS chưa từng chạy trên thiết bị này"}
+        }
+      ],
+      "codeExplainer": {
+        "en": "LocationHelper wraps FusedLocationProviderClient with a simple callback-based API. getCurrentLocation() first checks for ACCESS_FINE_LOCATION permission — if missing, it immediately calls back with (0.0, 0.0) so the caller knows something went wrong. Then it calls lastLocation which returns the most recently cached position. The ?.let pattern safely unwraps the nullable location: if the location is null (no GPS fix cached yet), it falls back to (0.0, 0.0). addOnFailureListener handles cases where the location service itself is unavailable.",
+        "vn": "LocationHelper bọc FusedLocationProviderClient với API đơn giản dựa callback. getCurrentLocation() đầu tiên kiểm tra quyền ACCESS_FINE_LOCATION — nếu thiếu, ngay lập tức gọi lại với (0.0, 0.0) để người gọi biết có vấn đề. Sau đó gọi lastLocation trả về vị trí cache gần nhất. Mẫu ?.let an toàn unwrap location nullable: nếu location null (chưa có GPS fix cache), dùng (0.0, 0.0). addOnFailureListener xử lý khi bản thân dịch vụ vị trí không khả dụng."
+      }
+    },
+    {
+      "stepNumber": 7,
+      "type": "lesson",
+      "bugNumber": 0,
+      "title": {
+        "en": "Step 7: Wire up Park Here",
+        "vn": "Bước 7: Kết nối nút Đậu Xe"
+      },
+      "instruction": {
+        "en": "Time to connect the pieces. When the student taps 'Park Here':\n1. Camera opens → student photos the spot\n2. Photo saved → `saveCurrentSpot()` is called\n3. GPS is fetched → all data assembled into a `ParkingSpot`\n4. `ParkingStorage.save()` writes it to SharedPreferences\n\nWe also need to request location permission if it's not granted — same pattern as camera permission.",
+        "vn": "Đến lúc kết nối các mảnh. Khi sinh viên nhấn 'Đậu Xe':\n1. Camera mở → sinh viên chụp chỗ đậu\n2. Ảnh lưu → `saveCurrentSpot()` được gọi\n3. GPS lấy → tất cả dữ liệu ghép thành `ParkingSpot`\n4. `ParkingStorage.save()` ghi vào SharedPreferences\n\nTa cũng cần xin quyền vị trí nếu chưa được cấp — cùng mẫu với quyền camera."
+      },
+      "promptText": {
+        "en": "Add to MainActivity:\n1. A requestLocationPermission ActivityResultLauncher (same pattern as camera permission)\n2. A saveCurrentSpot() function that: gets current location using LocationHelper, creates a ParkingSpot with photoUri?.toString(), the coordinates, and System.currentTimeMillis(), saves it using ParkingStorage, and shows a Toast 'Spot saved!'\n3. Update onParkHere lambda to call checkAndOpenCamera()\n4. Add a checkLocationPermission() helper similar to checkAndOpenCamera()",
+        "vn": "Thêm vào MainActivity:\n1. ActivityResultLauncher requestLocationPermission (cùng mẫu quyền camera)\n2. Hàm saveCurrentSpot() lấy vị trí dùng LocationHelper, tạo ParkingSpot với photoUri?.toString(), tọa độ, và System.currentTimeMillis(), lưu bằng ParkingStorage, hiện Toast 'Đã lưu chỗ đậu!'\n3. Cập nhật lambda onParkHere để gọi checkAndOpenCamera()\n4. Thêm checkLocationPermission() tương tự checkAndOpenCamera()"
+      },
+      "promptRationale": {
+        "en": "Breaking the prompt into numbered steps forces the AI to address each requirement — a single vague sentence would miss the permission check or the Toast.",
+        "vn": "Chia prompt thành các bước đánh số buộc AI phải xử lý từng yêu cầu — một câu mơ hồ sẽ bỏ qua kiểm tra quyền hoặc Toast."
+      },
+      "aiResponse": {
+        "en": "Everything is now connected. When you tap 'Park Here': camera → photo → `saveCurrentSpot()` → GPS → `ParkingSpot` → SharedPreferences. One tap, four steps, done.\n\n`photoUri?.toString()` converts the nullable Uri to a nullable String — the `?.` means 'only call toString() if photoUri isn't null'. If the user somehow cancels the photo, the path is null, and `ParkingSpot` accepts that.\n\n`System.currentTimeMillis()` stamps the exact moment of parking in milliseconds — we'll format that into human-readable time in the Find screen.",
+        "vn": "Mọi thứ đã kết nối. Khi nhấn 'Đậu Xe': camera → ảnh → `saveCurrentSpot()` → GPS → `ParkingSpot` → SharedPreferences. Một chạm, bốn bước, xong.\n\n`photoUri?.toString()` chuyển Uri nullable thành String nullable — `?.` nghĩa là 'chỉ gọi toString() nếu photoUri không null'. Nếu người dùng hủy ảnh, đường dẫn là null, và `ParkingSpot` chấp nhận điều đó.\n\n`System.currentTimeMillis()` đóng dấu thời điểm đậu xe chính xác bằng mili giây — ta sẽ định dạng thành thời gian con người đọc được ở màn hình Tìm."
+      },
+      "codeSnippets": [
+        {
+          "fileName": "MainActivity.kt",
+          "code": "\n// ── Location permission ───────────────────────────────────────────────────────\n\nprivate val locationHelper by lazy { LocationHelper(this) }\nprivate val storage by lazy { ParkingStorage(this) }\n\nprivate val requestLocationPermission =\n    registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->\n        if (!granted) {\n            Toast.makeText(this, \"Location needed for GPS pin\", Toast.LENGTH_SHORT).show()\n        }\n    }\n\nprivate fun checkLocationPermission() {\n    if (ContextCompat.checkSelfPermission(\n            this, Manifest.permission.ACCESS_FINE_LOCATION\n        ) != PackageManager.PERMISSION_GRANTED\n    ) {\n        requestLocationPermission.launch(Manifest.permission.ACCESS_FINE_LOCATION)\n    }\n}\n\n// ── Save parking spot ─────────────────────────────────────────────────────────\n\nprivate fun saveCurrentSpot() {\n    locationHelper.getCurrentLocation { lat, lng ->\n        val spot = ParkingSpot(\n            photoPath  = photoUri?.toString(),\n            latitude   = lat,\n            longitude  = lng,\n            timestamp  = System.currentTimeMillis()\n        )\n        storage.save(spot)\n        Toast.makeText(this, \"Spot saved! Find it anytime.\", Toast.LENGTH_SHORT).show()\n    }\n}",
+          "lineExplanations": {
+            "3": {"en": "lazy { } creates the helper only when first used — avoids creating LocationHelper before the Activity is fully ready", "vn": "lazy { } tạo helper chỉ khi dùng lần đầu — tránh tạo LocationHelper trước khi Activity hoàn toàn sẵn sàng"},
+            "6": {"en": "Location permission launcher — same registerForActivityResult pattern as camera but for ACCESS_FINE_LOCATION", "vn": "Launcher quyền vị trí — cùng mẫu registerForActivityResult như camera nhưng cho ACCESS_FINE_LOCATION"},
+            "22": {"en": "getCurrentLocation takes a trailing lambda — the { lat, lng -> } block runs when GPS result is ready", "vn": "getCurrentLocation nhận trailing lambda — khối { lat, lng -> } chạy khi kết quả GPS sẵn sàng"},
+            "23": {"en": "Assembling the ParkingSpot: photo path, coordinates, and current timestamp — all in one named-parameter constructor call", "vn": "Ghép ParkingSpot: đường dẫn ảnh, tọa độ và timestamp hiện tại — tất cả trong một lời gọi constructor với tham số đặt tên"},
+            "24": {"en": "photoUri?.toString() — if photoUri is null (photo cancelled), this returns null, which ParkingSpot accepts as String?", "vn": "photoUri?.toString() — nếu photoUri null (ảnh bị hủy), trả null, ParkingSpot chấp nhận là String?"}
+          }
+        }
+      ],
+      "clawdExplanation": {
+        "en": "Park Here is fully functional. Photo + GPS + save — three technologies in one button tap.\n\nNext: the 'Find My Bike' screen. It loads the saved ParkingSpot, shows you when you parked, the coordinates, and the distance from your current location. Then we'll add the photo.",
+        "vn": "Đậu Xe hoạt động đầy đủ. Ảnh + GPS + lưu — ba công nghệ trong một lần nhấn nút.\n\nTiếp: màn hình 'Tìm Xe'. Nó tải ParkingSpot đã lưu, hiển thị khi bạn đậu xe, tọa độ, và khoảng cách từ vị trí hiện tại. Sau đó ta thêm ảnh."
+      },
+      "answerChoices": [],
+      "vocabTerms": [
+        {
+          "term": "lazy { }",
+          "color": "#A78BFA",
+          "explanation": {"en": "Deferred initialization — the object is created only when first accessed, not when the class is created", "vn": "Khởi tạo trì hoãn — đối tượng chỉ được tạo khi truy cập lần đầu, không khi lớp được tạo"}
+        },
+        {
+          "term": "trailing lambda",
+          "color": "#60A5FA",
+          "explanation": {"en": "When the last parameter of a function is a lambda, Kotlin lets you write it outside the parentheses — { } after the call", "vn": "Khi tham số cuối của hàm là lambda, Kotlin cho phép viết nó ngoài dấu ngoặc — { } sau lời gọi"}
+        },
+        {
+          "term": "System.currentTimeMillis()",
+          "color": "#FBBF24",
+          "explanation": {"en": "Returns the current time as milliseconds since Jan 1 1970 (epoch) — a Long that uniquely identifies any moment in time", "vn": "Trả về thời gian hiện tại bằng mili giây từ 1/1/1970 (epoch) — Long xác định duy nhất bất kỳ thời điểm nào"}
+        }
+      ],
+      "codeExplainer": {
+        "en": "This step wired the Park Here flow end-to-end. Two lazy-initialized helpers are created: LocationHelper and ParkingStorage. A location permission launcher handles the ACCESS_FINE_LOCATION request. saveCurrentSpot() calls locationHelper.getCurrentLocation with a trailing lambda — when GPS returns, it builds a ParkingSpot with the photo URI (converted to a nullable String), coordinates, and the current timestamp, then saves it to SharedPreferences and shows a confirmation Toast. The Park Here button now chains: camera permission check → take photo → save spot with GPS.",
+        "vn": "Bước này kết nối flow Đậu Xe từ đầu đến cuối. Hai helper lazy-initialized được tạo: LocationHelper và ParkingStorage. Launcher quyền vị trí xử lý yêu cầu ACCESS_FINE_LOCATION. saveCurrentSpot() gọi locationHelper.getCurrentLocation với trailing lambda — khi GPS trả về, tạo ParkingSpot với URI ảnh (chuyển thành String nullable), tọa độ và timestamp hiện tại, rồi lưu vào SharedPreferences và hiển thị Toast xác nhận. Nút Đậu Xe giờ nối chuỗi: kiểm tra quyền camera → chụp ảnh → lưu chỗ với GPS."
+      }
+    },
+    {
+      "stepNumber": 8,
+      "type": "lesson",
+      "bugNumber": 0,
+      "title": {
+        "en": "Step 8: Build the Find My Bike screen",
+        "vn": "Bước 8: Xây dựng màn hình Tìm Xe"
+      },
+      "instruction": {
+        "en": "The student parked, the data is saved. Now they need to FIND the bike.\n\nThe Find My Bike screen loads the saved `ParkingSpot` from SharedPreferences, shows when they parked, and displays the GPS coordinates. In the next step we'll add the photo and distance calculation.\n\nThis screen needs to re-check the saved spot every time it opens — the student might have re-parked since last time.",
+        "vn": "Sinh viên đã đậu xe, dữ liệu đã lưu. Giờ họ cần TÌM xe.\n\nMàn hình Tìm Xe tải `ParkingSpot` đã lưu từ SharedPreferences, hiển thị khi họ đậu, và tọa độ GPS. Ở bước sau ta thêm ảnh và tính khoảng cách.\n\nMàn hình này cần kiểm tra lại chỗ đã lưu mỗi khi mở — sinh viên có thể đã đậu lại từ lần trước."
+      },
+      "promptText": {
+        "en": "Write a FindBikeScreen composable function in FindBikeScreen.kt. It should:\n- Take a ParkingStorage parameter and an onBack lambda\n- Load the saved ParkingSpot using remember { storage.load() }\n- Show 'No spot saved yet — tap Park Here first!' if nothing saved\n- If a spot exists: show 'You parked here' header, the timestamp formatted as a readable date/time using SimpleDateFormat('dd MMM HH:mm'), latitude and longitude, a Back button\n- Dark background matching the home screen (#0F172A)",
+        "vn": "Viết composable FindBikeScreen trong FindBikeScreen.kt. Nó cần:\n- Nhận ParkingStorage và lambda onBack\n- Tải ParkingSpot đã lưu dùng remember { storage.load() }\n- Hiện 'Chưa lưu chỗ — nhấn Đậu Xe trước!' nếu chưa có gì\n- Nếu có chỗ: hiện header 'Xe bạn đậu ở đây', timestamp định dạng dd MMM HH:mm, vĩ độ và kinh độ, nút Quay lại\n- Nền tối giống màn hình chính (#0F172A)"
+      },
+      "promptRationale": {
+        "en": "Specifying the empty-state message and the date format string saves a revision cycle — the AI produces exactly what you need the first time.",
+        "vn": "Chỉ định thông báo trạng thái rỗng và chuỗi định dạng ngày tiết kiệm một vòng sửa — AI tạo ra chính xác những gì bạn cần ngay lần đầu."
+      },
+      "aiResponse": {
+        "en": "Find screen done. A few things to notice:\n\n`remember { storage.load() }` runs the load exactly once when the composable first enters the composition — not on every recomposition. That's what `remember` does: caches the result.\n\n`SimpleDateFormat('dd MMM HH:mm').format(Date(spot.timestamp))` converts the Long timestamp back to a human date. `Date(timestamp)` wraps a millisecond value; `format()` prints it as '15 Jan 14:32'.\n\nThe `spot?.let { }` safe-call checks that spot isn't null before showing the data — same null-safety pattern as the GPS code.",
+        "vn": "Màn hình Tìm xong. Một số điều cần chú ý:\n\n`remember { storage.load() }` chạy load đúng một lần khi composable lần đầu vào composition — không phải mỗi lần recomposition. Đó là `remember`: cache kết quả.\n\n`SimpleDateFormat('dd MMM HH:mm').format(Date(spot.timestamp))` chuyển timestamp Long thành ngày người đọc được. `Date(timestamp)` bọc giá trị mili giây; `format()` in ra '15 tháng 1 14:32'.\n\n`spot?.let { }` safe-call kiểm tra spot không null trước khi hiển thị dữ liệu — cùng mẫu null-safety với code GPS."
+      },
+      "codeSnippets": [
+        {
+          "fileName": "FindBikeScreen.kt",
+          "code": "@Composable\nfun FindBikeScreen(\n    storage: ParkingStorage,\n    onBack: () -> Unit\n) {\n    val spot = remember { storage.load() }\n\n    Column(\n        modifier = Modifier\n            .fillMaxSize()\n            .background(Color(0xFF0F172A))\n            .padding(24.dp),\n        horizontalAlignment = Alignment.CenterHorizontally\n    ) {\n        Text(\n            text = \"Find My Bike\",\n            fontSize = 28.sp,\n            fontWeight = FontWeight.Bold,\n            color = Color.White\n        )\n        Spacer(Modifier.height(32.dp))\n\n        if (spot == null) {\n            Text(\n                text = \"No spot saved yet — tap Park Here first!\",\n                color = Color(0xFF94A3B8),\n                fontSize = 16.sp,\n                textAlign = TextAlign.Center\n            )\n        } else {\n            Text(\"You parked here\", fontSize = 14.sp, color = Color(0xFF60A5FA))\n            Spacer(Modifier.height(8.dp))\n            val timeStr = remember(spot.timestamp) {\n                SimpleDateFormat(\"dd MMM HH:mm\", Locale.getDefault())\n                    .format(Date(spot.timestamp))\n            }\n            Text(timeStr, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color.White)\n            Spacer(Modifier.height(16.dp))\n            Text(\n                text = \"%.5f, %.5f\".format(spot.latitude, spot.longitude),\n                fontSize = 14.sp,\n                color = Color(0xFF94A3B8),\n                fontFamily = FontFamily.Monospace\n            )\n        }\n\n        Spacer(Modifier.weight(1f))\n        OutlinedButton(onClick = onBack, modifier = Modifier.fillMaxWidth()) {\n            Text(\"Back\", color = Color.White)\n        }\n    }\n}",
+          "lineExplanations": {
+            "6": {"en": "remember { storage.load() } runs load() once and caches it — recompositions won't re-read storage unnecessarily", "vn": "remember { storage.load() } chạy load() một lần và cache — các recomposition sẽ không đọc lại storage không cần thiết"},
+            "22": {"en": "if (spot == null) shows the empty state — always handle the case where no data is saved yet", "vn": "if (spot == null) hiện trạng thái rỗng — luôn xử lý trường hợp chưa có dữ liệu lưu"},
+            "31": {"en": "remember(spot.timestamp) recalculates the formatted time only when the timestamp changes — not on every recompose", "vn": "remember(spot.timestamp) tính lại thời gian định dạng chỉ khi timestamp thay đổi — không phải mỗi lần recompose"},
+            "32": {"en": "SimpleDateFormat('dd MMM HH:mm') formats a Date as '15 Jan 14:32' — Locale.getDefault() uses the device's language setting", "vn": "SimpleDateFormat('dd MMM HH:mm') định dạng Date thành '15 thg 1 14:32' — Locale.getDefault() dùng ngôn ngữ thiết bị"},
+            "37": {"en": "'%.5f, %.5f'.format(lat, lng) prints coordinates with 5 decimal places — enough precision to within ~1 metre", "vn": "'%.5f, %.5f'.format(lat, lng) in tọa độ với 5 chữ số thập phân — đủ chính xác trong ~1 mét"}
+          }
+        }
+      ],
+      "clawdExplanation": {
+        "en": "Find screen shows when and where. But the most useful part is the PHOTO — seeing the actual spot image instantly reminds the student which bay their bike is in.\n\nNext: load and display the saved photo using Coil, and calculate how many metres away the saved spot is from the student's current position.",
+        "vn": "Màn hình Tìm hiển thị khi nào và ở đâu. Nhưng phần hữu ích nhất là ẢNH — thấy hình ảnh thực chỗ đậu ngay lập tức nhắc nhở sinh viên xe của họ ở ô nào.\n\nTiếp: tải và hiển thị ảnh đã lưu dùng Coil, và tính khoảng cách bằng mét từ chỗ đã lưu đến vị trí hiện tại của sinh viên."
+      },
+      "answerChoices": [],
+      "vocabTerms": [
+        {
+          "term": "remember { }",
+          "color": "#60A5FA",
+          "explanation": {"en": "Caches a value in Compose — runs the lambda once and stores the result. Recompositions use the cached value without re-running", "vn": "Cache giá trị trong Compose — chạy lambda một lần và lưu kết quả. Các recomposition dùng giá trị cache mà không chạy lại"}
+        },
+        {
+          "term": "SimpleDateFormat",
+          "color": "#FBBF24",
+          "explanation": {"en": "Formats a Date object into a human-readable string — 'dd MMM HH:mm' produces '15 Jan 14:32'", "vn": "Định dạng đối tượng Date thành chuỗi con người đọc được — 'dd MMM HH:mm' tạo ra '15 thg 1 14:32'"}
+        },
+        {
+          "term": "Spacer(weight(1f))",
+          "color": "#A78BFA",
+          "explanation": {"en": "A flexible spacer that expands to fill remaining space — pushes the Back button to the bottom of the screen", "vn": "Spacer linh hoạt mở rộng để lấp đầy không gian còn lại — đẩy nút Quay lại xuống dưới cùng màn hình"}
+        }
+      ],
+      "codeExplainer": {
+        "en": "FindBikeScreen loads the saved ParkingSpot once using remember { storage.load() } — the remember wrapper ensures load() is only called once, not on every recomposition. If no spot is saved, it shows an empty-state message. If a spot exists, it displays a formatted timestamp (converting the Long millisecond value to a readable date string with SimpleDateFormat), and the GPS coordinates formatted to 5 decimal places — enough precision to locate a specific parking bay. Spacer(Modifier.weight(1f)) pushes the Back button to the bottom of the column.",
+        "vn": "FindBikeScreen tải ParkingSpot đã lưu một lần dùng remember { storage.load() } — wrapper remember đảm bảo load() chỉ được gọi một lần, không phải mỗi recomposition. Nếu không có chỗ đã lưu, hiện thông báo trạng thái rỗng. Nếu có chỗ, hiển thị timestamp được định dạng (chuyển giá trị Long mili giây thành chuỗi ngày đọc được với SimpleDateFormat), và tọa độ GPS định dạng 5 chữ số thập phân — đủ chính xác để xác định ô đậu xe cụ thể. Spacer(Modifier.weight(1f)) đẩy nút Quay lại xuống dưới column."
+      }
+    },
+    {
+      "stepNumber": 9,
+      "type": "lesson",
+      "bugNumber": 0,
+      "title": {
+        "en": "Step 9: Show the photo and distance",
+        "vn": "Bước 9: Hiển thị ảnh và khoảng cách"
+      },
+      "instruction": {
+        "en": "Two features that make the app genuinely useful:\n\n1. **The photo** — seeing the actual image of your spot instantly jogs memory. Coil is Android's best image-loading library: it handles URI loading, caching, and error states in one line.\n\n2. **Distance** — 'Your bike is 47 metres away' is far more useful than raw GPS coordinates. Android's built-in `Location.distanceBetween()` calculates the straight-line distance between two GPS points.",
+        "vn": "Hai tính năng làm app thực sự hữu ích:\n\n1. **Ảnh** — thấy hình ảnh thực chỗ đậu ngay lập tức gợi nhớ. Coil là thư viện tải ảnh tốt nhất Android: xử lý tải URI, cache và trạng thái lỗi trong một dòng.\n\n2. **Khoảng cách** — 'Xe bạn cách 47 mét' hữu ích hơn nhiều so với tọa độ GPS thô. `Location.distanceBetween()` tích hợp Android tính khoảng cách đường thẳng giữa hai điểm GPS."
+      },
+      "promptText": {
+        "en": "Add to FindBikeScreen.kt inside the 'else' block (spot exists):\n1. If spot.photoPath is not null: show an AsyncImage (Coil) loading from Uri.parse(spot.photoPath), ContentScale.Crop, 200dp height, rounded corners 12dp\n2. Below the coordinates: show distance in metres using Location.distanceBetween() between a 'currentLat/Lng' state and spot.latitude/longitude. For now, hardcode currentLat = 10.7769, currentLng = 106.7009 (HCMC center) — we'll make it live in a later step\n3. Format distance as '%.0f m away'.format(distance) if under 1000m, or '%.1f km away'.format(distance/1000) if over",
+        "vn": "Thêm vào FindBikeScreen.kt trong khối 'else' (chỗ tồn tại):\n1. Nếu spot.photoPath không null: hiện AsyncImage (Coil) tải từ Uri.parse(spot.photoPath), ContentScale.Crop, cao 200dp, góc bo 12dp\n2. Dưới tọa độ: hiện khoảng cách bằng mét dùng Location.distanceBetween() giữa 'currentLat/Lng' state và spot.latitude/longitude. Tạm thời hardcode currentLat = 10.7769, currentLng = 106.7009 (trung tâm HCMC)\n3. Định dạng khoảng cách '%.0f m away'.format(distance) nếu dưới 1000m, hoặc '%.1f km'.format(distance/1000) nếu trên"
+      },
+      "promptRationale": {
+        "en": "Hardcoding HCMC coordinates is the right call for now — we'll add live location in a later step. Tell the AI this explicitly so it doesn't over-engineer a live GPS update flow you don't need yet.",
+        "vn": "Hardcode tọa độ HCMC là đúng tạm thời — ta thêm vị trí trực tiếp ở bước sau. Nói rõ điều này với AI để nó không thiết kế quá mức flow cập nhật GPS trực tiếp bạn chưa cần."
+      },
+      "aiResponse": {
+        "en": "Photo display and distance done.\n\n`AsyncImage` from Coil handles everything: network/local loading, caching, placeholder on error — all in one composable. `ContentScale.Crop` fills the frame without stretching.\n\n`Location.distanceBetween()` fills a FloatArray — Android's way of returning multiple values from a C-backed math function. `results[0]` is the distance in metres. For Ho Chi Minh City at 10.7769°N, 106.7009°E, anything under 500m is walking distance.\n\nThe smart formatting (`m` vs `km`) makes this feel like a real app instead of a developer tool.",
+        "vn": "Hiển thị ảnh và khoảng cách xong.\n\n`AsyncImage` từ Coil xử lý mọi thứ: tải mạng/cục bộ, cache, placeholder khi lỗi — tất cả trong một composable. `ContentScale.Crop` lấp đầy khung mà không kéo dài.\n\n`Location.distanceBetween()` điền vào FloatArray — cách Android trả về nhiều giá trị từ hàm toán học C. `results[0]` là khoảng cách bằng mét. Ở HCMC 10.7769°N, 106.7009°E, dưới 500m là khoảng cách đi bộ.\n\nĐịnh dạng thông minh (`m` vs `km`) làm app trông thật thay vì công cụ dev."
+      },
+      "codeSnippets": [
+        {
+          "fileName": "FindBikeScreen.kt",
+          "code": "\n// Add inside the 'else { }' block after the coordinates Text:\n\nSpacer(Modifier.height(24.dp))\n\n// ── Parking photo ─────────────────────────────────────────────────────────────\nspot.photoPath?.let { path ->\n    AsyncImage(\n        model = Uri.parse(path),\n        contentDescription = \"Your parking spot\",\n        contentScale = ContentScale.Crop,\n        modifier = Modifier\n            .fillMaxWidth()\n            .height(200.dp)\n            .clip(RoundedCornerShape(12.dp))\n    )\n    Spacer(Modifier.height(16.dp))\n}\n\n// ── Distance ──────────────────────────────────────────────────────────────────\nval currentLat = 10.7769   // TODO Step 10: replace with live location\nval currentLng = 106.7009\n\nval results = FloatArray(1)\nLocation.distanceBetween(\n    currentLat, currentLng,\n    spot.latitude, spot.longitude,\n    results\n)\nval distanceM = results[0]\nval distanceText = if (distanceM < 1000f)\n    \"%.0f m away\".format(distanceM)\nelse\n    \"%.1f km away\".format(distanceM / 1000f)\n\nText(\n    text = distanceText,\n    fontSize = 20.sp,\n    fontWeight = FontWeight.Bold,\n    color = Color(0xFF34D399)\n)",
+          "lineExplanations": {
+            "5": {"en": "spot.photoPath?.let — safe-call that only shows the photo section if a photo path was saved", "vn": "spot.photoPath?.let — safe-call chỉ hiện phần ảnh nếu đường dẫn ảnh đã được lưu"},
+            "6": {"en": "AsyncImage from Coil loads any URI (file://, content://, https://) asynchronously with automatic caching", "vn": "AsyncImage từ Coil tải bất kỳ URI nào (file://, content://, https://) bất đồng bộ với cache tự động"},
+            "8": {"en": "ContentScale.Crop fills the image frame — crops the edges if the image aspect ratio doesn't match the frame", "vn": "ContentScale.Crop lấp đầy khung ảnh — cắt cạnh nếu tỷ lệ khung hình không khớp với khung"},
+            "18": {"en": "FloatArray(1) is a pre-allocated array for the result — Location.distanceBetween() writes the distance in metres to index 0", "vn": "FloatArray(1) là mảng phân bổ trước cho kết quả — Location.distanceBetween() ghi khoảng cách mét vào chỉ số 0"},
+            "19": {"en": "distanceBetween(fromLat, fromLng, toLat, toLng, results) — fills results[0] with the straight-line distance in metres", "vn": "distanceBetween(fromLat, fromLng, toLat, toLng, results) — điền results[0] với khoảng cách đường thẳng bằng mét"},
+            "24": {"en": "Smart formatting: metres under 1000, kilometres with one decimal above — makes the number meaningful to the user", "vn": "Định dạng thông minh: mét dưới 1000, km với một chữ số thập phân trên — làm số có ý nghĩa với người dùng"}
+          }
+        }
+      ],
+      "clawdExplanation": {
+        "en": "Photo visible. Distance displayed. This is now a usable app.\n\nNext: a notification. When the student parks, they'll get a reminder: 'You parked at 14:32 — tap to find your bike'. This teaches `NotificationManager`, notification channels (required since Android 8), and scheduling a one-tap action.",
+        "vn": "Ảnh hiển thị. Khoảng cách hiện thị. Đây là app có thể dùng được rồi.\n\nTiếp: thông báo. Khi sinh viên đậu xe, họ sẽ nhận nhắc nhở: 'Bạn đậu lúc 14:32 — nhấn để tìm xe'. Điều này dạy `NotificationManager`, notification channel (bắt buộc từ Android 8), và đặt lịch hành động một chạm."
+      },
+      "answerChoices": [],
+      "vocabTerms": [
+        {
+          "term": "AsyncImage",
+          "color": "#60A5FA",
+          "explanation": {"en": "Coil's Compose composable for loading images from any URI — handles caching, loading states, and errors automatically", "vn": "Composable Compose của Coil để tải ảnh từ bất kỳ URI nào — xử lý cache, trạng thái tải và lỗi tự động"}
+        },
+        {
+          "term": "distanceBetween()",
+          "color": "#34D399",
+          "explanation": {"en": "Android's built-in function that calculates the straight-line distance in metres between two GPS coordinates", "vn": "Hàm tích hợp Android tính khoảng cách đường thẳng bằng mét giữa hai tọa độ GPS"}
+        },
+        {
+          "term": "ContentScale.Crop",
+          "color": "#A78BFA",
+          "explanation": {"en": "An image scaling mode — fills the entire frame by cropping overflow, like CSS object-fit: cover", "vn": "Chế độ co giãn ảnh — lấp đầy toàn bộ khung bằng cách cắt phần tràn, như CSS object-fit: cover"}
+        }
+      ],
+      "codeExplainer": {
+        "en": "This step added photo display and distance to FindBikeScreen. The photo section uses spot.photoPath?.let — it only renders if a photo path was actually saved. AsyncImage from Coil loads the photo from the saved content:// URI path, crops it to fill a 200dp rounded-corner frame. Distance uses Android's Location.distanceBetween() which takes two lat/lng pairs and fills a FloatArray with the straight-line distance in metres. The distance is formatted smartly: metres for under 1km, kilometres with one decimal for larger distances, shown in green to make it prominent.",
+        "vn": "Bước này thêm hiển thị ảnh và khoảng cách vào FindBikeScreen. Phần ảnh dùng spot.photoPath?.let — chỉ render nếu đường dẫn ảnh thực sự đã lưu. AsyncImage từ Coil tải ảnh từ đường dẫn content:// URI đã lưu, crop để lấp đầy khung 200dp góc bo. Khoảng cách dùng Location.distanceBetween() của Android nhận hai cặp lat/lng và điền FloatArray với khoảng cách đường thẳng bằng mét. Khoảng cách được định dạng thông minh: mét dưới 1km, km với một chữ số thập phân cho khoảng cách lớn hơn, hiển thị màu xanh lá để nổi bật."
+      }
+    },
+    {
+      "stepNumber": 10,
+      "type": "lesson",
+      "bugNumber": 0,
+      "title": {
+        "en": "Step 10: Parking reminder notification",
+        "vn": "Bước 10: Thông báo nhắc nhở đậu xe"
+      },
+      "instruction": {
+        "en": "The student parked, the photo and GPS are saved. But what if they forget to open the app? A notification appears on their lock screen: 'Parked at 14:32 — tap to find your bike'.\n\nNotifications in Android require:\n1. A **notification channel** (since Android 8.0 / API 26) — a category the user can silence\n2. A **PendingIntent** — an action that runs when the user taps the notification\n3. **POST_NOTIFICATIONS** permission on Android 13+",
+        "vn": "Sinh viên đã đậu xe, ảnh và GPS đã lưu. Nhưng nếu họ quên mở app? Một thông báo xuất hiện trên màn hình khóa: 'Đậu lúc 14:32 — nhấn để tìm xe'.\n\nThông báo trong Android cần:\n1. **Notification channel** (từ Android 8.0 / API 26) — danh mục người dùng có thể tắt tiếng\n2. **PendingIntent** — hành động chạy khi người dùng nhấn thông báo\n3. Quyền **POST_NOTIFICATIONS** trên Android 13+"
+      },
+      "promptText": {
+        "en": "Write a NotificationHelper class that:\n- Creates a notification channel 'parking_channel' with name 'Parking Reminders' in the constructor\n- Has a showParkingNotification(timeParked: String) function\n- The notification: small icon android.R.drawable.ic_dialog_map, title 'Bike parked!', text 'You parked at [timeParked] — tap to find it'\n- Tapping opens MainActivity (use PendingIntent.getActivity with FLAG_IMMUTABLE)\n- Checks POST_NOTIFICATIONS permission on Android 13+ before showing",
+        "vn": "Viết lớp NotificationHelper:\n- Tạo notification channel 'parking_channel' tên 'Parking Reminders' trong constructor\n- Có hàm showParkingNotification(timeParked: String)\n- Thông báo: icon android.R.drawable.ic_dialog_map, tiêu đề 'Xe đã đậu!', nội dung 'Bạn đậu lúc [timeParked] — nhấn để tìm'\n- Nhấn mở MainActivity (dùng PendingIntent.getActivity với FLAG_IMMUTABLE)\n- Kiểm tra quyền POST_NOTIFICATIONS trên Android 13+ trước khi hiện"
+      },
+      "promptRationale": {
+        "en": "Name the channel ID and specify FLAG_IMMUTABLE explicitly — forgetting FLAG_IMMUTABLE is one of the most common notification crashes on Android 12+.",
+        "vn": "Đặt tên channel ID và chỉ định FLAG_IMMUTABLE rõ ràng — quên FLAG_IMMUTABLE là một trong những crash thông báo phổ biến nhất trên Android 12+."
+      },
+      "aiResponse": {
+        "en": "Notification helper done. A few things worth knowing:\n\n`NotificationChannel` is required on Android 8.0+. Creating it multiple times is safe — Android ignores duplicate channel registrations. So it's fine to create the channel in the constructor.\n\n`PendingIntent.FLAG_IMMUTABLE` is required on Android 12+ — it tells Android that this intent cannot be modified after creation. Forgetting it is a common crash.\n\n`NotificationManagerCompat` from AndroidX handles the Android version differences automatically — the same code works from API 21 to API 34.\n\nNow: when should the notification appear? The moment the spot is saved — right inside `saveCurrentSpot()`.",
+        "vn": "NotificationHelper xong. Một số điều đáng biết:\n\n`NotificationChannel` bắt buộc trên Android 8.0+. Tạo nhiều lần là an toàn — Android bỏ qua đăng ký channel trùng. Nên ổn khi tạo channel trong constructor.\n\n`PendingIntent.FLAG_IMMUTABLE` bắt buộc trên Android 12+ — báo Android rằng intent này không thể sửa đổi sau khi tạo. Quên điều này là crash phổ biến.\n\n`NotificationManagerCompat` từ AndroidX tự xử lý sự khác biệt phiên bản Android — cùng code chạy từ API 21 đến API 34.\n\nBây giờ: thông báo nên xuất hiện lúc nào? Ngay khi chỗ được lưu — ngay bên trong `saveCurrentSpot()`."
+      },
+      "codeSnippets": [
+        {
+          "fileName": "NotificationHelper.kt",
+          "code": "class NotificationHelper(private val context: Context) {\n\n    private val notificationManager =\n        NotificationManagerCompat.from(context)\n\n    init {\n        // Create channel once — safe to call repeatedly, Android ignores duplicates\n        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {\n            val channel = NotificationChannel(\n                \"parking_channel\",\n                \"Parking Reminders\",\n                NotificationManager.IMPORTANCE_DEFAULT\n            )\n            notificationManager.createNotificationChannel(channel)\n        }\n    }\n\n    fun showParkingNotification(timeParked: String) {\n        // Android 13+: check POST_NOTIFICATIONS permission\n        if (Build.VERSION.SDK_INT >= 33 &&\n            ContextCompat.checkSelfPermission(\n                context, Manifest.permission.POST_NOTIFICATIONS\n            ) != PackageManager.PERMISSION_GRANTED\n        ) return\n\n        val intent = Intent(context, MainActivity::class.java)\n        val pendingIntent = PendingIntent.getActivity(\n            context, 0, intent,\n            PendingIntent.FLAG_IMMUTABLE\n        )\n\n        val notification = NotificationCompat.Builder(context, \"parking_channel\")\n            .setSmallIcon(android.R.drawable.ic_dialog_map)\n            .setContentTitle(\"Bike parked!\")\n            .setContentText(\"You parked at $timeParked — tap to find it\")\n            .setContentIntent(pendingIntent)\n            .setAutoCancel(true)\n            .build()\n\n        notificationManager.notify(1001, notification)\n    }\n}",
+          "lineExplanations": {
+            "6": {"en": "init { } runs when the class is first created — a good place for one-time setup like registering a notification channel", "vn": "init { } chạy khi lớp được tạo lần đầu — nơi tốt để thiết lập một lần như đăng ký notification channel"},
+            "8": {"en": "NotificationChannel requires API 26+ — Build.VERSION.SDK_INT check prevents crash on older Android versions", "vn": "NotificationChannel yêu cầu API 26+ — kiểm tra Build.VERSION.SDK_INT ngăn crash trên phiên bản Android cũ hơn"},
+            "19": {"en": "Android 13 (API 33) added POST_NOTIFICATIONS as a runtime permission — must check before notifying on new devices", "vn": "Android 13 (API 33) thêm POST_NOTIFICATIONS là quyền runtime — phải kiểm tra trước khi thông báo trên thiết bị mới"},
+            "26": {"en": "FLAG_IMMUTABLE required on Android 12+ — marks the PendingIntent as unchangeable for security", "vn": "FLAG_IMMUTABLE bắt buộc trên Android 12+ — đánh dấu PendingIntent không thể thay đổi vì bảo mật"},
+            "36": {"en": "setAutoCancel(true) removes the notification when the user taps it — standard behaviour for action notifications", "vn": "setAutoCancel(true) xóa thông báo khi người dùng nhấn — hành vi chuẩn cho thông báo hành động"},
+            "39": {"en": "notify(1001, notification) — the first argument is the notification ID. Using the same ID updates/replaces an existing notification", "vn": "notify(1001, notification) — tham số đầu là ID thông báo. Dùng cùng ID cập nhật/thay thế thông báo hiện có"}
+          }
+        }
+      ],
+      "clawdExplanation": {
+        "en": "Notifications wired. The student parks, photo and GPS save, and a lock-screen reminder pops up immediately.\n\nNext: hook the notification into saveCurrentSpot so it actually fires when the user parks. Then we'll tackle two real bugs — the kind that cause app store one-star reviews.",
+        "vn": "Thông báo đã kết nối. Sinh viên đậu xe, ảnh và GPS lưu, và nhắc nhở màn hình khóa xuất hiện ngay lập tức.\n\nTiếp theo: gắn thông báo vào saveCurrentSpot để nó kích hoạt khi người dùng đậu xe. Sau đó ta xử lý hai bug thực — loại gây đánh giá một sao trên app store."
+      },
+      "answerChoices": [],
+      "vocabTerms": [
+        {
+          "term": "NotificationChannel",
+          "color": "#60A5FA",
+          "explanation": {"en": "Required since Android 8.0 — a category for notifications that lets users control sound, vibration, and visibility per app feature", "vn": "Bắt buộc từ Android 8.0 — danh mục thông báo cho phép người dùng kiểm soát âm thanh, rung và hiển thị theo tính năng app"}
+        },
+        {
+          "term": "PendingIntent",
+          "color": "#FBBF24",
+          "explanation": {"en": "A pre-packaged Intent that another app (like Android's notification system) can fire on your app's behalf at a later time", "vn": "Intent được đóng gói trước mà app khác (như hệ thống thông báo Android) có thể kích hoạt thay cho app của bạn sau này"}
+        },
+        {
+          "term": "FLAG_IMMUTABLE",
+          "color": "#F87171",
+          "explanation": {"en": "A PendingIntent flag required on Android 12+ — tells the system this intent cannot be modified after creation (security requirement)", "vn": "Flag PendingIntent bắt buộc trên Android 12+ — báo hệ thống intent này không thể sửa đổi sau khi tạo (yêu cầu bảo mật)"}
+        }
+      ],
+      "codeExplainer": {
+        "en": "NotificationHelper encapsulates all notification logic. The init block creates a NotificationChannel — required on Android 8.0+ and safe to call repeatedly (Android ignores duplicates). showParkingNotification() first checks POST_NOTIFICATIONS permission on Android 13+ and returns early if not granted. It creates a PendingIntent wrapping MainActivity — this is what runs when the user taps the notification. The notification is built with NotificationCompat.Builder using the channel ID, then posted with notificationManager.notify(). FLAG_IMMUTABLE is required on Android 12+ for security.",
+        "vn": "NotificationHelper đóng gói tất cả logic thông báo. Khối init tạo NotificationChannel — bắt buộc trên Android 8.0+ và an toàn gọi nhiều lần (Android bỏ qua trùng lặp). showParkingNotification() đầu tiên kiểm tra quyền POST_NOTIFICATIONS trên Android 13+ và return sớm nếu không được cấp. Nó tạo PendingIntent bọc MainActivity — đây là thứ chạy khi người dùng nhấn thông báo. Thông báo được xây bằng NotificationCompat.Builder với channel ID, sau đó đăng bằng notificationManager.notify(). FLAG_IMMUTABLE bắt buộc trên Android 12+ vì bảo mật."
+      }
+    },
+    {
+      "stepNumber": 11,
+      "type": "lesson",
+      "bugNumber": 0,
+      "title": {
+        "en": "Step 11: Trigger the notification when parking",
+        "vn": "Bước 11: Kích hoạt thông báo khi đậu xe"
+      },
+      "instruction": {
+        "en": "The notification helper exists but nothing calls it yet. Time to wire it into `saveCurrentSpot()` — the moment a parking spot is saved is exactly when the user wants the reminder.\n\nOn Android 13+, we also need to request `POST_NOTIFICATIONS` permission. Without it, the notification silently fails — no error, just nothing shows.\n\nThis is one of the most overlooked Android changes from the last few years.",
+        "vn": "Notification helper đã có nhưng chưa gì gọi nó. Đến lúc gắn vào `saveCurrentSpot()` — thời điểm lưu chỗ đậu xe chính là lúc người dùng muốn nhắc nhở.\n\nTrên Android 13+, ta cũng cần xin quyền `POST_NOTIFICATIONS`. Không có nó, thông báo lặng lẽ thất bại — không lỗi, chỉ không hiện.\n\nĐây là một trong những thay đổi Android bị bỏ qua nhiều nhất vài năm gần đây."
+      },
+      "promptText": {
+        "en": "Update MainActivity:\n1. Add a notificationHelper lazy property: `private val notificationHelper by lazy { NotificationHelper(this) }`\n2. Add a requestNotificationPermission ActivityResultLauncher (RequestPermission contract for POST_NOTIFICATIONS)\n3. In onCreate, if Build.VERSION.SDK_INT >= 33 and POST_NOTIFICATIONS isn't granted, launch the request\n4. Inside saveCurrentSpot(), after storage.save(spot), format the timestamp with SimpleDateFormat('HH:mm') and call notificationHelper.showParkingNotification(timeStr)",
+        "vn": "Cập nhật MainActivity:\n1. Thêm thuộc tính lazy notificationHelper: `private val notificationHelper by lazy { NotificationHelper(this) }`\n2. Thêm ActivityResultLauncher requestNotificationPermission (contract RequestPermission cho POST_NOTIFICATIONS)\n3. Trong onCreate, nếu Build.VERSION.SDK_INT >= 33 và POST_NOTIFICATIONS chưa được cấp, khởi chạy yêu cầu\n4. Bên trong saveCurrentSpot(), sau storage.save(spot), định dạng timestamp với SimpleDateFormat('HH:mm') và gọi notificationHelper.showParkingNotification(timeStr)"
+      },
+      "promptRationale": {
+        "en": "Specify the Android version check (SDK_INT >= 33) explicitly. The AI sometimes forgets that POST_NOTIFICATIONS is only a runtime permission on Android 13+ — on older versions, you must NOT request it.",
+        "vn": "Chỉ định kiểm tra phiên bản Android (SDK_INT >= 33) rõ ràng. AI đôi khi quên rằng POST_NOTIFICATIONS chỉ là quyền runtime trên Android 13+ — phiên bản cũ hơn KHÔNG được yêu cầu."
+      },
+      "aiResponse": {
+        "en": "Notification trigger wired. Now when the user parks, three things happen in sequence: spot saves → notification fires → lock screen shows the reminder.\n\n`SimpleDateFormat(\"HH:mm\")` formats just the hour and minute — '14:32'. The notification text reads naturally: 'You parked at 14:32 — tap to find it'.\n\nThe `Build.VERSION.SDK_INT >= 33` check is critical. On Android 12 and below, `POST_NOTIFICATIONS` doesn't exist as a runtime permission — trying to request it would be a no-op or worse. This pattern (check version, then request) appears throughout Android development.\n\nThe app is now functionally complete. Time to test it... and find bugs.",
+        "vn": "Kích hoạt thông báo đã kết nối. Giờ khi người dùng đậu xe, ba điều xảy ra liên tiếp: lưu chỗ → kích hoạt thông báo → màn hình khóa hiện nhắc nhở.\n\n`SimpleDateFormat(\"HH:mm\")` định dạng chỉ giờ và phút — '14:32'. Nội dung thông báo đọc tự nhiên: 'Bạn đậu lúc 14:32 — nhấn để tìm'.\n\nKiểm tra `Build.VERSION.SDK_INT >= 33` rất quan trọng. Trên Android 12 trở xuống, `POST_NOTIFICATIONS` không tồn tại như quyền runtime — yêu cầu nó sẽ không có tác dụng hoặc tệ hơn. Mẫu này (kiểm tra phiên bản, rồi yêu cầu) xuất hiện khắp nơi trong phát triển Android.\n\nApp giờ đã hoàn chỉnh chức năng. Đến lúc kiểm thử... và tìm bug."
+      },
+      "codeSnippets": [
+        {
+          "fileName": "MainActivity.kt",
+          "code": "\n// ── Notification setup ────────────────────────────────────────────────────────\n\nprivate val notificationHelper by lazy { NotificationHelper(this) }\n\nprivate val requestNotificationPermission =\n    registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->\n        if (!granted) {\n            Toast.makeText(\n                this,\n                \"Notifications off — you won't get parking reminders\",\n                Toast.LENGTH_SHORT\n            ).show()\n        }\n    }\n\n// Add inside onCreate(), AFTER setContent { }:\n// Request POST_NOTIFICATIONS on Android 13+ — silently fails otherwise\nif (Build.VERSION.SDK_INT >= 33) {\n    if (ContextCompat.checkSelfPermission(\n            this, Manifest.permission.POST_NOTIFICATIONS\n        ) != PackageManager.PERMISSION_GRANTED\n    ) {\n        requestNotificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)\n    }\n}\n\n// ── Update saveCurrentSpot() — fire the notification ─────────────────────────\n\nprivate fun saveCurrentSpot() {\n    locationHelper.getCurrentLocation { lat, lng ->\n        val now = System.currentTimeMillis()\n        val spot = ParkingSpot(\n            photoPath  = photoUri?.toString(),\n            latitude   = lat,\n            longitude  = lng,\n            timestamp  = now\n        )\n        storage.save(spot)\n\n        // Format the time as 'HH:mm' and trigger lock-screen reminder\n        val timeStr = SimpleDateFormat(\"HH:mm\", Locale.getDefault())\n            .format(Date(now))\n        notificationHelper.showParkingNotification(timeStr)\n\n        Toast.makeText(this, \"Spot saved! Find it anytime.\", Toast.LENGTH_SHORT).show()\n    }\n}",
+          "lineExplanations": {
+            "3": {"en": "lazy initialization — NotificationHelper is only created the first time it's used, saving startup time", "vn": "Khởi tạo lazy — NotificationHelper chỉ được tạo lần đầu khi dùng, tiết kiệm thời gian khởi động"},
+            "5": {"en": "Same registerForActivityResult pattern as camera/location, but for POST_NOTIFICATIONS", "vn": "Cùng mẫu registerForActivityResult như camera/vị trí, nhưng cho POST_NOTIFICATIONS"},
+            "17": {"en": "SDK_INT >= 33 — POST_NOTIFICATIONS is only a runtime permission on Android 13+. Older versions get it automatically", "vn": "SDK_INT >= 33 — POST_NOTIFICATIONS chỉ là quyền runtime trên Android 13+. Phiên bản cũ tự động có"},
+            "29": {"en": "Storing 'now' in a local variable — we use it twice (for the timestamp AND for formatting), so cache it", "vn": "Lưu 'now' vào biến cục bộ — dùng hai lần (cho timestamp VÀ định dạng), nên cache"},
+            "39": {"en": "SimpleDateFormat('HH:mm') gives the 24-hour time like '14:32' — short and clear for a notification", "vn": "SimpleDateFormat('HH:mm') cho thời gian 24 giờ như '14:32' — ngắn và rõ cho thông báo"},
+            "41": {"en": "notificationHelper.showParkingNotification triggers the actual lock-screen notification — the final piece", "vn": "notificationHelper.showParkingNotification kích hoạt thông báo màn hình khóa thực — mảnh ghép cuối"}
+          }
+        }
+      ],
+      "clawdExplanation": {
+        "en": "End-to-end: tap Park Here → photo → GPS → save → notification. Five technologies, one tap.\n\nNow comes the part every real developer dreads: the app crashes. You'll tap Park Here and get a `FileUriExposedException` — or maybe a `SecurityException` from location. Real apps, real errors. Next two steps fix them.",
+        "vn": "Đầu cuối: nhấn Đậu Xe → ảnh → GPS → lưu → thông báo. Năm công nghệ, một chạm.\n\nGiờ đến phần mọi dev thực sợ: app crash. Bạn sẽ nhấn Đậu Xe và bị `FileUriExposedException` — hoặc `SecurityException` từ vị trí. App thực, lỗi thực. Hai bước tiếp sửa chúng."
+      },
+      "answerChoices": [],
+      "vocabTerms": [
+        {
+          "term": "Build.VERSION.SDK_INT",
+          "color": "#FBBF24",
+          "explanation": {"en": "An integer representing the device's Android API level — used to gate code that requires specific Android versions", "vn": "Số nguyên đại diện cấp API Android của thiết bị — dùng để gate code yêu cầu phiên bản Android cụ thể"}
+        },
+        {
+          "term": "POST_NOTIFICATIONS",
+          "color": "#F87171",
+          "explanation": {"en": "Android 13+ runtime permission for showing notifications — without it, notifications silently fail. Older Android grants it automatically", "vn": "Quyền runtime Android 13+ để hiện thông báo — không có nó, thông báo lặng lẽ thất bại. Android cũ tự động cấp"}
+        },
+        {
+          "term": "SimpleDateFormat(\"HH:mm\")",
+          "color": "#34D399",
+          "explanation": {"en": "Formats a Date to 24-hour time only — 'HH' is hours 00-23, 'mm' is minutes 00-59. Result: '14:32'", "vn": "Định dạng Date thành thời gian 24 giờ — 'HH' là giờ 00-23, 'mm' là phút 00-59. Kết quả: '14:32'"}
+        }
+      ],
+      "codeExplainer": {
+        "en": "This step connected the notification trigger. A lazy notificationHelper property creates the helper on first use. A requestNotificationPermission launcher follows the same pattern as camera and location. In onCreate, if running on Android 13+ and POST_NOTIFICATIONS isn't granted, the permission request fires automatically. Inside saveCurrentSpot(), after the spot is saved, the timestamp is formatted with SimpleDateFormat('HH:mm') and passed to showParkingNotification — which displays the lock-screen reminder. The 'now' variable is captured once so the same value goes into both the saved spot and the notification text.",
+        "vn": "Bước này kết nối kích hoạt thông báo. Thuộc tính lazy notificationHelper tạo helper khi dùng lần đầu. Launcher requestNotificationPermission theo cùng mẫu camera và vị trí. Trong onCreate, nếu chạy trên Android 13+ và POST_NOTIFICATIONS chưa được cấp, yêu cầu quyền tự động kích hoạt. Bên trong saveCurrentSpot(), sau khi chỗ được lưu, timestamp được định dạng bằng SimpleDateFormat('HH:mm') và truyền vào showParkingNotification — hiển thị nhắc nhở màn hình khóa. Biến 'now' được lưu một lần nên cùng giá trị đi vào cả chỗ đã lưu và nội dung thông báo."
+      }
+    },
+    {
+      "stepNumber": 12,
+      "type": "lesson",
+      "bugNumber": 0,
+      "title": {
+        "en": "Step 12: Null safety check",
+        "vn": "Bước 12: Kiểm tra null safety"
+      },
+      "instruction": {
+        "en": "Before we tackle real bugs, a quick comprehension check on Kotlin's most important feature: **null safety**.\n\nIn `FindBikeScreen`, we used `storage.load()` which returns `ParkingSpot?` (nullable). We then wrote `if (spot == null) { ... } else { ... }`.\n\nBut what if a beginner wrote `spot.latitude` directly without the null check? Pick the right answer below.",
+        "vn": "Trước khi xử lý bug thực, kiểm tra hiểu biết nhanh về tính năng quan trọng nhất của Kotlin: **null safety**.\n\nTrong `FindBikeScreen`, ta dùng `storage.load()` trả về `ParkingSpot?` (nullable). Sau đó viết `if (spot == null) { ... } else { ... }`.\n\nNhưng nếu người mới viết `spot.latitude` trực tiếp không kiểm tra null? Chọn đáp án đúng dưới đây."
+      },
+      "promptText": {
+        "en": "If savedSpot is declared as 'val savedSpot: ParkingSpot? = storage.load()' and we try to access 'savedSpot.latitude' directly without a null check, what does Kotlin do? Why is the right approach to use 'savedSpot?.latitude' (safe call) or to null-check first?",
+        "vn": "Nếu savedSpot khai báo 'val savedSpot: ParkingSpot? = storage.load()' và ta truy cập 'savedSpot.latitude' trực tiếp không kiểm tra null, Kotlin làm gì? Vì sao cách đúng là dùng 'savedSpot?.latitude' (safe call) hoặc kiểm tra null trước?"
+      },
+      "promptRationale": {
+        "en": "Asking 'what does the compiler do' makes the AI explain Kotlin's type system clearly — better than just 'how do I avoid the bug', which gets a workaround instead of the principle.",
+        "vn": "Hỏi 'compiler làm gì' khiến AI giải thích hệ thống kiểu Kotlin rõ ràng — tốt hơn chỉ hỏi 'làm sao tránh bug', sẽ nhận giải pháp tạm thay vì nguyên tắc."
+      },
+      "aiResponse": {
+        "en": "Kotlin's compiler catches this at compile time — that's the whole point of nullable types. You literally cannot write `savedSpot.latitude` on a `ParkingSpot?`; the code won't compile. The compiler forces you to handle the null case.\n\nThree ways to access a nullable property safely:\n\n1. **Safe call (`?.`)** — `savedSpot?.latitude` returns `Double?` (null if savedSpot is null). Best for chains.\n2. **Null check + smart cast** — after `if (savedSpot != null)`, the compiler treats it as non-null inside the block. What we did in FindBikeScreen.\n3. **Elvis operator (`?:`)** — `savedSpot?.latitude ?: 0.0` falls back to 0.0 if null.\n\nThe `!!` operator forces non-null and crashes with NPE if it actually is null — avoid this unless you're 100% sure.\n\nThis is why Kotlin apps have dramatically fewer NullPointerException crashes than Java apps.",
+        "vn": "Compiler Kotlin bắt điều này lúc biên dịch — đó là điểm chính của kiểu nullable. Bạn không thể viết `savedSpot.latitude` trên `ParkingSpot?`; code sẽ không biên dịch. Compiler buộc bạn xử lý trường hợp null.\n\nBa cách truy cập thuộc tính nullable an toàn:\n\n1. **Safe call (`?.`)** — `savedSpot?.latitude` trả `Double?` (null nếu savedSpot null). Tốt cho chuỗi.\n2. **Kiểm tra null + smart cast** — sau `if (savedSpot != null)`, compiler xem nó là non-null trong khối. Cái ta làm trong FindBikeScreen.\n3. **Toán tử Elvis (`?:`)** — `savedSpot?.latitude ?: 0.0` rơi về 0.0 nếu null.\n\nToán tử `!!` ép không null và crash với NPE nếu thực sự null — tránh trừ khi 100% chắc.\n\nĐây là lý do app Kotlin có ít crash NullPointerException hơn app Java rất nhiều."
+      },
+      "codeSnippets": [
+        {
+          "fileName": "FindBikeScreen.kt",
+          "code": "// ❌ WRONG — won't compile. Kotlin's compiler rejects this:\nval savedSpot: ParkingSpot? = storage.load()\nText(\"Lat: ${savedSpot.latitude}\")\n// → compile error: Only safe (?.) or non-null asserted (!!.) calls\n//   are allowed on a nullable receiver of type ParkingSpot?\n\n// ✅ OPTION 1: Safe call — returns null if savedSpot is null\nText(\"Lat: ${savedSpot?.latitude ?: \"unknown\"}\")\n\n// ✅ OPTION 2: Null check + smart cast (what FindBikeScreen does)\nif (savedSpot != null) {\n    // inside this block, savedSpot is auto-cast to non-null ParkingSpot\n    Text(\"Lat: ${savedSpot.latitude}\")\n}\n\n// ✅ OPTION 3: Elvis operator for default value\nval lat = savedSpot?.latitude ?: 0.0\n\n// ⚠️ OPTION 4: Force-unwrap (!!) — crashes with NPE if null. Avoid!\nval risky = savedSpot!!.latitude   // throws NullPointerException if null",
+          "lineExplanations": {
+            "1": {"en": "The ❌ example shows what NOT to do — Kotlin won't even let you compile this. The compiler enforces null safety", "vn": "Ví dụ ❌ cho thấy KHÔNG nên làm gì — Kotlin thậm chí không cho biên dịch. Compiler ép null safety"},
+            "7": {"en": "savedSpot?.latitude — safe call returns latitude OR null. Chain with ?: to provide a default", "vn": "savedSpot?.latitude — safe call trả latitude HOẶC null. Nối với ?: để cung cấp giá trị mặc định"},
+            "10": {"en": "After 'if (savedSpot != null)', Kotlin's smart cast lets you use savedSpot as if it's non-null inside the block", "vn": "Sau 'if (savedSpot != null)', smart cast của Kotlin cho bạn dùng savedSpot như non-null trong khối"},
+            "16": {"en": "?: 0.0 — the Elvis operator provides a fallback value when the left side is null. Compact and clear", "vn": "?: 0.0 — toán tử Elvis cung cấp giá trị dự phòng khi vế trái null. Gọn và rõ"},
+            "19": {"en": "!! is the force-unwrap operator — it crashes with NullPointerException if the value is actually null. Use sparingly", "vn": "!! là toán tử ép unwrap — crash với NullPointerException nếu giá trị thực sự null. Dùng cẩn thận"}
+          }
+        }
+      ],
+      "clawdExplanation": {
+        "en": "Kotlin's null safety eliminates an entire category of runtime crashes. Java apps need defensive `if (x != null)` checks everywhere; Kotlin makes it a compiler error.\n\nNext: two real bugs in the app you just built. The first is a `FileUriExposedException` — your camera code crashes because of a missing line in `AndroidManifest.xml`.",
+        "vn": "Null safety của Kotlin loại bỏ cả một danh mục crash runtime. App Java cần kiểm tra phòng thủ `if (x != null)` khắp nơi; Kotlin biến nó thành lỗi biên dịch.\n\nTiếp: hai bug thực trong app bạn vừa xây. Đầu tiên là `FileUriExposedException` — code camera crash vì thiếu một dòng trong `AndroidManifest.xml`."
+      },
+      "answerChoices": [
+        {
+          "en": "Compile error — Kotlin's compiler rejects 'savedSpot.latitude' on a nullable type. Use safe call (?.), null-check + smart cast, or the Elvis operator (?:) — all enforced at compile time, not at runtime",
+          "vn": "Lỗi biên dịch — compiler Kotlin từ chối 'savedSpot.latitude' trên kiểu nullable. Dùng safe call (?.), kiểm tra null + smart cast, hoặc toán tử Elvis (?:) — tất cả được ép lúc biên dịch, không phải runtime"
+        }
+      ],
+      "vocabTerms": [
+        {
+          "term": "Safe call (?.)",
+          "color": "#34D399",
+          "explanation": {"en": "Returns the property value if the object is non-null, or null if the object is null — never throws NPE", "vn": "Trả giá trị thuộc tính nếu đối tượng không null, hoặc null nếu đối tượng null — không bao giờ ném NPE"}
+        },
+        {
+          "term": "Smart cast",
+          "color": "#60A5FA",
+          "explanation": {"en": "Kotlin compiler automatically treats a nullable variable as non-null inside an 'if (x != null)' block — no manual casting needed", "vn": "Compiler Kotlin tự động xem biến nullable là non-null trong khối 'if (x != null)' — không cần ép kiểu thủ công"}
+        },
+        {
+          "term": "Force unwrap (!!)",
+          "color": "#F87171",
+          "explanation": {"en": "Forces a nullable type to non-null — crashes with NullPointerException if the value actually is null. Avoid unless absolutely necessary", "vn": "Ép kiểu nullable thành non-null — crash với NullPointerException nếu giá trị thực sự null. Tránh trừ khi cực kỳ cần"}
+        }
+      ],
+      "codeExplainer": {
+        "en": "This step explored Kotlin null safety. The key insight: 'savedSpot.latitude' on a 'ParkingSpot?' is a COMPILE error, not a runtime crash. Kotlin's type system distinguishes nullable from non-nullable types and forces you to handle the null case at compile time. The three safe approaches are: safe call (?.) which returns null if the receiver is null, null-check + smart cast (if x != null, then inside the block x is treated as non-null), and the Elvis operator (?:) for providing default values. The force-unwrap operator (!!) bypasses these checks and should be avoided.",
+        "vn": "Bước này khám phá null safety Kotlin. Insight chính: 'savedSpot.latitude' trên 'ParkingSpot?' là lỗi BIÊN DỊCH, không phải crash runtime. Hệ thống kiểu Kotlin phân biệt kiểu nullable và non-nullable và buộc bạn xử lý trường hợp null lúc biên dịch. Ba cách an toàn: safe call (?.) trả null nếu receiver null, kiểm tra null + smart cast (if x != null, bên trong khối x được xem là non-null), và toán tử Elvis (?:) để cung cấp giá trị mặc định. Toán tử ép unwrap (!!) bỏ qua các kiểm tra này và nên tránh."
+      }
+    },
+    {
+      "stepNumber": 13,
+      "type": "bug",
+      "bugNumber": 1,
+      "title": {
+        "en": "Bug 1: FileUriExposedException crash",
+        "vn": "Bug 1: Crash FileUriExposedException"
+      },
+      "instruction": {
+        "en": "You tap **Park Here**. The app crashes immediately. The Logcat error is:\n\n```\njava.lang.IllegalArgumentException: Failed to find configured root\nthat contains /storage/emulated/0/Android/data/com.example.findmyxe/files/Pictures/parking_1706789123.jpg\n```\n\nThe crash happens inside `FileProvider.getUriForFile()`. The error is clear: FileProvider can't find a configured root for that path.\n\nTwo files are involved:\n- `AndroidManifest.xml` — must declare the `<provider>` element\n- `res/xml/file_paths.xml` — must list the folders FileProvider is allowed to share\n\nFor this bug, one of those is missing or wrong.",
+        "vn": "Bạn nhấn **Đậu Xe**. App crash ngay lập tức. Lỗi Logcat:\n\n```\njava.lang.IllegalArgumentException: Failed to find configured root\nthat contains /storage/emulated/0/Android/data/com.example.findmyxe/files/Pictures/parking_1706789123.jpg\n```\n\nCrash xảy ra trong `FileProvider.getUriForFile()`. Lỗi rõ: FileProvider không tìm thấy root cấu hình cho đường dẫn đó.\n\nHai file liên quan:\n- `AndroidManifest.xml` — phải khai báo phần tử `<provider>`\n- `res/xml/file_paths.xml` — phải liệt kê thư mục FileProvider được phép chia sẻ\n\nVới bug này, một trong hai bị thiếu hoặc sai."
+      },
+      "promptText": {
+        "en": "I'm getting this crash when tapping Park Here in my Android app:\n\njava.lang.IllegalArgumentException: Failed to find configured root that contains /storage/emulated/0/Android/data/com.example.findmyxe/files/Pictures/parking_1706789123.jpg\n\nIt happens inside FileProvider.getUriForFile() with authority '${packageName}.fileprovider'. I have a <provider> declaration in AndroidManifest.xml but the crash still happens. What's wrong with my file_paths.xml and how do I fix it?",
+        "vn": "Tôi bị crash khi nhấn Đậu Xe trong app Android:\n\njava.lang.IllegalArgumentException: Failed to find configured root that contains /storage/emulated/0/Android/data/com.example.findmyxe/files/Pictures/parking_1706789123.jpg\n\nXảy ra trong FileProvider.getUriForFile() với authority '${packageName}.fileprovider'. Tôi có khai báo <provider> trong AndroidManifest.xml nhưng crash vẫn xảy ra. file_paths.xml của tôi sai gì và sửa thế nào?"
+      },
+      "promptRationale": {
+        "en": "Paste the full stack trace and mention the manifest declaration already exists. The AI immediately knows to look at file_paths.xml — without this context, it might rewrite the manifest unnecessarily.",
+        "vn": "Dán toàn bộ stack trace và đề cập khai báo manifest đã có. AI biết ngay phải xem file_paths.xml — không có context này, có thể viết lại manifest không cần thiết."
+      },
+      "aiResponse": {
+        "en": "Classic FileProvider bug. The error 'Failed to find configured root' means: the manifest declares the provider, but `file_paths.xml` doesn't list the folder you're writing to.\n\nYour photo is in `getExternalFilesDir(DIRECTORY_PICTURES)` — that maps to `<external-files-path>` in the XML config. The bug is that `file_paths.xml` uses `<external-path>` instead, which points to a different root.\n\nThe rule: the XML root element must match the folder you're writing to:\n- `<files-path>` → `getFilesDir()` (app-private internal)\n- `<external-files-path>` → `getExternalFilesDir()` (app-private external, what we use)\n- `<external-path>` → `Environment.getExternalStorageDirectory()` (deprecated, public)\n- `<cache-path>` → `getCacheDir()`\n\nFix: change `<external-path>` to `<external-files-path>` and the crash disappears.",
+        "vn": "Bug FileProvider kinh điển. Lỗi 'Failed to find configured root' nghĩa là: manifest khai báo provider, nhưng `file_paths.xml` không liệt kê thư mục bạn đang ghi.\n\nẢnh ở `getExternalFilesDir(DIRECTORY_PICTURES)` — ánh xạ tới `<external-files-path>` trong cấu hình XML. Bug là `file_paths.xml` dùng `<external-path>` thay vào đó, trỏ đến root khác.\n\nQuy tắc: phần tử gốc XML phải khớp thư mục bạn đang ghi:\n- `<files-path>` → `getFilesDir()` (riêng nội)\n- `<external-files-path>` → `getExternalFilesDir()` (riêng ngoại, cái ta dùng)\n- `<external-path>` → `Environment.getExternalStorageDirectory()` (đã lỗi thời, công khai)\n- `<cache-path>` → `getCacheDir()`\n\nSửa: đổi `<external-path>` thành `<external-files-path>` và crash biến mất."
+      },
+      "codeSnippets": [
+        {
+          "fileName": "res/xml/file_paths.xml",
+          "code": "<!-- ❌ BEFORE: wrong root element — points to public external storage -->\n<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<paths xmlns:android=\"http://schemas.android.com/apk/res/android\">\n    <external-path\n        name=\"my_images\"\n        path=\"Android/data/com.example.findmyxe/files/Pictures\" />\n</paths>\n\n<!-- ✅ AFTER: <external-files-path> matches getExternalFilesDir() -->\n<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<paths xmlns:android=\"http://schemas.android.com/apk/res/android\">\n    <external-files-path\n        name=\"my_images\"\n        path=\"Pictures\" />\n</paths>\n\n<!-- ─────────────────────────────────────────────────────────────────────── -->\n<!-- AndroidManifest.xml — make sure the <provider> element looks like this: -->\n<!-- Place inside the <application> tag                                       -->\n\n<provider\n    android:name=\"androidx.core.content.FileProvider\"\n    android:authorities=\"${applicationId}.fileprovider\"\n    android:exported=\"false\"\n    android:grantUriPermissions=\"true\">\n    <meta-data\n        android:name=\"android.support.FILE_PROVIDER_PATHS\"\n        android:resource=\"@xml/file_paths\" />\n</provider>",
+          "lineExplanations": {
+            "4": {"en": "❌ <external-path> maps to Environment.getExternalStorageDirectory() — the deprecated public storage root, NOT what we wrote to", "vn": "❌ <external-path> ánh xạ tới Environment.getExternalStorageDirectory() — root công khai đã lỗi thời, KHÔNG phải nơi ta ghi"},
+            "11": {"en": "✅ <external-files-path> maps to getExternalFilesDir() — app-private external storage, which is what we used in openCamera()", "vn": "✅ <external-files-path> ánh xạ tới getExternalFilesDir() — bộ nhớ ngoại riêng của app, cái ta dùng trong openCamera()"},
+            "13": {"en": "path='Pictures' — relative to getExternalFilesDir(), matching the DIRECTORY_PICTURES constant", "vn": "path='Pictures' — tương đối với getExternalFilesDir(), khớp hằng số DIRECTORY_PICTURES"},
+            "22": {"en": "android:authorities='${applicationId}.fileprovider' — must match the authority string passed to getUriForFile()", "vn": "android:authorities='${applicationId}.fileprovider' — phải khớp chuỗi authority truyền vào getUriForFile()"},
+            "23": {"en": "exported='false' — only your app can directly access this provider. Other apps get temporary access via URI permissions", "vn": "exported='false' — chỉ app bạn truy cập trực tiếp provider này. App khác nhận quyền tạm qua URI permissions"},
+            "24": {"en": "grantUriPermissions='true' — allows your app to grant the camera temporary write access to the photo URI", "vn": "grantUriPermissions='true' — cho phép app bạn cấp camera quyền ghi tạm đến URI ảnh"}
+          }
+        }
+      ],
+      "clawdExplanation": {
+        "en": "One word change — `external-path` to `external-files-path` — and the crash is gone. FileProvider's error messages are notoriously cryptic, but once you know the mapping (XML element ↔ Context method), bugs like this are easy.\n\nNext: a second real bug. You'll tap Park Here, the photo saves, but the app crashes with `SecurityException: gps requires permission ACCESS_FINE_LOCATION`. Sound familiar?",
+        "vn": "Đổi một từ — `external-path` thành `external-files-path` — và crash biến mất. Thông báo lỗi của FileProvider nổi tiếng khó hiểu, nhưng khi biết ánh xạ (phần tử XML ↔ phương thức Context), bug như này dễ.\n\nTiếp: bug thực thứ hai. Bạn nhấn Đậu Xe, ảnh lưu, nhưng app crash với `SecurityException: gps requires permission ACCESS_FINE_LOCATION`. Nghe quen?"
+      },
+      "answerChoices": [],
+      "vocabTerms": [
+        {
+          "term": "<external-files-path>",
+          "color": "#60A5FA",
+          "explanation": {"en": "FileProvider XML element that maps to getExternalFilesDir() — app-private external storage that survives uninstall-protected files", "vn": "Phần tử XML FileProvider ánh xạ tới getExternalFilesDir() — bộ nhớ ngoại riêng của app"}
+        },
+        {
+          "term": "<external-path>",
+          "color": "#F87171",
+          "explanation": {"en": "FileProvider XML element that maps to Environment.getExternalStorageDirectory() — the deprecated public storage root", "vn": "Phần tử XML FileProvider ánh xạ tới Environment.getExternalStorageDirectory() — root công khai đã lỗi thời"}
+        },
+        {
+          "term": "grantUriPermissions",
+          "color": "#34D399",
+          "explanation": {"en": "FileProvider attribute that allows your app to grant other apps (like the camera) temporary access to specific URIs", "vn": "Thuộc tính FileProvider cho phép app bạn cấp app khác (như camera) quyền truy cập tạm đến URI cụ thể"}
+        }
+      ],
+      "codeExplainer": {
+        "en": "This bug fix shows the critical mapping between Android's Context APIs and FileProvider's XML configuration. Our openCamera() uses getExternalFilesDir(DIRECTORY_PICTURES) — which maps to <external-files-path> in file_paths.xml, NOT <external-path>. <external-path> points to the deprecated public external storage root (Environment.getExternalStorageDirectory()), which is a completely different folder. The fix is changing the XML element name. Each Context.getXxxDir() method has a matching <xxx-path> element — getting them aligned is critical or FileProvider can't translate file paths to content:// URIs.",
+        "vn": "Sửa bug này cho thấy ánh xạ quan trọng giữa API Context của Android và cấu hình XML của FileProvider. openCamera() của ta dùng getExternalFilesDir(DIRECTORY_PICTURES) — ánh xạ tới <external-files-path> trong file_paths.xml, KHÔNG phải <external-path>. <external-path> trỏ tới root bộ nhớ ngoại công khai đã lỗi thời (Environment.getExternalStorageDirectory()), thư mục hoàn toàn khác. Sửa là đổi tên phần tử XML. Mỗi phương thức Context.getXxxDir() có phần tử <xxx-path> khớp — căn chỉnh chúng quan trọng nếu không FileProvider không thể chuyển đường dẫn file thành content:// URI."
+      }
+    },
+    {
+      "stepNumber": 14,
+      "type": "bug",
+      "bugNumber": 2,
+      "title": {
+        "en": "Bug 2: SecurityException from location",
+        "vn": "Bug 2: SecurityException từ vị trí"
+      },
+      "instruction": {
+        "en": "FileProvider bug fixed. You tap Park Here again. Camera opens, you take a photo, the app crashes:\n\n```\njava.lang.SecurityException: \"gps\" location provider requires\nACCESS_FINE_LOCATION permission.\n```\n\nThe permission IS declared in `AndroidManifest.xml` — you can see it there. The runtime permission launcher exists. But `LocationHelper.getCurrentLocation()` still crashes.\n\nLook at the call chain carefully. Where's the gap?",
+        "vn": "Sửa bug FileProvider. Bạn nhấn Đậu Xe lại. Camera mở, bạn chụp ảnh, app crash:\n\n```\njava.lang.SecurityException: \"gps\" location provider requires\nACCESS_FINE_LOCATION permission.\n```\n\nQuyền ĐÃ khai báo trong `AndroidManifest.xml` — bạn thấy nó. Launcher quyền runtime tồn tại. Nhưng `LocationHelper.getCurrentLocation()` vẫn crash.\n\nNhìn kỹ chuỗi gọi. Khoảng trống ở đâu?"
+      },
+      "promptText": {
+        "en": "I'm getting java.lang.SecurityException: 'gps' location provider requires ACCESS_FINE_LOCATION permission when calling LocationHelper.getCurrentLocation(). I've declared the permission in AndroidManifest.xml, and I have a requestLocationPermission ActivityResultLauncher in MainActivity. But the location call still crashes. Here's the relevant code:\n\nonParkHere = { checkAndOpenCamera() }\n\nAnd saveCurrentSpot() calls locationHelper.getCurrentLocation { lat, lng -> ... }.\n\nWhat am I missing in the flow?",
+        "vn": "Tôi bị java.lang.SecurityException: 'gps' location provider requires ACCESS_FINE_LOCATION permission khi gọi LocationHelper.getCurrentLocation(). Đã khai báo quyền trong AndroidManifest.xml, có ActivityResultLauncher requestLocationPermission trong MainActivity. Nhưng gọi vị trí vẫn crash. Code liên quan:\n\nonParkHere = { checkAndOpenCamera() }\n\nVà saveCurrentSpot() gọi locationHelper.getCurrentLocation { lat, lng -> ... }.\n\nTôi thiếu gì trong flow?"
+      },
+      "promptRationale": {
+        "en": "Show the call chain in the prompt — onParkHere → checkAndOpenCamera → saveCurrentSpot. The AI sees the chain and immediately spots that nothing requests location permission anywhere in the flow. Without the chain, it might guess at the wrong layer.",
+        "vn": "Hiển thị chuỗi gọi trong prompt — onParkHere → checkAndOpenCamera → saveCurrentSpot. AI thấy chuỗi và nhận ra ngay không gì xin quyền vị trí trong flow. Không có chuỗi, có thể đoán sai lớp."
+      },
+      "aiResponse": {
+        "en": "Found it. You request CAMERA permission but never request LOCATION permission anywhere in the user flow.\n\nWalk through it:\n1. Tap Park Here → `checkAndOpenCamera()` requests CAMERA only\n2. Camera opens → photo taken\n3. `saveCurrentSpot()` runs → calls `locationHelper.getCurrentLocation()`\n4. `LocationHelper` checks ACCESS_FINE_LOCATION — denied → either crashes (without the check) or silently fails (with the check)\n\nYou created `checkLocationPermission()` and `requestLocationPermission` — but nothing in the user flow calls `checkLocationPermission()`. It's defined but never invoked.\n\nFix: call BOTH permission checks when the user taps Park Here. Do it at the top of `onParkHere` — request camera AND location together so the user grants both up front.\n\nThis is a flow bug, not a permission-declaration bug. The permission exists in the manifest, but no code path actually requests it from the user.",
+        "vn": "Tìm thấy rồi. Bạn xin quyền CAMERA nhưng không bao giờ xin quyền VỊ TRÍ ở đâu trong flow người dùng.\n\nĐi qua từng bước:\n1. Nhấn Đậu Xe → `checkAndOpenCamera()` chỉ xin CAMERA\n2. Camera mở → chụp ảnh\n3. `saveCurrentSpot()` chạy → gọi `locationHelper.getCurrentLocation()`\n4. `LocationHelper` kiểm tra ACCESS_FINE_LOCATION — từ chối → crash (không có kiểm tra) hoặc lặng lẽ thất bại (có kiểm tra)\n\nBạn tạo `checkLocationPermission()` và `requestLocationPermission` — nhưng không gì trong flow gọi `checkLocationPermission()`. Định nghĩa nhưng chưa bao giờ gọi.\n\nSửa: gọi CẢ HAI kiểm tra quyền khi người dùng nhấn Đậu Xe. Làm ở đầu `onParkHere` — xin camera VÀ vị trí cùng nhau để người dùng cấp cả hai trước.\n\nĐây là bug flow, không phải bug khai báo quyền. Quyền tồn tại trong manifest, nhưng không code path nào thực sự xin từ người dùng."
+      },
+      "codeSnippets": [
+        {
+          "fileName": "MainActivity.kt",
+          "code": "// ❌ BEFORE — only camera permission is requested, location never asked\nsetContent {\n    ParkingHomeScreen(\n        onParkHere = {\n            checkAndOpenCamera()    // ← only requests CAMERA permission\n        },\n        onFindMyBike = { /* ... */ }\n    )\n}\n// → SecurityException when LocationHelper.getCurrentLocation() runs later\n\n\n// ✅ AFTER — request BOTH permissions at the start of the parking flow\nsetContent {\n    ParkingHomeScreen(\n        onParkHere = {\n            checkLocationPermission()  // ← request location FIRST\n            checkAndOpenCamera()       //   then continue to camera\n        },\n        onFindMyBike = { /* ... */ }\n    )\n}\n\n// Existing helper — already defined, just wasn't being called from onParkHere\nprivate fun checkLocationPermission() {\n    if (ContextCompat.checkSelfPermission(\n            this, Manifest.permission.ACCESS_FINE_LOCATION\n        ) != PackageManager.PERMISSION_GRANTED\n    ) {\n        requestLocationPermission.launch(Manifest.permission.ACCESS_FINE_LOCATION)\n    }\n}",
+          "lineExplanations": {
+            "3": {"en": "❌ The old onParkHere only triggers camera permission — when location is needed later, the user has never been asked", "vn": "❌ onParkHere cũ chỉ kích hoạt quyền camera — khi vị trí cần sau, người dùng chưa bao giờ được hỏi"},
+            "14": {"en": "✅ Fix: call checkLocationPermission() FIRST, then checkAndOpenCamera(). Both permission dialogs appear in sequence", "vn": "✅ Sửa: gọi checkLocationPermission() TRƯỚC, rồi checkAndOpenCamera(). Hai hộp thoại quyền xuất hiện liên tiếp"},
+            "16": {"en": "Order matters here — requesting location first lets it overlap with camera opening, so the GPS fix is ready when we need it", "vn": "Thứ tự quan trọng — xin vị trí trước cho phép nó chồng với mở camera, nên GPS fix sẵn sàng khi cần"},
+            "24": {"en": "checkLocationPermission() was already defined — the bug was simply that nothing in the user flow called it", "vn": "checkLocationPermission() đã được định nghĩa — bug đơn giản là không gì trong flow người dùng gọi nó"}
+          }
+        }
+      ],
+      "clawdExplanation": {
+        "en": "The most common Android permission bug — manifest declared, launcher exists, but no code path actually invokes the launcher. The permission system gives you the tools; you have to wire them into the flow.\n\nYour app now works end-to-end. Park Here → both permissions requested → photo → GPS → save → notification. Find My Bike → photo + timestamp + distance. Two genuine real-world apps from one conversation.",
+        "vn": "Bug quyền Android phổ biến nhất — manifest khai báo, launcher tồn tại, nhưng không code path nào thực sự gọi launcher. Hệ thống quyền cho bạn công cụ; bạn phải kết nối vào flow.\n\nApp giờ chạy đầu cuối. Đậu Xe → xin cả hai quyền → ảnh → GPS → lưu → thông báo. Tìm Xe → ảnh + timestamp + khoảng cách. Hai app thực thế từ một cuộc trò chuyện."
+      },
+      "answerChoices": [],
+      "vocabTerms": [
+        {
+          "term": "SecurityException",
+          "color": "#F87171",
+          "explanation": {"en": "The runtime exception thrown when your app calls a protected API without the required permission — caught at runtime, not compile time", "vn": "Exception runtime ném khi app gọi API được bảo vệ không có quyền cần — bắt lúc runtime, không phải biên dịch"}
+        },
+        {
+          "term": "Permission flow",
+          "color": "#60A5FA",
+          "explanation": {"en": "The full path from user action → permission check → permission request → permission grant → API call. A break anywhere causes a crash", "vn": "Đường đầy đủ từ hành động người dùng → kiểm tra quyền → yêu cầu quyền → cấp quyền → gọi API. Đứt ở đâu cũng gây crash"}
+        },
+        {
+          "term": "ACCESS_FINE_LOCATION",
+          "color": "#FBBF24",
+          "explanation": {"en": "Android's runtime permission for precise GPS location — required for FusedLocationProviderClient to return actual coordinates", "vn": "Quyền runtime Android cho vị trí GPS chính xác — cần để FusedLocationProviderClient trả tọa độ thực"}
+        }
+      ],
+      "codeExplainer": {
+        "en": "This bug demonstrates a subtle but critical class of Android bug: an unused permission helper. checkLocationPermission() was correctly defined and the launcher correctly registered, but the user flow (onParkHere) only called checkAndOpenCamera(). When saveCurrentSpot() later tried to fetch GPS, the permission had never been requested, so the system denied access and LocationHelper crashed (or with the safety check, silently fell back to 0,0). The fix calls BOTH permission helpers at the start of the parking flow. Lesson: declaring a permission in the manifest does nothing on its own — you must actively request it from the user via the launcher in your code path.",
+        "vn": "Bug này minh họa một loại bug Android tinh tế nhưng quan trọng: helper quyền không dùng. checkLocationPermission() đã được định nghĩa đúng và launcher đăng ký đúng, nhưng flow người dùng (onParkHere) chỉ gọi checkAndOpenCamera(). Khi saveCurrentSpot() sau đó cố lấy GPS, quyền chưa bao giờ được xin, nên hệ thống từ chối và LocationHelper crash (hoặc với kiểm tra an toàn, lặng lẽ rơi về 0,0). Sửa gọi CẢ HAI helper quyền ở đầu flow đậu xe. Bài học: khai báo quyền trong manifest tự nó không làm gì — bạn phải chủ động xin từ người dùng qua launcher trong code path."
+      }
+    },
+    {
+      "stepNumber": 15,
+      "type": "lesson",
+      "bugNumber": 0,
+      "title": {
+        "en": "Step 15: Find My Xe is complete",
+        "vn": "Bước 15: Find My Xe hoàn thành"
+      },
+      "instruction": {
+        "en": "Two bugs squashed. The app works. Let's look at what you actually built.\n\n**Find My Xe** — a complete Android app:\n- Camera capture with FileProvider (the right way)\n- GPS location with FusedLocationProviderClient\n- Persistent storage with SharedPreferences + Gson\n- Lock-screen notifications with channels and PendingIntent\n- Compose UI with proper state management\n- Runtime permission flows for three sensitive resources\n\nA student in HCMC can install this and never lose their bike at school again. That's a real product.",
+        "vn": "Hai bug đã sửa. App chạy. Xem bạn thực sự đã xây gì.\n\n**Find My Xe** — app Android hoàn chỉnh:\n- Chụp camera với FileProvider (cách đúng)\n- Vị trí GPS với FusedLocationProviderClient\n- Lưu trữ vĩnh viễn với SharedPreferences + Gson\n- Thông báo màn hình khóa với channel và PendingIntent\n- UI Compose với quản lý state đúng\n- Flow quyền runtime cho ba tài nguyên nhạy cảm\n\nSinh viên ở HCMC có thể cài và không bao giờ mất xe ở trường nữa. Đó là sản phẩm thực."
+      },
+      "promptText": {
+        "en": "Looking at the complete Find My Xe app — MainActivity wiring photo capture, GPS, storage, notifications, and three permission flows; the FindBikeScreen with photo + timestamp + distance; the helper classes (LocationHelper, ParkingStorage, NotificationHelper) — what would I add to take this from a class project to something I could publish on the Play Store? Give me five concrete next features ranked by user value.",
+        "vn": "Nhìn app Find My Xe hoàn chỉnh — MainActivity kết nối chụp ảnh, GPS, lưu trữ, thông báo, và ba flow quyền; FindBikeScreen với ảnh + timestamp + khoảng cách; các lớp helper (LocationHelper, ParkingStorage, NotificationHelper) — tôi sẽ thêm gì để chuyển từ project học đến cái có thể đăng Play Store? Cho tôi năm tính năng cụ thể tiếp theo xếp theo giá trị người dùng."
+      },
+      "promptRationale": {
+        "en": "Asking for a ranked list forces concrete suggestions. 'How do I improve this?' gets fluff. 'Five features ranked by user value' gets a roadmap.",
+        "vn": "Hỏi danh sách xếp hạng buộc đề xuất cụ thể. 'Làm sao cải thiện?' nhận chung chung. 'Năm tính năng xếp theo giá trị người dùng' nhận lộ trình."
+      },
+      "aiResponse": {
+        "en": "Five concrete features, ranked by impact on a real student:\n\n**1. Multiple saved spots with history** — replace one current spot with a list. School lot Monday, dorm Tuesday, coffee shop Wednesday. Show the last 10 on the Find screen. Massive jump in usefulness.\n\n**2. Live walking distance + direction arrow** — instead of hardcoded HCMC coordinates, request live GPS on the Find screen and rotate an arrow toward the saved spot. 'Your bike is 47m NE'.\n\n**3. Voice note** — record a 5-second voice memo when parking: 'Row C, near the red gate, level 2'. Plays back on Find screen. Beats typing every time.\n\n**4. Photo annotations** — let the user tap on the saved photo to drop a pin or draw a circle around their bike. Useful when there are 30 identical xe in the frame.\n\n**5. Group lots** — group spots by location cluster. After a week, the app knows 'school parking', 'home', 'cafe'. Auto-categorize so the history isn't just a flat list.\n\nAll five build on what you already have. No rewrites — just extensions.",
+        "vn": "Năm tính năng cụ thể, xếp theo tác động lên sinh viên thực:\n\n**1. Nhiều chỗ đã lưu với lịch sử** — thay một chỗ hiện tại bằng danh sách. Bãi trường thứ Hai, KTX thứ Ba, quán cà phê thứ Tư. Hiện 10 cái cuối trên màn hình Tìm. Nhảy vọt độ hữu ích.\n\n**2. Khoảng cách đi bộ trực tiếp + mũi tên chỉ hướng** — thay vì tọa độ HCMC hardcode, xin GPS trực tiếp trên màn hình Tìm và xoay mũi tên về chỗ đã lưu. 'Xe bạn cách 47m ĐB'.\n\n**3. Ghi âm** — ghi memo giọng nói 5 giây khi đậu xe: 'Hàng C, gần cổng đỏ, tầng 2'. Phát lại trên màn hình Tìm. Tốt hơn gõ mọi lần.\n\n**4. Chú thích ảnh** — cho người dùng chạm vào ảnh đã lưu để đánh pin hoặc vẽ vòng quanh xe. Hữu ích khi có 30 xe giống nhau trong khung.\n\n**5. Nhóm bãi xe** — nhóm chỗ theo cụm vị trí. Sau một tuần, app biết 'bãi trường', 'nhà', 'cà phê'. Tự phân loại để lịch sử không chỉ là danh sách phẳng.\n\nCả năm xây trên cái bạn đã có. Không viết lại — chỉ mở rộng."
+      },
+      "codeSnippets": [
+        {
+          "fileName": "ProjectStructure.txt",
+          "code": "Find My Xe — final project structure\n────────────────────────────────────────────────────────────────\n\napp/src/main/\n├── AndroidManifest.xml\n│   • CAMERA, ACCESS_FINE_LOCATION, POST_NOTIFICATIONS permissions\n│   • FileProvider <provider> element with file_paths.xml\n│\n├── res/xml/file_paths.xml\n│   • <external-files-path> mapped to getExternalFilesDir()\n│\n└── java/com/example/findmyxe/\n    ├── MainActivity.kt\n    │   • ParkingHomeScreen composable\n    │   • Camera + Location + Notification permission launchers\n    │   • openCamera() → FileProvider URI → TakePicture\n    │   • saveCurrentSpot() → GPS → ParkingSpot → save + notify\n    │\n    ├── ParkingSpot.kt\n    │   • data class: photoPath, lat, lng, timestamp, note\n    │\n    ├── ParkingStorage.kt\n    │   • SharedPreferences + Gson\n    │   • save() / load() / clear()\n    │\n    ├── LocationHelper.kt\n    │   • FusedLocationProviderClient wrapper\n    │   • Callback-based getCurrentLocation()\n    │\n    ├── NotificationHelper.kt\n    │   • NotificationChannel + PendingIntent\n    │   • showParkingNotification(timeParked)\n    │\n    └── FindBikeScreen.kt\n        • Compose UI: photo + time + coordinates + distance\n        • AsyncImage from Coil for photo display\n        • Location.distanceBetween() for distance math\n\n────────────────────────────────────────────────────────────────\nTotal: 6 Kotlin files, 2 XML files, ~300 lines of code.\nFunctionality: full-featured Android app with camera, GPS,\nlocal storage, notifications, and three runtime permission flows.\n────────────────────────────────────────────────────────────────",
+          "lineExplanations": {
+            "1": {"en": "The complete file layout — six Kotlin files plus two XML config files. Compact for what it does", "vn": "Bố cục file hoàn chỉnh — sáu file Kotlin cộng hai file cấu hình XML. Gọn cho những gì nó làm"},
+            "4": {"en": "AndroidManifest declares ALL permissions and the FileProvider — the security backbone of the app", "vn": "AndroidManifest khai báo TẤT CẢ quyền và FileProvider — xương sống bảo mật của app"},
+            "11": {"en": "MainActivity is the largest file — coordinates permissions, camera, location, storage, and notifications together", "vn": "MainActivity là file lớn nhất — phối hợp quyền, camera, vị trí, lưu trữ và thông báo cùng nhau"},
+            "17": {"en": "ParkingSpot is the smallest file — one data class, five fields. The entire app revolves around this type", "vn": "ParkingSpot là file nhỏ nhất — một data class, năm trường. Toàn bộ app xoay quanh kiểu này"},
+            "27": {"en": "Three helper classes (LocationHelper, ParkingStorage, NotificationHelper) keep MainActivity from becoming a 1000-line monster", "vn": "Ba lớp helper (LocationHelper, ParkingStorage, NotificationHelper) giữ MainActivity không thành quái vật 1000 dòng"},
+            "33": {"en": "FindBikeScreen is a separate composable file — the find UI is independent of MainActivity, easier to test and modify", "vn": "FindBikeScreen là file composable riêng — UI tìm độc lập với MainActivity, dễ test và sửa hơn"}
+          }
+        }
+      ],
+      "clawdExplanation": {
+        "en": "Two tutorial projects, two real apps. Rain Alert taught you APIs, JSON, and background work. Find My Xe taught you camera, GPS, file security, and notifications.\n\nIf you wanted, you could combine them — a 'parking weather' feature that warns you when rain is coming AND reminds you which row your bike is in. That's how real apps grow: small features connected by a clear user story.\n\nKeep going. The next app idea is whatever frustrates you most this week.",
+        "vn": "Hai project hướng dẫn, hai app thực. Rain Alert dạy bạn API, JSON và background work. Find My Xe dạy bạn camera, GPS, bảo mật file và thông báo.\n\nNếu muốn, bạn có thể kết hợp — tính năng 'thời tiết bãi xe' cảnh báo mưa sắp đến VÀ nhắc bạn xe ở hàng nào. Đó là cách app thực phát triển: tính năng nhỏ kết nối bằng câu chuyện người dùng rõ.\n\nTiếp tục. Ý tưởng app tiếp theo là bất cứ gì làm bạn bực nhất tuần này."
+      },
+      "answerChoices": [],
+      "vocabTerms": [
+        {
+          "term": "MVP",
+          "color": "#60A5FA",
+          "explanation": {"en": "Minimum Viable Product — the smallest version of an app that delivers real value. Find My Xe is one MVP for the parking problem", "vn": "Minimum Viable Product — phiên bản app nhỏ nhất mang lại giá trị thực. Find My Xe là một MVP cho vấn đề đậu xe"}
+        },
+        {
+          "term": "Helper class",
+          "color": "#A78BFA",
+          "explanation": {"en": "A class that encapsulates one focused responsibility — LocationHelper handles GPS, NotificationHelper handles notifications. Keeps MainActivity clean", "vn": "Lớp đóng gói một trách nhiệm tập trung — LocationHelper xử lý GPS, NotificationHelper xử lý thông báo. Giữ MainActivity gọn"}
+        },
+        {
+          "term": "Composable file",
+          "color": "#34D399",
+          "explanation": {"en": "A Kotlin file containing one or more @Composable functions — a unit of UI that can be developed and tested independently", "vn": "File Kotlin chứa một hoặc nhiều hàm @Composable — đơn vị UI có thể phát triển và test độc lập"}
+        }
+      ],
+      "codeExplainer": {
+        "en": "This summary view shows the architectural shape of Find My Xe: six Kotlin files split by responsibility, two XML files for permissions and FileProvider config. MainActivity is the controller — it owns the permission launchers and the camera/save flow but delegates work to three helper classes (LocationHelper, ParkingStorage, NotificationHelper) and one screen (FindBikeScreen). This separation is the key practice: a god-class MainActivity would be 800+ lines and untestable. The data class ParkingSpot is the smallest file but the most central — every other class either produces it, stores it, or displays it. Around 300 total lines of code for a fully functional camera + GPS + storage + notifications app.",
+        "vn": "Tổng quan này cho thấy hình dạng kiến trúc của Find My Xe: sáu file Kotlin chia theo trách nhiệm, hai file XML cho quyền và cấu hình FileProvider. MainActivity là controller — sở hữu các launcher quyền và flow camera/lưu nhưng ủy nhiệm công việc cho ba lớp helper (LocationHelper, ParkingStorage, NotificationHelper) và một màn hình (FindBikeScreen). Sự tách biệt này là thực hành chính: MainActivity god-class sẽ 800+ dòng và không test được. Data class ParkingSpot là file nhỏ nhất nhưng trung tâm nhất — mọi lớp khác hoặc tạo nó, lưu nó, hoặc hiển thị nó. Khoảng 300 dòng code tổng cho app camera + GPS + lưu trữ + thông báo đầy đủ chức năng."
+      }
+    }
+  ]
+}

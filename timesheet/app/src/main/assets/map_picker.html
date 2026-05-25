@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="initial-scale=1.0, width=device-width">
+  <title>Pick Location</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #111; color: #fff; font-family: monospace; display: flex; flex-direction: column; height: 100vh; }
+    #search-bar { display: flex; gap: 6px; padding: 10px 10px 6px; background: #1a1a1a; }
+    #search-input {
+      flex: 1; padding: 9px 12px; background: #2a2a2a; color: #fff;
+      border: 1px solid #333; font-family: monospace; font-size: 14px;
+      outline: none;
+    }
+    #search-btn {
+      padding: 9px 16px; background: #29B6F6; color: #000; border: none;
+      font-family: monospace; font-weight: bold; font-size: 13px;
+      cursor: pointer; letter-spacing: 0.05em;
+    }
+    #map { flex: 1; }
+    #status {
+      padding: 8px 14px; background: #1a1a1a; color: #646464;
+      font-size: 11px; letter-spacing: 0.03em; min-height: 32px;
+    }
+    #confirm-btn {
+      padding: 16px; background: #00E676; color: #000; border: none;
+      font-family: monospace; font-weight: bold; font-size: 14px;
+      letter-spacing: 0.12em; cursor: pointer; width: 100%;
+    }
+    #confirm-btn:disabled { background: #333; color: #646464; cursor: default; }
+  </style>
+</head>
+<body>
+  <div id="search-bar">
+    <input id="search-input" type="text" placeholder="Search address…"
+           onkeydown="if(event.key==='Enter') doSearch()"/>
+    <button id="search-btn" onclick="doSearch()">FIND</button>
+  </div>
+  <div id="map"></div>
+  <div id="status">Tap the map to place a pin, or search an address above</div>
+  <button id="confirm-btn" onclick="doConfirm()" disabled>CONFIRM LOCATION</button>
+
+  <script>
+    var map = L.map('map').setView([10.7769, 106.7009], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors',
+      maxZoom: 19
+    }).addTo(map);
+
+    var marker = null;
+    var currentLat = null;
+    var currentLng = null;
+
+    function setPin(lat, lng, label) {
+      if (marker) marker.remove();
+      marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+      marker.on('dragend', function(e) {
+        currentLat = e.target.getLatLng().lat;
+        currentLng = e.target.getLatLng().lng;
+        showStatus(null);
+      });
+      currentLat = lat;
+      currentLng = lng;
+      showStatus(label);
+      document.getElementById('confirm-btn').disabled = false;
+    }
+
+    function showStatus(label) {
+      var coords = currentLat !== null
+        ? currentLat.toFixed(6) + ',  ' + currentLng.toFixed(6)
+        : '';
+      var text = label ? label + '  ·  ' + coords : coords;
+      document.getElementById('status').textContent = text || 'Tap map to place pin';
+    }
+
+    map.on('click', function(e) {
+      setPin(e.latlng.lat, e.latlng.lng, null);
+    });
+
+    async function doSearch() {
+      var q = document.getElementById('search-input').value.trim();
+      if (!q) return;
+      document.getElementById('status').textContent = 'Searching…';
+      try {
+        var resp = await fetch(
+          'https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(q) + '&limit=1',
+          { headers: { 'Accept-Language': 'en', 'User-Agent': 'TimesheetApp/1.0' } }
+        );
+        var results = await resp.json();
+        if (results.length > 0) {
+          var r = results[0];
+          var lat = parseFloat(r.lat);
+          var lng = parseFloat(r.lon);
+          var shortName = r.display_name.split(',').slice(0, 2).join(',').trim();
+          map.setView([lat, lng], 17);
+          setPin(lat, lng, shortName);
+        } else {
+          document.getElementById('status').textContent = 'No results — try a more specific address';
+        }
+      } catch(e) {
+        document.getElementById('status').textContent = 'Search failed — check internet connection';
+      }
+    }
+
+    function doConfirm() {
+      if (currentLat === null) {
+        Android.showToast('Place a pin on the map first');
+        return;
+      }
+      Android.onLocationPicked(currentLat, currentLng);
+    }
+
+    // Called from Kotlin when GPS location is available
+    function setInitialLocation(lat, lng) {
+      map.setView([lat, lng], 17);
+      setPin(lat, lng, 'Current GPS position');
+    }
+
+    // Called from Kotlin to centre without placing a pin
+    function centreMap(lat, lng) {
+      map.setView([lat, lng], 15);
+    }
+  </script>
+</body>
+</html>

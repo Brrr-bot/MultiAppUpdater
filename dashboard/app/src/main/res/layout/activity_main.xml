@@ -1,0 +1,405 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.homehub.dashboard.ui.StarfieldView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="10dp">
+
+        <!-- Banner: compact, clock dominant, settings icon right -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="16dp"
+            android:paddingEnd="4dp"
+            android:background="@color/banner_bg">
+
+            <TextView
+                android:id="@+id/tv_clock"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textColor="@color/neon_cyan"
+                android:textSize="26sp"
+                android:fontFamily="monospace"
+                android:textStyle="bold" />
+
+            <ImageButton
+                android:id="@+id/btn_settings"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:src="@drawable/ic_more_vert"
+                android:tint="@color/neon_cyan"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/settings" />
+        </LinearLayout>
+
+        <!-- Weather card — weight 1.3 -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1.3"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/neon_card_cyan"
+            android:padding="14dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="7 DAY WEATHER"
+                        android:textColor="@color/neon_cyan"
+                        android:textSize="11sp"
+                        android:fontFamily="monospace"
+                        android:textStyle="bold"
+                        android:letterSpacing="0.2"
+                        android:layout_alignParentStart="true"
+                        android:layout_centerVertical="true" />
+
+                    <TextView
+                        android:id="@+id/tv_weather_location"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="11sp"
+                        android:fontFamily="monospace"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true" />
+                </RelativeLayout>
+
+                <LinearLayout
+                    android:id="@+id/weather_row"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:layout_marginTop="8dp"
+                    android:orientation="horizontal"
+                    android:weightSum="7" />
+            </LinearLayout>
+        </FrameLayout>
+
+        <!-- Middle row: Hub (50%) | Finance (25%) | Timesheet (25%) — weight 1.2 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1.2"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal">
+
+            <!-- Hub card — half width (weight 2) -->
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="2"
+                android:layout_marginEnd="4dp"
+                android:background="@drawable/neon_card_purple"
+                android:padding="10dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="LIVE HUB"
+                        android:textColor="@color/neon_purple"
+                        android:textSize="11sp"
+                        android:fontFamily="monospace"
+                        android:textStyle="bold"
+                        android:letterSpacing="0.2" />
+
+                    <TextView
+                        android:id="@+id/tv_hub_status"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="3dp"
+                        android:textColor="@color/text_primary"
+                        android:textSize="13sp" />
+
+                    <TextView
+                        android:id="@+id/tv_hub_last_updated"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="12sp"
+                        android:fontFamily="monospace" />
+
+                    <TextView
+                        android:id="@+id/tv_hub_transfer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="3dp"
+                        android:textColor="@color/text_primary"
+                        android:textSize="13sp" />
+
+                    <ScrollView
+                        android:id="@+id/scroll_hub_logs"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:layout_marginTop="4dp"
+                        android:fillViewport="true">
+
+                        <TextView
+                            android:id="@+id/tv_hub_logs"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="12sp"
+                            android:fontFamily="monospace"
+                            android:lineSpacingExtra="0dp" />
+                    </ScrollView>
+                </LinearLayout>
+            </FrameLayout>
+
+            <!-- Finance card — quarter width (weight 1) -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_marginEnd="4dp"
+                android:background="@drawable/neon_card_cyan"
+                android:orientation="vertical"
+                android:padding="10dp">
+
+                <!-- Header row: label + period date -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="FINANCE"
+                        android:textColor="@color/neon_cyan"
+                        android:textSize="11sp"
+                        android:fontFamily="monospace"
+                        android:textStyle="bold"
+                        android:letterSpacing="0.2" />
+
+                    <TextView
+                        android:id="@+id/tv_finance_period"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="10sp"
+                        android:fontFamily="monospace"
+                        android:text="—" />
+                </LinearLayout>
+
+                <View android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" />
+
+                <!-- IN row -->
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+                    <TextView android:layout_width="30dp" android:layout_height="wrap_content"
+                        android:text="IN" android:textColor="#FF00E676" android:textSize="11sp"
+                        android:fontFamily="monospace" android:textStyle="bold" />
+                    <TextView android:id="@+id/tv_finance_income" android:layout_width="0dp"
+                        android:layout_height="wrap_content" android:layout_weight="1"
+                        android:textColor="#FF00E676" android:textSize="11sp"
+                        android:fontFamily="monospace" android:textStyle="bold" android:text="—" />
+                </LinearLayout>
+
+                <View android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" />
+
+                <!-- OUT row -->
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+                    <TextView android:layout_width="30dp" android:layout_height="wrap_content"
+                        android:text="OUT" android:textColor="#FFFF5252" android:textSize="11sp"
+                        android:fontFamily="monospace" android:textStyle="bold" />
+                    <TextView android:id="@+id/tv_finance_expense" android:layout_width="0dp"
+                        android:layout_height="wrap_content" android:layout_weight="1"
+                        android:textColor="#FFFF5252" android:textSize="11sp"
+                        android:fontFamily="monospace" android:textStyle="bold" android:text="—" />
+                </LinearLayout>
+
+                <View android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" />
+
+                <!-- BAL row -->
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+                    <TextView android:layout_width="30dp" android:layout_height="wrap_content"
+                        android:text="BAL" android:textColor="#FFFFB300" android:textSize="11sp"
+                        android:fontFamily="monospace" android:textStyle="bold" />
+                    <TextView android:id="@+id/tv_finance_bal" android:layout_width="0dp"
+                        android:layout_height="wrap_content" android:layout_weight="1"
+                        android:textColor="#FFFFB300" android:textSize="11sp"
+                        android:fontFamily="monospace" android:textStyle="bold" android:text="—" />
+                </LinearLayout>
+
+                <!-- Divider -->
+                <View android:layout_width="match_parent" android:layout_height="1dp"
+                    android:layout_marginTop="4dp" android:layout_marginBottom="4dp"
+                    android:background="#33FFFFFF" />
+
+                <!-- SAV row -->
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+                    <TextView android:layout_width="30dp" android:layout_height="wrap_content"
+                        android:text="SAV" android:textColor="@color/neon_cyan" android:textSize="11sp"
+                        android:fontFamily="monospace" android:textStyle="bold" />
+                    <TextView android:id="@+id/tv_finance_savings" android:layout_width="0dp"
+                        android:layout_height="wrap_content" android:layout_weight="1"
+                        android:textColor="@color/neon_cyan" android:textSize="11sp"
+                        android:fontFamily="monospace" android:textStyle="bold" android:text="—" />
+                </LinearLayout>
+
+                <View android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" />
+
+            </LinearLayout>
+
+            <!-- Timesheet card — quarter width (weight 1) -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/neon_card_green"
+                android:orientation="vertical"
+                android:padding="8dp">
+
+                <!-- Header row: label + earned -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="TIMESHEET"
+                        android:textColor="@color/neon_green"
+                        android:textSize="11sp"
+                        android:fontFamily="monospace"
+                        android:textStyle="bold"
+                        android:letterSpacing="0.2" />
+
+                    <TextView
+                        android:id="@+id/tv_timesheet_earned"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="#FFFFB300"
+                        android:textSize="11sp"
+                        android:fontFamily="monospace"
+                        android:textStyle="bold"
+                        android:text="—" />
+                </LinearLayout>
+
+                <!-- Hours / sessions sub-label -->
+                <TextView
+                    android:id="@+id/tv_timesheet_hours"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="10sp"
+                    android:fontFamily="monospace"
+                    android:text="" />
+
+                <!-- Today label -->
+                <TextView
+                    android:id="@+id/tv_timesheet_today_label"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="1dp"
+                    android:textColor="@color/neon_green"
+                    android:textSize="10sp"
+                    android:fontFamily="monospace"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.1"
+                    android:text="" />
+
+                <!-- Two-column schedule grid (AM left, PM right) -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="1dp">
+
+                    <LinearLayout
+                        android:id="@+id/ll_timesheet_am"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical" />
+
+                    <LinearLayout
+                        android:id="@+id/ll_timesheet_pm"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical" />
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- Alarms card — teal, weight 1.3 -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1.3"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/neon_card_green"
+            android:padding="14dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="WEEKLY ALARMS"
+                    android:textColor="@color/neon_green"
+                    android:textSize="11sp"
+                    android:fontFamily="monospace"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.2" />
+
+                <LinearLayout
+                    android:id="@+id/day_card_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:layout_marginTop="10dp"
+                    android:orientation="horizontal" />
+            </LinearLayout>
+        </FrameLayout>
+    </LinearLayout>
+
+    <!-- Dim overlay — animates alpha to darken UI without touching system brightness -->
+    <View
+        android:id="@+id/dim_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#000000"
+        android:alpha="0"
+        android:clickable="false"
+        android:focusable="false" />
+
+</FrameLayout>

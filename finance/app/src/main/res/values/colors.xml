@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="bg_space">#03040A</color>
+    <color name="card_bg">#0D0D0D</color>
+    <color name="card_border">#1E1E1E</color>
+    <color name="banner_bg">#CC04040F</color>
+
+    <color name="neon_sky">#29B6F6</color>
+    <color name="neon_green">#00E676</color>
+    <color name="neon_gold">#FFB300</color>
+    <color name="neon_red">#FF1744</color>
+
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#646464</color>
+    <color name="text_label">#969696</color>
+
+    <!-- Launcher icon -->
+    <color name="ic_launcher_background">#03040A</color>
+
+    <!-- Legacy aliases for Material theme -->
+    <color name="forest_green">#29B6F6</color>
+    <color name="amber">#FFB300</color>
+    <color name="light_sage">#03040A</color>
+    <color name="card_white">#0D0D0D</color>
+</resources>

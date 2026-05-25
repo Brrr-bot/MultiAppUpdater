@@ -1,0 +1,24 @@
+# Android build outputs
+**/build/
+**/.gradle/
+**/.idea/
+**/.kotlin/
+**/.kotlin-daemon/
+**/.android/
+**/.gradle-user/
+**/local.properties
+**/*.apk
+**/*.aab
+
+# Node / Cloudflare
+**/node_modules/
+**/.wrangler/
+**/dist/
+
+# Python
+**/__pycache__/
+**/*.pyc
+
+# Misc
+**/*.log
+robot_pack_temp/

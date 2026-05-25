@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Space background -->
+    <color name="bg_space">#03040A</color>
+    <color name="card_bg">#0D0D0D</color>
+    <color name="card_border">#1E1E1E</color>
+    <color name="banner_bg">#CC04040F</color>
+
+    <!-- Accent colours (matching AiALVN dashboard.py) -->
+    <color name="neon_sky">#29B6F6</color>      <!-- TTH — sky blue -->
+    <color name="neon_green">#00E676</color>    <!-- LVV — neon green -->
+    <color name="neon_gold">#FFB300</color>     <!-- AL  — gold -->
+    <color name="neon_purple">#CE93D8</color>   <!-- TQB — purple -->
+
+    <!-- School bg tints -->
+    <color name="school_tth_bg">#021829</color>
+    <color name="school_lvv_bg">#011409</color>
+    <color name="school_al_bg">#140E00</color>
+    <color name="school_tqb_bg">#0E0716</color>
+
+    <!-- Text -->
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#646464</color>
+    <color name="text_label">#969696</color>
+    <color name="text_white">#FFFFFF</color>
+    <color name="text_white_70">#B3FFFFFF</color>
+
+    <!-- Legacy names kept for item_session.xml -->
+    <color name="forest_green">#29B6F6</color>
+    <color name="amber">#FFB300</color>
+    <color name="light_sage">#03040A</color>
+    <color name="card_white">#0D0D0D</color>
+    <color name="school_default">#646464</color>
+    <color name="progress_track">#1E1E1E</color>
+
+    <!-- School stripe colours in session list -->
+    <color name="school_tan_thoi_hoa">#29B6F6</color>
+    <color name="school_le_van_viet">#00E676</color>
+    <color name="school_an_lac">#FFB300</color>
+    <color name="school_ta_quang_buu">#CE93D8</color>
+</resources>

@@ -1,0 +1,19 @@
+name = "app-updates"
+main = "worker.js"
+compatibility_date = "2024-09-23"
+
+[[durable_objects.bindings]]
+name = "UPDATE"
+class_name = "UpdateDO"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["UpdateDO"]
+
+# R2 bucket for APK storage — enable R2 on the account first, then uncomment:
+# [[r2_buckets]]
+# binding = "APKS"
+# bucket_name = "app-updates-apks"
+#
+# Then run: npx wrangler r2 bucket create app-updates-apks
+# And set:  npx wrangler secret put UPLOAD_KEY

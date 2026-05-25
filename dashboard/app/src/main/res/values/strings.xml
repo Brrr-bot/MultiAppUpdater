@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Home Hub Dashboard</string>
+    <string name="settings">Settings</string>
+    <string name="default_alarm_label">Wake Up</string>
+    <string name="accessibility_service_description">Keeps the Home Hub dashboard process alive for kiosk mode.</string>
+</resources>

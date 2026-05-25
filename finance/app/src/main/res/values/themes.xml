@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="DatePickerTheme" parent="Theme.MaterialComponents.Dialog">
+        <item name="colorPrimary">@color/neon_sky</item>
+        <item name="colorAccent">@color/neon_sky</item>
+        <item name="android:textColorPrimary">@color/text_primary</item>
+        <item name="android:textColorSecondary">@color/text_label</item>
+        <item name="android:windowBackground">@color/card_bg</item>
+        <item name="colorSurface">@color/card_bg</item>
+        <item name="colorOnSurface">@color/text_primary</item>
+        <item name="buttonBarPositiveButtonStyle">@style/DatePickerButtonStyle</item>
+        <item name="buttonBarNegativeButtonStyle">@style/DatePickerButtonStyle</item>
+    </style>
+
+    <style name="DatePickerButtonStyle" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
+        <item name="android:textColor">#FFFFFF</item>
+    </style>
+
+    <style name="Theme.Finance" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimary">@color/neon_sky</item>
+        <item name="colorPrimaryVariant">@color/neon_sky</item>
+        <item name="colorOnPrimary">@color/bg_space</item>
+        <item name="colorSecondary">@color/neon_gold</item>
+        <item name="colorOnSecondary">@color/bg_space</item>
+        <item name="android:colorBackground">@color/bg_space</item>
+        <item name="android:windowBackground">@color/bg_space</item>
+        <item name="colorSurface">@color/card_bg</item>
+        <item name="colorOnSurface">@color/text_primary</item>
+    </style>
+</resources>

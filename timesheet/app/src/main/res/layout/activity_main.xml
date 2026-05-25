@@ -1,0 +1,524 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_space">
+
+    <!-- ── Main content column ─────────────────────────────────────────────── -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <!-- Top banner -->
+        <LinearLayout
+            android:id="@+id/topBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@color/banner_bg"
+            android:elevation="4dp">
+
+            <!-- Title + earnings row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:paddingTop="40dp"
+                android:paddingBottom="10dp"
+                android:gravity="center_vertical">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tvAppTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/app_title"
+                        android:textColor="@color/neon_sky"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:fontFamily="monospace"
+                        android:letterSpacing="0.08"/>
+
+                    <TextView
+                        android:id="@+id/tvAppSubtitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/app_subtitle"
+                        android:textColor="@color/text_label"
+                        android:textSize="11sp"
+                        android:letterSpacing="0.1"/>
+
+                </LinearLayout>
+
+                <!-- Earnings badge -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="end">
+
+                    <TextView
+                        android:id="@+id/tvTopBarEarnings"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="₫ 0"
+                        android:textColor="@color/neon_gold"
+                        android:textSize="22sp"
+                        android:textStyle="bold"
+                        android:fontFamily="monospace"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/this_month"
+                        android:textColor="@color/text_label"
+                        android:textSize="11sp"
+                        android:layout_gravity="end"/>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- Tab row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center_horizontal">
+
+                    <TextView
+                        android:id="@+id/btnTabSchedule"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="SCHEDULE"
+                        android:textColor="@color/neon_sky"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:fontFamily="monospace"
+                        android:letterSpacing="0.1"
+                        android:paddingTop="6dp"
+                        android:paddingBottom="8dp"
+                        android:paddingStart="12dp"
+                        android:paddingEnd="12dp"
+                        android:background="?attr/selectableItemBackground"/>
+
+                    <View
+                        android:id="@+id/tabIndicatorSchedule"
+                        android:layout_width="match_parent"
+                        android:layout_height="2dp"
+                        android:background="@color/neon_sky"
+                        android:visibility="visible"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center_horizontal">
+
+                    <TextView
+                        android:id="@+id/btnTabHistory"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="HISTORY"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:fontFamily="monospace"
+                        android:letterSpacing="0.1"
+                        android:paddingTop="6dp"
+                        android:paddingBottom="8dp"
+                        android:paddingStart="12dp"
+                        android:paddingEnd="12dp"
+                        android:background="?attr/selectableItemBackground"/>
+
+                    <View
+                        android:id="@+id/tabIndicatorHistory"
+                        android:layout_width="match_parent"
+                        android:layout_height="2dp"
+                        android:background="@color/neon_sky"
+                        android:visibility="invisible"/>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- Month nav (history only) -->
+            <LinearLayout
+                android:id="@+id/monthNav"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:paddingTop="2dp"
+                android:paddingBottom="4dp"
+                android:visibility="gone">
+
+                <ImageButton
+                    android:id="@+id/btnPrevMonth"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@android:drawable/ic_media_previous"
+                    android:background="@null"
+                    android:tint="@android:color/white"
+                    android:scaleType="fitCenter"
+                    android:contentDescription="Previous month"/>
+
+                <TextView
+                    android:id="@+id/tvMonthLabel"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:textColor="@color/text_primary"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:fontFamily="monospace"
+                    android:letterSpacing="0.08"/>
+
+                <ImageButton
+                    android:id="@+id/btnNextMonth"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@android:drawable/ic_media_next"
+                    android:background="@null"
+                    android:tint="@android:color/white"
+                    android:scaleType="fitCenter"
+                    android:contentDescription="Next month"/>
+
+            </LinearLayout>
+
+            <!-- Sky blue bottom stripe -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:background="@color/neon_sky"/>
+
+        </LinearLayout>
+
+        <!-- ── Pending verification strip ──────────────────────────────────── -->
+        <LinearLayout
+            android:id="@+id/pendingVerifySection"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@color/bg_space"
+            android:visibility="gone"/>
+
+        <!-- Content -->
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:id="@+id/swipeRefresh"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:fillViewport="true"
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <!-- SCHEDULE TAB -->
+                    <LinearLayout
+                        android:id="@+id/layoutSchedule"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:visibility="visible">
+
+                        <LinearLayout
+                            android:id="@+id/scheduleContainer"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:paddingTop="8dp"
+                            android:paddingBottom="96dp"/>
+
+                    </LinearLayout>
+
+                    <!-- HISTORY TAB -->
+                    <LinearLayout
+                        android:id="@+id/layoutHistory"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:paddingTop="8dp"
+                        android:paddingBottom="96dp"
+                        android:visibility="gone">
+
+                        <!-- Summary card -->
+                        <LinearLayout
+                            android:id="@+id/cardSummary"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
+                            android:layout_marginEnd="12dp"
+                            android:layout_marginTop="8dp"
+                            android:layout_marginBottom="4dp"
+                            android:orientation="horizontal"
+                            android:background="@color/card_bg"
+                            android:padding="0dp">
+
+                            <!-- Gold left border -->
+                            <View
+                                android:layout_width="3dp"
+                                android:layout_height="match_parent"
+                                android:background="@color/neon_gold"/>
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:padding="16dp">
+
+                                <TextView
+                                    android:id="@+id/tvSummaryMonth"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="May 2026"
+                                    android:textColor="@color/neon_sky"
+                                    android:textSize="15sp"
+                                    android:textStyle="bold"
+                                    android:fontFamily="monospace"
+                                    android:layout_marginBottom="10dp"/>
+
+                                <LinearLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="horizontal"
+                                    android:layout_marginBottom="12dp">
+
+                                    <LinearLayout
+                                        android:layout_width="0dp"
+                                        android:layout_height="wrap_content"
+                                        android:layout_weight="1"
+                                        android:orientation="vertical">
+                                        <TextView
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="HOURS"
+                                            android:textColor="@color/text_secondary"
+                                            android:textSize="10sp"
+                                            android:fontFamily="monospace"
+                                            android:letterSpacing="0.1"/>
+                                        <TextView
+                                            android:id="@+id/tvSummaryHours"
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="0.00 hrs"
+                                            android:textColor="@color/text_primary"
+                                            android:textSize="18sp"
+                                            android:textStyle="bold"
+                                            android:fontFamily="monospace"/>
+                                    </LinearLayout>
+
+                                    <LinearLayout
+                                        android:layout_width="0dp"
+                                        android:layout_height="wrap_content"
+                                        android:layout_weight="1"
+                                        android:orientation="vertical">
+                                        <TextView
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="PERIODS"
+                                            android:textColor="@color/text_secondary"
+                                            android:textSize="10sp"
+                                            android:fontFamily="monospace"
+                                            android:letterSpacing="0.1"/>
+                                        <TextView
+                                            android:id="@+id/tvSummaryPeriods"
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="0"
+                                            android:textColor="@color/text_primary"
+                                            android:textSize="18sp"
+                                            android:textStyle="bold"
+                                            android:fontFamily="monospace"/>
+                                    </LinearLayout>
+
+                                    <LinearLayout
+                                        android:layout_width="0dp"
+                                        android:layout_height="wrap_content"
+                                        android:layout_weight="1"
+                                        android:orientation="vertical">
+                                        <TextView
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="EARNED"
+                                            android:textColor="@color/text_secondary"
+                                            android:textSize="10sp"
+                                            android:fontFamily="monospace"
+                                            android:letterSpacing="0.1"/>
+                                        <TextView
+                                            android:id="@+id/tvSummaryEarnings"
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="₫ 0"
+                                            android:textColor="@color/neon_gold"
+                                            android:textSize="16sp"
+                                            android:textStyle="bold"
+                                            android:fontFamily="monospace"/>
+                                    </LinearLayout>
+
+                                </LinearLayout>
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/monthly_target"
+                                    android:textColor="@color/text_secondary"
+                                    android:textSize="10sp"
+                                    android:fontFamily="monospace"
+                                    android:layout_marginBottom="4dp"/>
+
+                                <ProgressBar
+                                    android:id="@+id/progressHours"
+                                    style="?android:attr/progressBarStyleHorizontal"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="4dp"
+                                    android:max="100"
+                                    android:progress="0"
+                                    android:progressTint="@color/neon_sky"
+                                    android:progressBackgroundTint="@color/card_border"/>
+
+                                <TextView
+                                    android:id="@+id/tvProgressLabel"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="0 / 80 hrs"
+                                    android:textColor="@color/text_secondary"
+                                    android:textSize="10sp"
+                                    android:fontFamily="monospace"
+                                    android:layout_marginTop="4dp"/>
+
+                            </LinearLayout>
+                        </LinearLayout>
+
+                        <!-- Error -->
+                        <LinearLayout
+                            android:id="@+id/layoutError"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:gravity="center"
+                            android:padding="32dp"
+                            android:visibility="gone">
+
+                            <TextView
+                                android:id="@+id/tvError"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/error_network"
+                                android:textColor="@color/text_label"
+                                android:textSize="13sp"
+                                android:fontFamily="monospace"
+                                android:gravity="center"
+                                android:layout_marginBottom="16dp"/>
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btnRetry"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/retry"
+                                android:fontFamily="monospace"
+                                app:backgroundTint="@color/neon_sky"/>
+
+                        </LinearLayout>
+
+                        <!-- Loading -->
+                        <LinearLayout
+                            android:id="@+id/layoutLoading"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:gravity="center"
+                            android:padding="32dp"
+                            android:visibility="gone">
+
+                            <ProgressBar
+                                android:layout_width="40dp"
+                                android:layout_height="40dp"
+                                android:indeterminateTint="@color/neon_sky"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/loading"
+                                android:textColor="@color/text_label"
+                                android:textSize="12sp"
+                                android:fontFamily="monospace"
+                                android:layout_marginTop="12dp"/>
+
+                        </LinearLayout>
+
+                        <!-- Empty -->
+                        <TextView
+                            android:id="@+id/tvEmpty"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/no_sessions"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="13sp"
+                            android:fontFamily="monospace"
+                            android:gravity="center"
+                            android:padding="32dp"
+                            android:visibility="gone"/>
+
+                        <!-- Session list (date-grouped, built programmatically) -->
+                        <LinearLayout
+                            android:id="@+id/historyContainer"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:paddingTop="4dp"
+                            android:paddingBottom="8dp"/>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+            </ScrollView>
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    </LinearLayout>
+
+    <!-- ── Floating + button — bottom centre ──────────────────────────────── -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/btnAddSession"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="28dp"
+        android:src="@android:drawable/ic_input_add"
+        android:contentDescription="Add session"
+        app:backgroundTint="@color/neon_sky"
+        app:tint="@color/bg_space"
+        app:elevation="8dp"
+        app:fabSize="normal"/>
+
+</FrameLayout>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Dark dialog used for "Add Session" -->
+    <style name="DarkDialog" parent="Theme.MaterialComponents.Dialog.Alert">
+        <!-- window + title bar background -->
+        <item name="android:background">#0D0D0D</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:colorBackground">#0D0D0D</item>
+        <!-- title text -->
+        <item name="android:textColorPrimary">#29B6F6</item>
+        <!-- body text -->
+        <item name="android:textColor">#FFFFFF</item>
+        <!-- button text -->
+        <item name="buttonBarPositiveButtonStyle">@style/DarkDialog.Button</item>
+        <item name="buttonBarNegativeButtonStyle">@style/DarkDialog.Button</item>
+        <!-- button bar background -->
+        <item name="buttonBarStyle">@style/DarkDialog.ButtonBar</item>
+    </style>
+    <style name="DarkDialog.Button" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
+        <item name="android:textColor">#29B6F6</item>
+        <item name="android:background">#0D0D0D</item>
+        <item name="rippleColor">#29B6F6</item>
+    </style>
+    <style name="DarkDialog.ButtonBar" parent="Widget.AppCompat.ButtonBar.AlertDialog">
+        <item name="android:background">#0D0D0D</item>
+        <item name="android:paddingTop">0dp</item>
+    </style>
+
+    <style name="Theme.Timesheet" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimary">@color/forest_green</item>
+        <item name="colorPrimaryVariant">@color/forest_green</item>
+        <item name="colorOnPrimary">@color/text_white</item>
+        <item name="colorSecondary">@color/amber</item>
+        <item name="colorOnSecondary">@color/forest_green</item>
+        <item name="android:colorBackground">@color/light_sage</item>
+        <item name="android:windowBackground">@color/light_sage</item>
+        <item name="colorSurface">@color/card_white</item>
+        <item name="colorOnSurface">@color/text_primary</item>
+    </style>
+</resources>

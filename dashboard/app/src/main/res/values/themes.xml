@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.HomeHub" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="android:statusBarColor">@color/bg_space</item>
+        <item name="android:navigationBarColor">@color/bg_space</item>
+        <item name="colorPrimary">@color/neon_cyan</item>
+        <item name="colorOnPrimary">@color/bg_space</item>
+        <item name="android:windowBackground">@color/bg_space</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:colorBackground">@color/bg_space</item>
+    </style>
+
+    <style name="Theme.HomeHub.Fullscreen" parent="Theme.HomeHub">
+        <item name="android:windowIsTranslucent">false</item>
+    </style>
+</resources>

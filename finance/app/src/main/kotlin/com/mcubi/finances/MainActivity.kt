@@ -187,6 +187,7 @@ class MainActivity : AppCompatActivity() {
         setDirection("out")
         showTab(add = true)
         initPeriodFromSalaries()
+        sendLog("Started v${BuildConfig.VERSION_NAME} (build ${BuildConfig.VERSION_CODE})")
         checkForUpdate()
     }
 

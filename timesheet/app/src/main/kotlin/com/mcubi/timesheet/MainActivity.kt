@@ -376,7 +376,7 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         fetchTodayPending()
-        sendLog("Started v${BuildConfig.VERSION_NAME} (build ${BuildConfig.VERSION_CODE})")
+        sendLog("Started v${BuildConfig.VERSION_NAME} (build ${BuildConfig.VERSION_CODE}) on ${android.os.Build.MODEL}")
         checkForUpdate()
     }
 

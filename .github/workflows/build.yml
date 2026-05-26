@@ -7,6 +7,12 @@ on:
       - '**/build_number.txt'
       - '.github/**'
       - '**.md'
+  workflow_dispatch:
+    inputs:
+      app:
+        description: 'App to build (timesheet/finance/dashboard/aiteaching/all)'
+        required: true
+        default: 'all'
 
 jobs:
   detect:
@@ -23,11 +29,24 @@ jobs:
       - name: Detect changed apps
         id: changes
         run: |
-          CHANGED=$(git diff --name-only HEAD~1 HEAD)
-          echo "timesheet=$(echo "$CHANGED" | grep -q '^timesheet/' && echo true || echo false)" >> $GITHUB_OUTPUT
-          echo "finance=$(echo "$CHANGED" | grep -q '^finance/' && echo true || echo false)" >> $GITHUB_OUTPUT
-          echo "dashboard=$(echo "$CHANGED" | grep -q '^dashboard/' && echo true || echo false)" >> $GITHUB_OUTPUT
-          echo "aiteaching=$(echo "$CHANGED" | grep -q '^aiteaching/' && echo true || echo false)" >> $GITHUB_OUTPUT
+          APP="${{ github.event.inputs.app }}"
+          if [ "$APP" = "all" ] || [ "${{ github.event_name }}" = "workflow_dispatch" -a "$APP" = "all" ]; then
+            echo "timesheet=true" >> $GITHUB_OUTPUT
+            echo "finance=true" >> $GITHUB_OUTPUT
+            echo "dashboard=true" >> $GITHUB_OUTPUT
+            echo "aiteaching=true" >> $GITHUB_OUTPUT
+          elif [ -n "$APP" ] && [ "$APP" != "" ]; then
+            echo "timesheet=$([ "$APP" = "timesheet" ] && echo true || echo false)" >> $GITHUB_OUTPUT
+            echo "finance=$([ "$APP" = "finance" ] && echo true || echo false)" >> $GITHUB_OUTPUT
+            echo "dashboard=$([ "$APP" = "dashboard" ] && echo true || echo false)" >> $GITHUB_OUTPUT
+            echo "aiteaching=$([ "$APP" = "aiteaching" ] && echo true || echo false)" >> $GITHUB_OUTPUT
+          else
+            CHANGED=$(git diff --name-only HEAD~1 HEAD)
+            echo "timesheet=$(echo "$CHANGED" | grep -q '^timesheet/' && echo true || echo false)" >> $GITHUB_OUTPUT
+            echo "finance=$(echo "$CHANGED" | grep -q '^finance/' && echo true || echo false)" >> $GITHUB_OUTPUT
+            echo "dashboard=$(echo "$CHANGED" | grep -q '^dashboard/' && echo true || echo false)" >> $GITHUB_OUTPUT
+            echo "aiteaching=$(echo "$CHANGED" | grep -q '^aiteaching/' && echo true || echo false)" >> $GITHUB_OUTPUT
+          fi
 
   timesheet:
     needs: detect

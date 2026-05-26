@@ -1,0 +1,238 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - '**/build_number.txt'
+      - '.github/**'
+      - '**.md'
+
+jobs:
+  detect:
+    runs-on: ubuntu-latest
+    outputs:
+      timesheet: ${{ steps.changes.outputs.timesheet }}
+      finance: ${{ steps.changes.outputs.finance }}
+      dashboard: ${{ steps.changes.outputs.dashboard }}
+      aiteaching: ${{ steps.changes.outputs.aiteaching }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Detect changed apps
+        id: changes
+        run: |
+          CHANGED=$(git diff --name-only HEAD~1 HEAD)
+          echo "timesheet=$(echo "$CHANGED" | grep -q '^timesheet/' && echo true || echo false)" >> $GITHUB_OUTPUT
+          echo "finance=$(echo "$CHANGED" | grep -q '^finance/' && echo true || echo false)" >> $GITHUB_OUTPUT
+          echo "dashboard=$(echo "$CHANGED" | grep -q '^dashboard/' && echo true || echo false)" >> $GITHUB_OUTPUT
+          echo "aiteaching=$(echo "$CHANGED" | grep -q '^aiteaching/' && echo true || echo false)" >> $GITHUB_OUTPUT
+
+  timesheet:
+    needs: detect
+    if: needs.detect.outputs.timesheet == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - name: Bump build number
+        id: bump
+        working-directory: timesheet
+        run: |
+          BUILD=$(cat build_number.txt | tr -d '[:space:]')
+          NEW=$((BUILD + 1))
+          echo $NEW > build_number.txt
+          echo "version_code=$NEW" >> $GITHUB_OUTPUT
+          echo "version_name=1.0.$NEW" >> $GITHUB_OUTPUT
+      - name: Commit bumped build number
+        working-directory: timesheet
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add build_number.txt
+          git commit -m "ci: bump timesheet build to ${{ steps.bump.outputs.version_code }} [skip ci]"
+          git push
+      - name: Build APK
+        working-directory: timesheet
+        run: chmod +x gradlew && ./gradlew :app:assembleDebug --no-daemon
+      - name: Release and register
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          APP=timesheet
+          VC=${{ steps.bump.outputs.version_code }}
+          VN=${{ steps.bump.outputs.version_name }}
+          TAG="${APP}-v${VC}"
+          gh release delete "$TAG" --yes --repo ${{ github.repository }} 2>/dev/null || true
+          git push --delete origin "$TAG" 2>/dev/null || true
+          gh release create "$TAG" \
+            timesheet/app/build/outputs/apk/debug/app-debug.apk#${APP}-${VN}.apk \
+            --title "Timesheet $VN" --notes "Build $VC" \
+            --repo ${{ github.repository }}
+          APK_URL="https://github.com/${{ github.repository }}/releases/download/${TAG}/${APP}-${VN}.apk"
+          curl -sf -X POST "https://app-updates.mcubittbuilders.workers.dev/upload/${APP}" \
+            -H "X-Upload-Key: ${{ secrets.UPLOAD_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d "{\"versionCode\": $VC, \"versionName\": \"$VN\", \"apkUrl\": \"$APK_URL\"}"
+
+  finance:
+    needs: detect
+    if: needs.detect.outputs.finance == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - name: Bump build number
+        id: bump
+        working-directory: finance
+        run: |
+          BUILD=$(cat build_number.txt | tr -d '[:space:]')
+          NEW=$((BUILD + 1))
+          echo $NEW > build_number.txt
+          echo "version_code=$NEW" >> $GITHUB_OUTPUT
+          echo "version_name=1.0.$NEW" >> $GITHUB_OUTPUT
+      - name: Commit bumped build number
+        working-directory: finance
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add build_number.txt
+          git commit -m "ci: bump finance build to ${{ steps.bump.outputs.version_code }} [skip ci]"
+          git push
+      - name: Build APK
+        working-directory: finance
+        run: chmod +x gradlew && ./gradlew :app:assembleDebug --no-daemon
+      - name: Release and register
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          APP=finance
+          VC=${{ steps.bump.outputs.version_code }}
+          VN=${{ steps.bump.outputs.version_name }}
+          TAG="${APP}-v${VC}"
+          gh release delete "$TAG" --yes --repo ${{ github.repository }} 2>/dev/null || true
+          git push --delete origin "$TAG" 2>/dev/null || true
+          gh release create "$TAG" \
+            finance/app/build/outputs/apk/debug/app-debug.apk#${APP}-${VN}.apk \
+            --title "Finance $VN" --notes "Build $VC" \
+            --repo ${{ github.repository }}
+          APK_URL="https://github.com/${{ github.repository }}/releases/download/${TAG}/${APP}-${VN}.apk"
+          curl -sf -X POST "https://app-updates.mcubittbuilders.workers.dev/upload/${APP}" \
+            -H "X-Upload-Key: ${{ secrets.UPLOAD_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d "{\"versionCode\": $VC, \"versionName\": \"$VN\", \"apkUrl\": \"$APK_URL\"}"
+
+  dashboard:
+    needs: detect
+    if: needs.detect.outputs.dashboard == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - name: Bump build number
+        id: bump
+        working-directory: dashboard
+        run: |
+          BUILD=$(cat build_number.txt | tr -d '[:space:]')
+          NEW=$((BUILD + 1))
+          echo $NEW > build_number.txt
+          echo "version_code=$NEW" >> $GITHUB_OUTPUT
+          echo "version_name=1.0.$NEW" >> $GITHUB_OUTPUT
+      - name: Commit bumped build number
+        working-directory: dashboard
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add build_number.txt
+          git commit -m "ci: bump dashboard build to ${{ steps.bump.outputs.version_code }} [skip ci]"
+          git push
+      - name: Build APK
+        working-directory: dashboard
+        run: chmod +x gradlew && ./gradlew :app:assembleDebug --no-daemon
+      - name: Release and register
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          APP=dashboard
+          VC=${{ steps.bump.outputs.version_code }}
+          VN=${{ steps.bump.outputs.version_name }}
+          TAG="${APP}-v${VC}"
+          gh release delete "$TAG" --yes --repo ${{ github.repository }} 2>/dev/null || true
+          git push --delete origin "$TAG" 2>/dev/null || true
+          gh release create "$TAG" \
+            dashboard/app/build/outputs/apk/debug/app-debug.apk#${APP}-${VN}.apk \
+            --title "Dashboard $VN" --notes "Build $VC" \
+            --repo ${{ github.repository }}
+          APK_URL="https://github.com/${{ github.repository }}/releases/download/${TAG}/${APP}-${VN}.apk"
+          curl -sf -X POST "https://app-updates.mcubittbuilders.workers.dev/upload/${APP}" \
+            -H "X-Upload-Key: ${{ secrets.UPLOAD_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d "{\"versionCode\": $VC, \"versionName\": \"$VN\", \"apkUrl\": \"$APK_URL\"}"
+
+  aiteaching:
+    needs: detect
+    if: needs.detect.outputs.aiteaching == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - name: Bump build number
+        id: bump
+        working-directory: aiteaching
+        run: |
+          BUILD=$(cat build_number.txt | tr -d '[:space:]')
+          NEW=$((BUILD + 1))
+          echo $NEW > build_number.txt
+          echo "version_code=$NEW" >> $GITHUB_OUTPUT
+          echo "version_name=1.0.$NEW" >> $GITHUB_OUTPUT
+      - name: Commit bumped build number
+        working-directory: aiteaching
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add build_number.txt
+          git commit -m "ci: bump aiteaching build to ${{ steps.bump.outputs.version_code }} [skip ci]"
+          git push
+      - name: Build APK
+        working-directory: aiteaching
+        run: chmod +x gradlew && ./gradlew :app:assembleDebug --no-daemon
+      - name: Release and register
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          APP=aiteaching
+          VC=${{ steps.bump.outputs.version_code }}
+          VN=${{ steps.bump.outputs.version_name }}
+          TAG="${APP}-v${VC}"
+          gh release delete "$TAG" --yes --repo ${{ github.repository }} 2>/dev/null || true
+          git push --delete origin "$TAG" 2>/dev/null || true
+          gh release create "$TAG" \
+            aiteaching/app/build/outputs/apk/debug/app-debug.apk#${APP}-${VN}.apk \
+            --title "AI Teaching $VN" --notes "Build $VC" \
+            --repo ${{ github.repository }}
+          APK_URL="https://github.com/${{ github.repository }}/releases/download/${TAG}/${APP}-${VN}.apk"
+          curl -sf -X POST "https://app-updates.mcubittbuilders.workers.dev/upload/${APP}" \
+            -H "X-Upload-Key: ${{ secrets.UPLOAD_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d "{\"versionCode\": $VC, \"versionName\": \"$VN\", \"apkUrl\": \"$APK_URL\"}"

@@ -2,9 +2,8 @@ plugins {
     id("com.android.application")
 }
 
-val buildNumberFile = rootProject.file("build_number.txt")
-val appVersionCode = buildNumberFile.readText().trim().toInt()
-val appVersionName = "1.0.$appVersionCode"
+val appVersionCode = (findProperty("versionCode") as String?)?.toInt() ?: rootProject.file("build_number.txt").readText().trim().toInt()
+val appVersionName = (findProperty("versionName") as String?) ?: "1.0.$appVersionCode"
 
 android {
     namespace = "com.homehub.dashboard"

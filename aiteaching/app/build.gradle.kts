@@ -11,8 +11,8 @@ android {
         applicationId = "com.example.aiteachingapp"
         minSdk = 26
         targetSdk = 34
-        versionCode = 8
-        versionName = "1.0.8"
+        versionCode = (findProperty("versionCode") as String?)?.toInt() ?: 8
+        versionName = (findProperty("versionName") as String?) ?: "1.0.8"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 

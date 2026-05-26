@@ -4,7 +4,6 @@ on:
   push:
     branches: [main]
     paths-ignore:
-      - '**/build_number.txt'
       - '.github/**'
       - '**.md'
   workflow_dispatch:
@@ -30,12 +29,12 @@ jobs:
         id: changes
         run: |
           APP="${{ github.event.inputs.app }}"
-          if [ "$APP" = "all" ] || [ "${{ github.event_name }}" = "workflow_dispatch" -a "$APP" = "all" ]; then
+          if [ "$APP" = "all" ]; then
             echo "timesheet=true" >> $GITHUB_OUTPUT
             echo "finance=true" >> $GITHUB_OUTPUT
             echo "dashboard=true" >> $GITHUB_OUTPUT
             echo "aiteaching=true" >> $GITHUB_OUTPUT
-          elif [ -n "$APP" ] && [ "$APP" != "" ]; then
+          elif [ -n "$APP" ]; then
             echo "timesheet=$([ "$APP" = "timesheet" ] && echo true || echo false)" >> $GITHUB_OUTPUT
             echo "finance=$([ "$APP" = "finance" ] && echo true || echo false)" >> $GITHUB_OUTPUT
             echo "dashboard=$([ "$APP" = "dashboard" ] && echo true || echo false)" >> $GITHUB_OUTPUT
@@ -54,39 +53,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
-      - name: Bump build number
-        id: bump
-        working-directory: timesheet
-        run: |
-          BUILD=$(cat build_number.txt | tr -d '[:space:]')
-          NEW=$((BUILD + 1))
-          echo $NEW > build_number.txt
-          echo "version_code=$NEW" >> $GITHUB_OUTPUT
-          echo "version_name=1.0.$NEW" >> $GITHUB_OUTPUT
-      - name: Commit bumped build number
-        working-directory: timesheet
-        run: |
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
-          git add build_number.txt
-          git commit -m "ci: bump timesheet build to ${{ steps.bump.outputs.version_code }} [skip ci]"
-          git push
       - name: Build APK
         working-directory: timesheet
-        run: chmod +x gradlew && ./gradlew :app:assembleDebug --no-daemon
+        run: chmod +x gradlew && ./gradlew :app:assembleDebug --no-daemon -PversionCode=${{ github.run_number }} -PversionName=1.0.${{ github.run_number }}
       - name: Release and register
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           APP=timesheet
-          VC=${{ steps.bump.outputs.version_code }}
-          VN=${{ steps.bump.outputs.version_name }}
+          VC=${{ github.run_number }}
+          VN=1.0.${{ github.run_number }}
           TAG="${APP}-v${VC}"
           gh release delete "$TAG" --yes --repo ${{ github.repository }} 2>/dev/null || true
           git push --delete origin "$TAG" 2>/dev/null || true
@@ -106,39 +86,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
-      - name: Bump build number
-        id: bump
-        working-directory: finance
-        run: |
-          BUILD=$(cat build_number.txt | tr -d '[:space:]')
-          NEW=$((BUILD + 1))
-          echo $NEW > build_number.txt
-          echo "version_code=$NEW" >> $GITHUB_OUTPUT
-          echo "version_name=1.0.$NEW" >> $GITHUB_OUTPUT
-      - name: Commit bumped build number
-        working-directory: finance
-        run: |
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
-          git add build_number.txt
-          git commit -m "ci: bump finance build to ${{ steps.bump.outputs.version_code }} [skip ci]"
-          git push
       - name: Build APK
         working-directory: finance
-        run: chmod +x gradlew && ./gradlew :app:assembleDebug --no-daemon
+        run: chmod +x gradlew && ./gradlew :app:assembleDebug --no-daemon -PversionCode=${{ github.run_number }} -PversionName=1.0.${{ github.run_number }}
       - name: Release and register
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           APP=finance
-          VC=${{ steps.bump.outputs.version_code }}
-          VN=${{ steps.bump.outputs.version_name }}
+          VC=${{ github.run_number }}
+          VN=1.0.${{ github.run_number }}
           TAG="${APP}-v${VC}"
           gh release delete "$TAG" --yes --repo ${{ github.repository }} 2>/dev/null || true
           git push --delete origin "$TAG" 2>/dev/null || true
@@ -158,39 +119,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
-      - name: Bump build number
-        id: bump
-        working-directory: dashboard
-        run: |
-          BUILD=$(cat build_number.txt | tr -d '[:space:]')
-          NEW=$((BUILD + 1))
-          echo $NEW > build_number.txt
-          echo "version_code=$NEW" >> $GITHUB_OUTPUT
-          echo "version_name=1.0.$NEW" >> $GITHUB_OUTPUT
-      - name: Commit bumped build number
-        working-directory: dashboard
-        run: |
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
-          git add build_number.txt
-          git commit -m "ci: bump dashboard build to ${{ steps.bump.outputs.version_code }} [skip ci]"
-          git push
       - name: Build APK
         working-directory: dashboard
-        run: chmod +x gradlew && ./gradlew :app:assembleDebug --no-daemon
+        run: chmod +x gradlew && ./gradlew :app:assembleDebug --no-daemon -PversionCode=${{ github.run_number }} -PversionName=1.0.${{ github.run_number }}
       - name: Release and register
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           APP=dashboard
-          VC=${{ steps.bump.outputs.version_code }}
-          VN=${{ steps.bump.outputs.version_name }}
+          VC=${{ github.run_number }}
+          VN=1.0.${{ github.run_number }}
           TAG="${APP}-v${VC}"
           gh release delete "$TAG" --yes --repo ${{ github.repository }} 2>/dev/null || true
           git push --delete origin "$TAG" 2>/dev/null || true
@@ -210,39 +152,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
-      - name: Bump build number
-        id: bump
-        working-directory: aiteaching
-        run: |
-          BUILD=$(cat build_number.txt | tr -d '[:space:]')
-          NEW=$((BUILD + 1))
-          echo $NEW > build_number.txt
-          echo "version_code=$NEW" >> $GITHUB_OUTPUT
-          echo "version_name=1.0.$NEW" >> $GITHUB_OUTPUT
-      - name: Commit bumped build number
-        working-directory: aiteaching
-        run: |
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
-          git add build_number.txt
-          git commit -m "ci: bump aiteaching build to ${{ steps.bump.outputs.version_code }} [skip ci]"
-          git push
       - name: Build APK
         working-directory: aiteaching
-        run: chmod +x gradlew && ./gradlew :app:assembleDebug --no-daemon
+        run: chmod +x gradlew && ./gradlew :app:assembleDebug --no-daemon -PversionCode=${{ github.run_number }} -PversionName=1.0.${{ github.run_number }}
       - name: Release and register
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           APP=aiteaching
-          VC=${{ steps.bump.outputs.version_code }}
-          VN=${{ steps.bump.outputs.version_name }}
+          VC=${{ github.run_number }}
+          VN=1.0.${{ github.run_number }}
           TAG="${APP}-v${VC}"
           gh release delete "$TAG" --yes --repo ${{ github.repository }} 2>/dev/null || true
           git push --delete origin "$TAG" 2>/dev/null || true

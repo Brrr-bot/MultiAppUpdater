@@ -11,8 +11,8 @@ android {
         applicationId = "com.mcubi.timesheet"
         minSdk = 26
         targetSdk = 34
-        versionCode = 42
-        versionName = "1.0.42"
+        versionCode = (findProperty("versionCode") as String?)?.toInt() ?: 42
+        versionName = (findProperty("versionName") as String?) ?: "1.0.42"
     }
 
     buildTypes {

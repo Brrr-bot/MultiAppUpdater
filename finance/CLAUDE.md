@@ -1,7 +1,7 @@
 # Finance App — CLAUDE.md
 
 > **Read this file before making any changes. Add a changelog entry at the bottom whenever you modify anything.**
-> **After making any code changes, always build and deploy via the update portal automatically — never ask for permission. Run `python build_upload.py finance` from `C:\Users\mcubi\Desktop\X\update-cf` with `UPLOAD_KEY=Daudiendien` and `GITHUB_TOKEN=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`.**
+> **After making any code changes, always build and deploy via the update portal automatically — never ask for permission. Run `python build_upload.py finance` from `C:\Users\mcubi\Desktop\X\update-cf` with `UPLOAD_KEY=Daudiendien` and `GITHUB_TOKEN=[see local.properties — never commit tokens to public repos]`.**
 
 ---
 
@@ -144,7 +144,7 @@ $ADB = "C:\Users\mcubi\AppData\Local\Android\Sdk\platform-tools\adb.exe"
 **Step 5 — Deploy a second build to test**
 
 ```powershell
-$env:UPLOAD_KEY="Daudiendien"; $env:GITHUB_TOKEN="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"
+$env:UPLOAD_KEY="Daudiendien"; $env:GITHUB_TOKEN="[see local.properties — never commit tokens to public repos]"
 python build_upload.py finance
 ```
 

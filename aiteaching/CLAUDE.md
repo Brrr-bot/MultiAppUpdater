@@ -69,3 +69,4 @@ $ADB = "C:\Users\mcubi\AppData\Local\Android\Sdk\platform-tools\adb.exe"
 
 - 2026-05-19 — Initial portal registration (aiteaching key, v1.0.1). Portal card live.
 - 2026-05-25 — Added OTA update system (checkForUpdate/promptInstall/downloadAndInstall with AlertDialog) and sendLog() for portal remote logging. Added INTERNET + REQUEST_INSTALL_PACKAGES permissions, InstallReceiver, OkHttp + coroutines dependencies.
+- 2026-05-27 — Moved CI to Brrr-bot/MultiAppUpdater (Mikeyctrl suspended). Repos are now public (no secrets in code; local.properties is gitignored). ADB install to device required local build at versionCode=300 (device was at v12, local default is v8 — version downgrade rejected). NOTE: always pass -PversionCode=N when building locally for ADB if installed version is higher than the hardcoded fallback in build.gradle.kts.

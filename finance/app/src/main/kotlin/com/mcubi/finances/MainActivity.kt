@@ -10,6 +10,8 @@ import android.graphics.Color
 import android.graphics.Typeface
 import android.net.Uri
 import android.os.Build
+import androidx.core.content.FileProvider
+import java.io.File
 import android.os.Bundle
 import android.view.Gravity
 import android.view.View
@@ -236,27 +238,31 @@ class MainActivity : AppCompatActivity() {
         }
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val req   = Request.Builder().url(apkUrl).build()
-                val resp  = client.newCall(req).execute()
-                if (!resp.isSuccessful) return@launch
-                val bytes = resp.body?.bytes() ?: return@launch
-
-                val pi      = packageManager.packageInstaller
-                val params  = PackageInstaller.SessionParams(PackageInstaller.SessionParams.MODE_FULL_INSTALL)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    params.setRequireUserAction(PackageInstaller.SessionParams.USER_ACTION_NOT_REQUIRED)
+                val resp = client.newCall(Request.Builder().url(apkUrl).build()).execute()
+                if (!resp.isSuccessful) {
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(this@MainActivity, "Download failed: ${resp.code}", Toast.LENGTH_LONG).show()
+                    }
+                    return@launch
                 }
-                val sessionId = pi.createSession(params)
-                val session   = pi.openSession(sessionId)
-                session.openWrite("apk", 0, bytes.size.toLong()).use { out ->
-                    out.write(bytes)
-                    session.fsync(out)
+                val bytes = resp.body?.bytes() ?: run {
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(this@MainActivity, "Download failed: empty response", Toast.LENGTH_LONG).show()
+                    }
+                    return@launch
                 }
-                val intent  = Intent(this@MainActivity, InstallReceiver::class.java)
-                val pending = PendingIntent.getBroadcast(
-                    this@MainActivity, sessionId, intent,
-                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE)
-                session.commit(pending.intentSender)
+                val apkFile = File(cacheDir, "update.apk")
+                apkFile.writeBytes(bytes)
+                val apkUri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    FileProvider.getUriForFile(this@MainActivity, "$packageName.fileprovider", apkFile)
+                } else {
+                    Uri.fromFile(apkFile)
+                }
+                val installIntent = Intent(Intent.ACTION_VIEW).apply {
+                    setDataAndType(apkUri, "application/vnd.android.package-archive")
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
+                }
+                withContext(Dispatchers.Main) { startActivity(installIntent) }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
                     Toast.makeText(this@MainActivity, "Install failed: ${e.message}", Toast.LENGTH_LONG).show()

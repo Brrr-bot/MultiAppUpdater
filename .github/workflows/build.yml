@@ -71,10 +71,10 @@ jobs:
           gh release delete "$TAG" --yes --repo ${{ github.repository }} 2>/dev/null || true
           git push --delete origin "$TAG" 2>/dev/null || true
           gh release create "$TAG" \
-            timesheet/app/build/outputs/apk/debug/app-debug.apk#${APP}-${VN}.apk \
+            timesheet/app/build/outputs/apk/debug/app-debug.apk \
             --title "Timesheet $VN" --notes "Build $VC" \
             --repo ${{ github.repository }}
-          APK_URL="https://github.com/${{ github.repository }}/releases/download/${TAG}/${APP}-${VN}.apk"
+          APK_URL="https://github.com/${{ github.repository }}/releases/download/${TAG}/app-debug.apk"
           curl -sf -X POST "https://app-updates.mcubittbuilders.workers.dev/upload/${APP}" \
             -H "X-Upload-Key: ${{ secrets.UPLOAD_KEY }}" \
             -H "Content-Type: application/json" \
@@ -104,10 +104,10 @@ jobs:
           gh release delete "$TAG" --yes --repo ${{ github.repository }} 2>/dev/null || true
           git push --delete origin "$TAG" 2>/dev/null || true
           gh release create "$TAG" \
-            finance/app/build/outputs/apk/debug/app-debug.apk#${APP}-${VN}.apk \
+            finance/app/build/outputs/apk/debug/app-debug.apk \
             --title "Finance $VN" --notes "Build $VC" \
             --repo ${{ github.repository }}
-          APK_URL="https://github.com/${{ github.repository }}/releases/download/${TAG}/${APP}-${VN}.apk"
+          APK_URL="https://github.com/${{ github.repository }}/releases/download/${TAG}/app-debug.apk"
           curl -sf -X POST "https://app-updates.mcubittbuilders.workers.dev/upload/${APP}" \
             -H "X-Upload-Key: ${{ secrets.UPLOAD_KEY }}" \
             -H "Content-Type: application/json" \
@@ -137,10 +137,10 @@ jobs:
           gh release delete "$TAG" --yes --repo ${{ github.repository }} 2>/dev/null || true
           git push --delete origin "$TAG" 2>/dev/null || true
           gh release create "$TAG" \
-            dashboard/app/build/outputs/apk/debug/app-debug.apk#${APP}-${VN}.apk \
+            dashboard/app/build/outputs/apk/debug/app-debug.apk \
             --title "Dashboard $VN" --notes "Build $VC" \
             --repo ${{ github.repository }}
-          APK_URL="https://github.com/${{ github.repository }}/releases/download/${TAG}/${APP}-${VN}.apk"
+          APK_URL="https://github.com/${{ github.repository }}/releases/download/${TAG}/app-debug.apk"
           curl -sf -X POST "https://app-updates.mcubittbuilders.workers.dev/upload/${APP}" \
             -H "X-Upload-Key: ${{ secrets.UPLOAD_KEY }}" \
             -H "Content-Type: application/json" \
@@ -170,10 +170,10 @@ jobs:
           gh release delete "$TAG" --yes --repo ${{ github.repository }} 2>/dev/null || true
           git push --delete origin "$TAG" 2>/dev/null || true
           gh release create "$TAG" \
-            aiteaching/app/build/outputs/apk/debug/app-debug.apk#${APP}-${VN}.apk \
+            aiteaching/app/build/outputs/apk/debug/app-debug.apk \
             --title "AI Teaching $VN" --notes "Build $VC" \
             --repo ${{ github.repository }}
-          APK_URL="https://github.com/${{ github.repository }}/releases/download/${TAG}/${APP}-${VN}.apk"
+          APK_URL="https://github.com/${{ github.repository }}/releases/download/${TAG}/app-debug.apk"
           curl -sf -X POST "https://app-updates.mcubittbuilders.workers.dev/upload/${APP}" \
             -H "X-Upload-Key: ${{ secrets.UPLOAD_KEY }}" \
             -H "Content-Type: application/json" \

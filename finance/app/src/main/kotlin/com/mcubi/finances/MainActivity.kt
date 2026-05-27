@@ -240,12 +240,14 @@ class MainActivity : AppCompatActivity() {
             try {
                 val resp = client.newCall(Request.Builder().url(apkUrl).build()).execute()
                 if (!resp.isSuccessful) {
+                    updateInProgress = false
                     withContext(Dispatchers.Main) {
                         Toast.makeText(this@MainActivity, "Download failed: ${resp.code}", Toast.LENGTH_LONG).show()
                     }
                     return@launch
                 }
                 val bytes = resp.body?.bytes() ?: run {
+                    updateInProgress = false
                     withContext(Dispatchers.Main) {
                         Toast.makeText(this@MainActivity, "Download failed: empty response", Toast.LENGTH_LONG).show()
                     }
@@ -264,6 +266,7 @@ class MainActivity : AppCompatActivity() {
                 }
                 withContext(Dispatchers.Main) { startActivity(installIntent) }
             } catch (e: Exception) {
+                updateInProgress = false
                 withContext(Dispatchers.Main) {
                     Toast.makeText(this@MainActivity, "Install failed: ${e.message}", Toast.LENGTH_LONG).show()
                 }

@@ -59,14 +59,14 @@ jobs:
           distribution: 'temurin'
       - name: Build APK
         working-directory: timesheet
-        run: chmod +x gradlew && ./gradlew :app:assembleDebug --no-daemon -PversionCode=$(( ${{ github.run_number }} + 200 )) -PversionName=1.0.$(( ${{ github.run_number }} + 200 ))
+        run: chmod +x gradlew && ./gradlew :app:assembleDebug --no-daemon -PversionCode=$(( ${{ github.run_number }} + 300 )) -PversionName=1.0.$(( ${{ github.run_number }} + 300 ))
       - name: Release and register
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           APP=timesheet
-          VC=$(( ${{ github.run_number }} + 200 ))
-          VN=1.0.$(( ${{ github.run_number }} + 200 ))
+          VC=$(( ${{ github.run_number }} + 300 ))
+          VN=1.0.$(( ${{ github.run_number }} + 300 ))
           TAG="${APP}-v${VC}"
           gh release delete "$TAG" --yes --repo ${{ github.repository }} 2>/dev/null || true
           git push --delete origin "$TAG" 2>/dev/null || true
@@ -92,14 +92,14 @@ jobs:
           distribution: 'temurin'
       - name: Build APK
         working-directory: finance
-        run: chmod +x gradlew && ./gradlew :app:assembleDebug --no-daemon -PversionCode=$(( ${{ github.run_number }} + 200 )) -PversionName=1.0.$(( ${{ github.run_number }} + 200 ))
+        run: chmod +x gradlew && ./gradlew :app:assembleDebug --no-daemon -PversionCode=$(( ${{ github.run_number }} + 300 )) -PversionName=1.0.$(( ${{ github.run_number }} + 300 ))
       - name: Release and register
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           APP=finance
-          VC=$(( ${{ github.run_number }} + 200 ))
-          VN=1.0.$(( ${{ github.run_number }} + 200 ))
+          VC=$(( ${{ github.run_number }} + 300 ))
+          VN=1.0.$(( ${{ github.run_number }} + 300 ))
           TAG="${APP}-v${VC}"
           gh release delete "$TAG" --yes --repo ${{ github.repository }} 2>/dev/null || true
           git push --delete origin "$TAG" 2>/dev/null || true
@@ -125,14 +125,14 @@ jobs:
           distribution: 'temurin'
       - name: Build APK
         working-directory: dashboard
-        run: chmod +x gradlew && ./gradlew :app:assembleDebug --no-daemon -PversionCode=$(( ${{ github.run_number }} + 200 )) -PversionName=1.0.$(( ${{ github.run_number }} + 200 ))
+        run: chmod +x gradlew && ./gradlew :app:assembleDebug --no-daemon -PversionCode=$(( ${{ github.run_number }} + 300 )) -PversionName=1.0.$(( ${{ github.run_number }} + 300 ))
       - name: Release and register
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           APP=dashboard
-          VC=$(( ${{ github.run_number }} + 200 ))
-          VN=1.0.$(( ${{ github.run_number }} + 200 ))
+          VC=$(( ${{ github.run_number }} + 300 ))
+          VN=1.0.$(( ${{ github.run_number }} + 300 ))
           TAG="${APP}-v${VC}"
           gh release delete "$TAG" --yes --repo ${{ github.repository }} 2>/dev/null || true
           git push --delete origin "$TAG" 2>/dev/null || true
@@ -158,14 +158,14 @@ jobs:
           distribution: 'temurin'
       - name: Build APK
         working-directory: aiteaching
-        run: chmod +x gradlew && ./gradlew :app:assembleDebug --no-daemon -PversionCode=$(( ${{ github.run_number }} + 200 )) -PversionName=1.0.$(( ${{ github.run_number }} + 200 ))
+        run: chmod +x gradlew && ./gradlew :app:assembleDebug --no-daemon -PversionCode=$(( ${{ github.run_number }} + 300 )) -PversionName=1.0.$(( ${{ github.run_number }} + 300 ))
       - name: Release and register
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           APP=aiteaching
-          VC=$(( ${{ github.run_number }} + 200 ))
-          VN=1.0.$(( ${{ github.run_number }} + 200 ))
+          VC=$(( ${{ github.run_number }} + 300 ))
+          VN=1.0.$(( ${{ github.run_number }} + 300 ))
           TAG="${APP}-v${VC}"
           gh release delete "$TAG" --yes --repo ${{ github.repository }} 2>/dev/null || true
           git push --delete origin "$TAG" 2>/dev/null || true

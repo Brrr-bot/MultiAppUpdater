@@ -4,6 +4,8 @@ import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
 import android.os.Build
+import androidx.core.content.FileProvider
+import java.io.File
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -650,26 +652,31 @@ class MainActivity : AppCompatActivity() {
         }
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val bytes = client.newCall(Request.Builder().url(apkUrl).build())
-                    .execute().body?.bytes() ?: return@launch
-                val pi      = packageManager.packageInstaller
-                val params  = android.content.pm.PackageInstaller.SessionParams(
-                    android.content.pm.PackageInstaller.SessionParams.MODE_FULL_INSTALL)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
-                    params.setRequireUserAction(android.content.pm.PackageInstaller.SessionParams.USER_ACTION_NOT_REQUIRED)
-                val sessionId = pi.createSession(params)
-                val session   = pi.openSession(sessionId)
-                session.openWrite("apk", 0, bytes.size.toLong()).use { out ->
-                    out.write(bytes); session.fsync(out)
+                val resp = client.newCall(Request.Builder().url(apkUrl).build()).execute()
+                if (!resp.isSuccessful) {
+                    updateInProgress = false
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(this@MainActivity, "Download failed: ${resp.code}", Toast.LENGTH_LONG).show()
+                    }
+                    return@launch
                 }
-                val intent  = Intent(this@MainActivity, InstallReceiver::class.java)
-                // FLAG_MUTABLE required — PackageInstaller fills in EXTRA_STATUS/EXTRA_INTENT
-                val pending = android.app.PendingIntent.getBroadcast(
-                    this@MainActivity, sessionId, intent,
-                    android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_MUTABLE)
-                session.commit(pending.intentSender)
-                // Do NOT call session.close() after commit
+                val bytes = resp.body?.bytes() ?: run {
+                    updateInProgress = false; return@launch
+                }
+                val apkFile = File(cacheDir, "update.apk")
+                apkFile.writeBytes(bytes)
+                val apkUri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    FileProvider.getUriForFile(this@MainActivity, "$packageName.fileprovider", apkFile)
+                } else {
+                    Uri.fromFile(apkFile)
+                }
+                val installIntent = Intent(Intent.ACTION_VIEW).apply {
+                    setDataAndType(apkUri, "application/vnd.android.package-archive")
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
+                }
+                withContext(Dispatchers.Main) { startActivity(installIntent) }
             } catch (e: Exception) {
+                updateInProgress = false
                 withContext(Dispatchers.Main) {
                     Toast.makeText(this@MainActivity, "Install failed: ${e.message}", Toast.LENGTH_LONG).show()
                 }

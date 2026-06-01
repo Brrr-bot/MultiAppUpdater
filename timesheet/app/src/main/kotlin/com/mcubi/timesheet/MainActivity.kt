@@ -19,6 +19,7 @@ import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.EditText
 import android.widget.LinearLayout
+import android.widget.HorizontalScrollView
 import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
@@ -1428,93 +1429,148 @@ class MainActivity : AppCompatActivity() {
         container.addView(totalCard)
     }
 
-    /** Month-by-month breakdown for one company, so months can be compared side by side. */
+    /** Monthly timekeeping grid for one company: schools (rows) × days (columns),
+     *  period counts per cell, Period/Hour totals per school + a grand total row.
+     *  ‹ › navigate between the months that have data so they can be compared. */
     private fun showCompanyMonthlyBreakdown(category: String) {
-        val white  = Color.WHITE
+        val white   = Color.WHITE
         val dim     = Color.parseColor("#969696")
         val gold    = Color.parseColor("#FFB300")
         val accent  = categoryColor(category)
+        val gridLn  = Color.parseColor("#2A2A2A")
+        val headBg  = Color.parseColor("#161616")
         val mono    = android.graphics.Typeface.MONOSPACE
 
         val sessions = readAllSessions().filter { schoolCategory(it.school) == category }
-        val byMonth  = sessions.groupBy { it.date.substring(0, 7) }
-            .entries.sortedByDescending { it.key }
+        // Distinct months that have data, ascending
+        val months = sessions.map { it.date.substring(0, 7) }.distinct().sorted()
 
-        val root = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            setPadding(dp(20), dp(12), dp(20), dp(8))
-        }
+        // Cell dimensions (kept identical between the frozen name column and the day grid so rows align)
+        val ROW_H  = dp(30)
+        val NAME_W = dp(116)
+        val DAY_W  = dp(30)
+        val SUM_W  = dp(52)
 
-        if (byMonth.isEmpty()) {
-            root.addView(TextView(this).apply {
-                text = "No sessions for this company yet"
-                setTextColor(dim); textSize = 13f; typeface = mono
-            })
-        }
-
-        for ((month, monthSessions) in byMonth) {
-            val ym       = java.time.YearMonth.parse(month)
-            val mPeriods = monthSessions.sumOf { it.periods }
-            val mEarn    = monthSessions.sumOf { sessionEarnings(it) }
-
-            // Month header
-            val mh = LinearLayout(this).apply {
-                orientation = LinearLayout.HORIZONTAL
-                gravity = Gravity.CENTER_VERTICAL
-                layoutParams = LinearLayout.LayoutParams(MATCH, WRAP).also { it.topMargin = dp(14); it.bottomMargin = dp(4) }
+        // Flat background + 1px margins (the container's gridLn background shows through as
+        // grid lines). Avoids allocating a GradientDrawable per cell, which made the ~340-cell
+        // grid janky to open and scroll.
+        fun cell(txt: String, w: Int, h: Int, color: Int, bg: Int, bold: Boolean, size: Float, alignStart: Boolean = false): TextView =
+            TextView(this).apply {
+                text = txt; textSize = size; typeface = mono
+                if (bold) setTypeface(typeface, android.graphics.Typeface.BOLD)
+                setTextColor(color)
+                gravity = if (alignStart) (Gravity.CENTER_VERTICAL or Gravity.START) else Gravity.CENTER
+                if (alignStart) { setPadding(dp(6), 0, dp(2), 0); maxLines = 1; ellipsize = android.text.TextUtils.TruncateAt.END }
+                setBackgroundColor(bg)
+                layoutParams = LinearLayout.LayoutParams(w, h).also { it.rightMargin = 1; it.bottomMargin = 1 }
             }
-            mh.addView(TextView(this).apply {
-                text = ym.format(MONTH_FMT)
-                setTextColor(accent); textSize = 13f; typeface = mono
-                setTypeface(typeface, android.graphics.Typeface.BOLD)
-                layoutParams = LinearLayout.LayoutParams(0, WRAP, 1f)
-            })
-            mh.addView(TextView(this).apply {
-                text = "$mPeriods p   ${formatVnd(mEarn)}"
-                setTextColor(gold); textSize = 12f; typeface = mono
-            })
-            root.addView(mh)
-            root.addView(View(this).apply {
-                setBackgroundColor(Color.parseColor("#222222"))
-                layoutParams = LinearLayout.LayoutParams(MATCH, dp(1)).also { it.bottomMargin = dp(4) }
-            })
 
-            // Per-school rows for this month
+        val outer = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+
+        // ── Month nav ────────────────────────────────────────────────────────────
+        var idx = months.lastIndex   // default = most recent month with data
+        val navRow = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL
+            setPadding(dp(16), dp(10), dp(16), dp(8))
+        }
+        val btnPrev = TextView(this).apply {
+            text = "‹"; textSize = 22f; typeface = mono; setTextColor(accent)
+            setPadding(dp(14), 0, dp(14), 0); isClickable = true; isFocusable = true
+        }
+        val lblMonth = TextView(this).apply {
+            textSize = 13f; typeface = mono; setTextColor(white)
+            setTypeface(typeface, android.graphics.Typeface.BOLD)
+            gravity = Gravity.CENTER
+            layoutParams = LinearLayout.LayoutParams(0, WRAP, 1f)
+        }
+        val btnNext = TextView(this).apply {
+            text = "›"; textSize = 22f; typeface = mono; setTextColor(accent)
+            setPadding(dp(14), 0, dp(14), 0); isClickable = true; isFocusable = true
+        }
+        navRow.addView(btnPrev); navRow.addView(lblMonth); navRow.addView(btnNext)
+        outer.addView(navRow)
+
+        // ── Grid body: frozen name column + horizontally-scrollable day grid ──────
+        val nameCol = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setBackgroundColor(gridLn) }
+        val gridCol = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setBackgroundColor(gridLn) }
+        val hScroll = HorizontalScrollView(this).apply {
+            isHorizontalScrollBarEnabled = false
+            addView(gridCol)
+            layoutParams = LinearLayout.LayoutParams(0, WRAP, 1f)
+        }
+        val bodyRow = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            addView(nameCol)
+            addView(hScroll)
+        }
+        val vScroll = ScrollView(this).apply { addView(bodyRow) }
+        outer.addView(vScroll)
+
+        fun render() {
+            nameCol.removeAllViews(); gridCol.removeAllViews()
+            if (months.isEmpty()) {
+                lblMonth.text = "No data"
+                nameCol.addView(cell("No sessions", NAME_W + DAY_W, ROW_H, dim, headBg, false, 11f, true))
+                return
+            }
+            val ym       = java.time.YearMonth.parse(months[idx])
+            val days     = ym.lengthOfMonth()
+            lblMonth.text = ym.format(MONTH_FMT)
+            btnPrev.alpha = if (idx > 0) 1f else 0.3f
+            btnNext.alpha = if (idx < months.lastIndex) 1f else 0.3f
+
+            val monthSessions = sessions.filter { it.date.startsWith(months[idx]) }
+            // school -> (day -> periods), and totals
             val bySchool = monthSessions.groupBy { it.school }
-                .entries.sortedByDescending { e -> e.value.sumOf { it.periods } }
+                .entries.sortedBy { shortName(it.key).lowercase() }
+
+            // Header row
+            nameCol.addView(cell("SCHOOLS", NAME_W, ROW_H, dim, headBg, true, 10f, true))
+            val headRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+            for (d in 1..days) headRow.addView(cell("$d", DAY_W, ROW_H, dim, headBg, false, 9f))
+            headRow.addView(cell("PER", SUM_W, ROW_H, gold, headBg, true, 9f))
+            headRow.addView(cell("HRS", SUM_W, ROW_H, gold, headBg, true, 9f))
+            gridCol.addView(headRow)
+
+            var totP = 0; var totMins = 0
             for ((school, ss) in bySchool) {
-                val sp = ss.sumOf { it.periods }
-                val row = LinearLayout(this).apply {
-                    orientation = LinearLayout.HORIZONTAL
-                    gravity = Gravity.CENTER_VERTICAL
-                    layoutParams = LinearLayout.LayoutParams(MATCH, WRAP).also { it.topMargin = dp(2) }
+                val perDay = IntArray(days + 1)
+                for (s in ss) {
+                    val day = s.date.substring(8, 10).toIntOrNull() ?: continue
+                    if (day in 1..days) perDay[day] += s.periods
                 }
-                row.addView(TextView(this).apply {
-                    text = shortName(school)
-                    setTextColor(white); textSize = 12f; typeface = mono
-                    layoutParams = LinearLayout.LayoutParams(0, WRAP, 1f)
-                    maxLines = 1; ellipsize = android.text.TextUtils.TruncateAt.END
-                })
-                row.addView(TextView(this).apply {
-                    text = "$sp p"
-                    setTextColor(dim); textSize = 11f; typeface = mono
-                    gravity = Gravity.END
-                    layoutParams = LinearLayout.LayoutParams(dp(48), WRAP)
-                })
-                row.addView(TextView(this).apply {
-                    text = formatVnd(ss.sumOf { s -> sessionEarnings(s) })
-                    setTextColor(dim); textSize = 11f; typeface = mono
-                    gravity = Gravity.END
-                    layoutParams = LinearLayout.LayoutParams(dp(96), WRAP)
-                })
-                root.addView(row)
+                val sp = ss.sumOf { it.periods }
+                val sMins = ss.sumOf { it.totalMins }
+                totP += sp; totMins += sMins
+
+                nameCol.addView(cell(shortName(school), NAME_W, ROW_H, white, Color.parseColor("#0D0D0D"), false, 10f, true))
+                val r = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+                for (d in 1..days) {
+                    val v = perDay[d]
+                    r.addView(cell(if (v > 0) "$v" else "", DAY_W, ROW_H,
+                        if (v > 0) accent else dim, Color.parseColor("#0D0D0D"), v > 0, 11f))
+                }
+                r.addView(cell("$sp", SUM_W, ROW_H, white, Color.parseColor("#0D0D0D"), true, 10f))
+                r.addView(cell("%.2f".format(sMins / 60.0), SUM_W, ROW_H, dim, Color.parseColor("#0D0D0D"), false, 10f))
+                gridCol.addView(r)
             }
+
+            // Total row
+            nameCol.addView(cell("TOTAL", NAME_W, ROW_H, gold, headBg, true, 10f, true))
+            val tr = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+            for (d in 1..days) tr.addView(cell("", DAY_W, ROW_H, dim, headBg, false, 11f))
+            tr.addView(cell("$totP", SUM_W, ROW_H, gold, headBg, true, 11f))
+            tr.addView(cell("%.2f".format(totMins / 60.0), SUM_W, ROW_H, gold, headBg, true, 11f))
+            gridCol.addView(tr)
         }
 
-        val scroll = ScrollView(this).apply { addView(root) }
+        btnPrev.setOnClickListener { if (idx > 0) { idx--; render() } }
+        btnNext.setOnClickListener { if (idx < months.lastIndex) { idx++; render() } }
+        render()
+
         AlertDialog.Builder(this, R.style.DarkDialog)
-            .setTitle(category)
-            .setView(scroll)
+            .setTitle("$category · timekeeping")
+            .setView(outer)
             .setPositiveButton("CLOSE", null)
             .show()
     }

@@ -452,10 +452,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    companion object {
-        private const val UPDATE_CH      = "app_update"
-        private const val UPDATE_NOTIF_ID = 9001
-    }
 
     // ── Today pending verification ─────────────────────────────────────────────
 
@@ -2055,6 +2051,8 @@ class MainActivity : AppCompatActivity() {
     private val WRAP  = ViewGroup.LayoutParams.WRAP_CONTENT
 
     companion object {
+        private const val UPDATE_CH       = "app_update"
+        private const val UPDATE_NOTIF_ID = 9001
         private const val REQ_LOCATION       = 101
         private const val REQ_BACKGROUND_LOC = 102
     }

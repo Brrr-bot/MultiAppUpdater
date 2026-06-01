@@ -99,6 +99,9 @@ class MainActivity : AppCompatActivity() {
     private var salaryDates  = listOf<LocalDate>()  // sorted ascending, one per salary entry date
 
     companion object {
+        private const val UPDATE_CH       = "app_update"
+        private const val UPDATE_NOTIF_ID = 9001
+
         fun fallbackPeriodStart(): LocalDate {
             val today = LocalDate.now()
             return if (today.dayOfMonth >= 10) today.withDayOfMonth(10)
@@ -260,10 +263,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    companion object {
-        private const val UPDATE_CH       = "app_update"
-        private const val UPDATE_NOTIF_ID = 9001
-    }
 
     // ── Date picker ───────────────────────────────────────────────────────────
 

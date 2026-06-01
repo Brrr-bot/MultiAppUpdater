@@ -528,6 +528,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     companion object {
+        private const val UPDATE_CH       = "app_update"
+        private const val UPDATE_NOTIF_ID = 9001
         // Compact schedule: Pair(time-range, class+school-abbrev)
         // Mirrors the hardcoded SCHEDULE in the Timesheet app
         val TODAY_SCHEDULE: Map<String, List<Pair<String, String>>> = mapOf(
@@ -679,11 +681,6 @@ class MainActivity : AppCompatActivity() {
                 )
             } catch (_: Exception) { updateInProgress = false }
         }
-    }
-
-    companion object {
-        private const val UPDATE_CH       = "app_update"
-        private const val UPDATE_NOTIF_ID = 9001
     }
 
     fun sendLog(msg: String, level: String = "INFO") {

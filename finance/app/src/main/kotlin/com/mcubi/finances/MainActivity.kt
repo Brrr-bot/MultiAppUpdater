@@ -225,6 +225,9 @@ class MainActivity : AppCompatActivity() {
                 if (serverCode > BuildConfig.VERSION_CODE && apkUrl.isNotEmpty()) {
                     updateInProgress = true
                     downloadAndNotify(serverCode, apkUrl)
+                } else {
+                    // Already up to date — clear any stale "update ready" notification.
+                    NotificationManagerCompat.from(this@MainActivity).cancel(UPDATE_NOTIF_ID)
                 }
             } catch (_: Exception) { }
         }

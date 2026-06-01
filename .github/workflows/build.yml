@@ -57,6 +57,10 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
+      - name: Set up debug signing keystore
+        run: |
+          mkdir -p ~/.android
+          echo "${{ secrets.DEBUG_KEYSTORE_B64 }}" | base64 --decode > ~/.android/debug.keystore
       - name: Build APK
         working-directory: timesheet
         run: chmod +x gradlew && ./gradlew :app:assembleDebug --no-daemon -PversionCode=$(( ${{ github.run_number }} + 300 )) -PversionName=1.0.$(( ${{ github.run_number }} + 300 ))
@@ -90,6 +94,10 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
+      - name: Set up debug signing keystore
+        run: |
+          mkdir -p ~/.android
+          echo "${{ secrets.DEBUG_KEYSTORE_B64 }}" | base64 --decode > ~/.android/debug.keystore
       - name: Build APK
         working-directory: finance
         run: chmod +x gradlew && ./gradlew :app:assembleDebug --no-daemon -PversionCode=$(( ${{ github.run_number }} + 300 )) -PversionName=1.0.$(( ${{ github.run_number }} + 300 ))
@@ -123,6 +131,10 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
+      - name: Set up debug signing keystore
+        run: |
+          mkdir -p ~/.android
+          echo "${{ secrets.DEBUG_KEYSTORE_B64 }}" | base64 --decode > ~/.android/debug.keystore
       - name: Build APK
         working-directory: dashboard
         run: chmod +x gradlew && ./gradlew :app:assembleDebug --no-daemon -PversionCode=$(( ${{ github.run_number }} + 300 )) -PversionName=1.0.$(( ${{ github.run_number }} + 300 ))
@@ -156,6 +168,10 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
+      - name: Set up debug signing keystore
+        run: |
+          mkdir -p ~/.android
+          echo "${{ secrets.DEBUG_KEYSTORE_B64 }}" | base64 --decode > ~/.android/debug.keystore
       - name: Build APK
         working-directory: aiteaching
         run: chmod +x gradlew && ./gradlew :app:assembleDebug --no-daemon -PversionCode=$(( ${{ github.run_number }} + 300 )) -PversionName=1.0.$(( ${{ github.run_number }} + 300 ))

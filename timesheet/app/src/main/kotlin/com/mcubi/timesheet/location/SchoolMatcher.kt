@@ -18,9 +18,30 @@ class SchoolMatcher(private val context: Context) {
     private val MIN_VISIT_MS = 35 * 60 * 1000L
     private val MIN_LOG_MS   = 10 * 60 * 1000L
 
+    companion object {
+        // Process-wide cache of the parsed school list (parsed once, reused).
+        @Volatile private var cachedSchools: List<School>? = null
+        private val cacheLock = Any()
+
+        /** Call after the user adds/edits a custom location so the next load re-reads it. */
+        fun invalidateCache() { cachedSchools = null }
+    }
+
     // ── Load schools from asset ───────────────────────────────────────────────
 
     fun loadSchools(): List<School> {
+        // Parse the ~590KB polygon DB at most once per process. Re-parsing on every
+        // call (fetchTodayPending runs on each onResume) churned the heap and OOM-crashed.
+        cachedSchools?.let { return it }
+        synchronized(cacheLock) {
+            cachedSchools?.let { return it }
+            val parsed = try { parseSchools() } catch (_: Throwable) { emptyList() }
+            cachedSchools = parsed
+            return parsed
+        }
+    }
+
+    private fun parseSchools(): List<School> {
         val list = mutableListOf<School>()
 
         // Primary polygon database

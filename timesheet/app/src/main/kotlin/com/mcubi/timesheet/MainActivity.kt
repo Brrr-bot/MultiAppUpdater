@@ -494,7 +494,7 @@ class MainActivity : AppCompatActivity() {
                     .map { PendingSchool(it.school.name, it.minutesSpent) }
 
                 withContext(Dispatchers.Main) { showPendingCards(pending) }
-            } catch (_: Exception) {}
+            } catch (_: Throwable) {}   // never let today-pending detection crash the app
         }
     }
 
@@ -1999,6 +1999,7 @@ class MainActivity : AppCompatActivity() {
 
         file.parentFile?.mkdirs()
         file.writeText(arr.toString(2), Charsets.UTF_8)
+        com.mcubi.timesheet.location.SchoolMatcher.invalidateCache()
         refreshUserLocations()
     }
 

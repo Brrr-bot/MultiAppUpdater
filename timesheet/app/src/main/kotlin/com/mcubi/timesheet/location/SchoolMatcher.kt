@@ -197,6 +197,12 @@ class SchoolMatcher(private val context: Context) {
             val midAcc = minOf((a.accuracyM + b.accuracyM) / 2.0, 150.0)
 
             for (school in schools) {
+                // Cheap bounding-box reject first: ~0.02° ≈ 2 km. Skips the expensive
+                // point-in-polygon / haversine for the ~1900 schools that are nowhere near,
+                // turning a per-resume CPU spike (1900 polygon tests per GPS point) into a
+                // handful of real checks. This was the main source of app-wide jank.
+                if (kotlin.math.abs(midLat - school.lat) > 0.02 ||
+                    kotlin.math.abs(midLng - school.lng) > 0.02) continue
                 if (!school.contains(midLat, midLng, midAcc)) continue
 
                 val windows = windowsMap.getOrPut(school) { mutableListOf() }

@@ -480,7 +480,8 @@ class MainActivity : AppCompatActivity() {
             // All data is local — just re-read it. (The old laptop-server sync was removed;
             // that server is retired and every call blocked on a network timeout.)
             fetchData()
-            fetchTodayPending()
+            fetchTodayPending(force = true)   // explicit refresh bypasses the throttle
+            b.swipeRefresh.isRefreshing = false
         }
 
         b.btnRetry.setOnClickListener { fetchData() }
@@ -499,8 +500,11 @@ class MainActivity : AppCompatActivity() {
         fetchTodayPending()
         sendLog("Started v${BuildConfig.VERSION_NAME} (build ${BuildConfig.VERSION_CODE}) on ${android.os.Build.MODEL}")
         createUpdateChannel()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS)
+                != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 9001)
+        }
         checkForUpdate()
     }
 
@@ -575,7 +579,14 @@ class MainActivity : AppCompatActivity() {
 
     // ── Today pending verification ─────────────────────────────────────────────
 
-    private fun fetchTodayPending() {
+    private var lastPendingCheckMs = 0L
+
+    private fun fetchTodayPending(force: Boolean = false) {
+        // Throttle: the GPS visit analysis is the heaviest thing the app does. Don't re-run it
+        // on every onResume/tab-tap — once every 60s is plenty for "today's pending sessions".
+        val now = System.currentTimeMillis()
+        if (!force && now - lastPendingCheckMs < 60_000L) return
+        lastPendingCheckMs = now
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val today   = LocalDate.now().toString()

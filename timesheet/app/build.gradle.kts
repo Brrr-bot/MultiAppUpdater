@@ -15,6 +15,17 @@ android {
         versionName = (findProperty("versionName") as String?) ?: "1.0.42"
     }
 
+    signingConfigs {
+        getByName("debug") {
+            (findProperty("debugKeystore") as String?)?.let { ks ->
+                storeFile = file(ks)
+                storePassword = "android"
+                keyAlias = "androiddebugkey"
+                keyPassword = "android"
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false

@@ -17,6 +17,17 @@ android {
         versionName = appVersionName
     }
 
+    signingConfigs {
+        getByName("debug") {
+            (findProperty("debugKeystore") as String?)?.let { ks ->
+                storeFile = file(ks)
+                storePassword = "android"
+                keyAlias = "androiddebugkey"
+                keyPassword = "android"
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false

@@ -64,7 +64,7 @@ jobs:
           keytool -list -keystore $HOME/.android/debug.keystore -storepass android -noprompt 2>&1 | head -3
       - name: Build APK
         working-directory: timesheet
-        run: chmod +x gradlew && ./gradlew :app:assembleDebug --no-daemon -PversionCode=$(( ${{ github.run_number }} + 300 )) -PversionName=1.0.$(( ${{ github.run_number }} + 300 ))
+        run: chmod +x gradlew && ./gradlew :app:assembleDebug --no-daemon -PdebugKeystore=$HOME/.android/debug.keystore -PversionCode=$(( ${{ github.run_number }} + 300 )) -PversionName=1.0.$(( ${{ github.run_number }} + 300 ))
       - name: Release and register
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -102,7 +102,7 @@ jobs:
           keytool -list -keystore $HOME/.android/debug.keystore -storepass android -noprompt 2>&1 | head -3
       - name: Build APK
         working-directory: finance
-        run: chmod +x gradlew && ./gradlew :app:assembleDebug --no-daemon -PversionCode=$(( ${{ github.run_number }} + 300 )) -PversionName=1.0.$(( ${{ github.run_number }} + 300 ))
+        run: chmod +x gradlew && ./gradlew :app:assembleDebug --no-daemon -PdebugKeystore=$HOME/.android/debug.keystore -PversionCode=$(( ${{ github.run_number }} + 300 )) -PversionName=1.0.$(( ${{ github.run_number }} + 300 ))
       - name: Release and register
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -140,7 +140,7 @@ jobs:
           keytool -list -keystore $HOME/.android/debug.keystore -storepass android -noprompt 2>&1 | head -3
       - name: Build APK
         working-directory: dashboard
-        run: chmod +x gradlew && ./gradlew :app:assembleDebug --no-daemon -PversionCode=$(( ${{ github.run_number }} + 300 )) -PversionName=1.0.$(( ${{ github.run_number }} + 300 ))
+        run: chmod +x gradlew && ./gradlew :app:assembleDebug --no-daemon -PdebugKeystore=$HOME/.android/debug.keystore -PversionCode=$(( ${{ github.run_number }} + 300 )) -PversionName=1.0.$(( ${{ github.run_number }} + 300 ))
       - name: Release and register
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -178,7 +178,7 @@ jobs:
           keytool -list -keystore $HOME/.android/debug.keystore -storepass android -noprompt 2>&1 | head -3
       - name: Build APK
         working-directory: aiteaching
-        run: chmod +x gradlew && ./gradlew :app:assembleDebug --no-daemon -PversionCode=$(( ${{ github.run_number }} + 300 )) -PversionName=1.0.$(( ${{ github.run_number }} + 300 ))
+        run: chmod +x gradlew && ./gradlew :app:assembleDebug --no-daemon -PdebugKeystore=$HOME/.android/debug.keystore -PversionCode=$(( ${{ github.run_number }} + 300 )) -PversionName=1.0.$(( ${{ github.run_number }} + 300 ))
       - name: Release and register
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

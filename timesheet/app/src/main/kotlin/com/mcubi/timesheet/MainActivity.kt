@@ -236,6 +236,8 @@ private fun schoolMapsQuery(school: String): String {
 }
 private fun schoolRate(name: String): Long {
     val lower = name.lowercase()
+    // A company-level profile (set in the company profile editor) overrides everything.
+    companyProfile(schoolCategory(name))?.let { return it.rateVnd }
     for ((key, rate) in SCHOOL_RATE) if (lower.contains(key.lowercase()) || key.lowercase().contains(lower)) return rate
     for (u in userLocations) if (lower.contains(u.name.lowercase()) || u.name.lowercase().contains(lower)) return u.rateVnd
     return 520_000L
@@ -270,6 +272,23 @@ private fun schoolCategory(name: String): String {
     return CAT_COMPASS
 }
 
+// ─── Company profiles (editable hourly rate + period length per company) ─────────
+// Persisted to filesDir/company_profiles.json. A profile overrides the built-in
+// per-school rate for every school that rolls up to that company.
+data class CompanyProfile(val name: String, val rateVnd: Long, val minsPerPeriod: Int)
+private var companyProfiles: List<CompanyProfile> = emptyList()
+
+private val COMPANY_DEFAULT_RATE = mapOf(
+    CAT_COMPASS to 520_000L, CAT_STEM to 600_000L, CAT_LOTUS to 460_000L
+)
+private fun companyDefaultRate(cat: String): Long = COMPANY_DEFAULT_RATE[cat] ?: 520_000L
+private fun companyProfile(cat: String): CompanyProfile? =
+    companyProfiles.firstOrNull { it.name.equals(cat, ignoreCase = true) }
+private fun companyRate(cat: String): Long = companyProfile(cat)?.rateVnd ?: companyDefaultRate(cat)
+private fun companyMins(cat: String): Int =
+    companyProfile(cat)?.minsPerPeriod?.takeIf { it > 0 }
+        ?: when (cat) { CAT_STEM -> 60; else -> 45 }
+
 // For session history stripe
 private val SESSION_COLORS = mapOf(
     "tân thới hòa" to "#29B6F6", "tan thoi hoa" to "#29B6F6",
@@ -303,6 +322,68 @@ data class TimesheetResponse(
     val sessions: List<TimesheetSession>
 )
 
+// ─── Lightweight Canvas grid (one View draws the whole timetable) ────────────────
+// Building hundreds of TextViews for the timekeeping grid was slow/janky. This
+// draws every cell + grid line in a single onDraw, so the popup opens instantly.
+data class GridCell(
+    val text: String, val textColor: Int, val bg: Int,
+    val sizePx: Float, val bold: Boolean = false, val alignStart: Boolean = false
+)
+
+class GridSection(
+    context: Context,
+    private val colW: IntArray,
+    private val rowH: Int,
+    private val rows: List<List<GridCell>>,
+    private val gridColor: Int,
+    private val padStartPx: Float
+) : View(context) {
+    private val tp = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
+        typeface = android.graphics.Typeface.MONOSPACE
+    }
+    private val bp = android.graphics.Paint()
+    private val lp = android.graphics.Paint().apply { color = gridColor; strokeWidth = 1f }
+    private val totalW = colW.sum()
+
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        setMeasuredDimension(totalW, rowH * rows.size)
+    }
+
+    override fun onDraw(canvas: android.graphics.Canvas) {
+        var y = 0f
+        for (row in rows) {
+            var x = 0f
+            for (i in row.indices) {
+                val cell = row[i]
+                val cw = colW[i].toFloat()
+                bp.color = cell.bg
+                canvas.drawRect(x, y, x + cw, y + rowH, bp)
+                canvas.drawLine(x, y, x, y + rowH, lp)                 // left border
+                if (cell.text.isNotEmpty()) {
+                    tp.color = cell.textColor
+                    tp.isFakeBoldText = cell.bold
+                    tp.textSize = cell.sizePx
+                    val baseline = y + rowH / 2f - (tp.descent() + tp.ascent()) / 2f
+                    if (cell.alignStart) {
+                        tp.textAlign = android.graphics.Paint.Align.LEFT
+                        canvas.save(); canvas.clipRect(x, y, x + cw, y + rowH)
+                        canvas.drawText(cell.text, x + padStartPx, baseline, tp)
+                        canvas.restore()
+                    } else {
+                        tp.textAlign = android.graphics.Paint.Align.CENTER
+                        canvas.drawText(cell.text, x + cw / 2f, baseline, tp)
+                    }
+                }
+                x += cw
+            }
+            canvas.drawLine(0f, y, totalW.toFloat(), y, lp)           // row top
+            y += rowH
+        }
+        canvas.drawLine(0f, y, totalW.toFloat(), y, lp)              // bottom border
+        canvas.drawLine(totalW.toFloat(), 0f, totalW.toFloat(), y, lp) // right border
+    }
+}
+
 // ─── Formatting ────────────────────────────────────────────────────────────────
 
 private val vndFmt: NumberFormat = NumberFormat.getNumberInstance(Locale.US).apply { maximumFractionDigits = 0 }
@@ -328,6 +409,8 @@ private var userLocations: List<UserLocationConfig> = emptyList()
 
 // Period length per school (minutes) — checks named rules first, then user locations
 private fun periodMins(school: String): Int {
+    // An explicit company profile period length overrides the defaults below.
+    companyProfile(schoolCategory(school))?.minsPerPeriod?.takeIf { it > 0 }?.let { return it }
     val lower = school.lowercase()
     when {
         lower.contains("stem")   -> return 60
@@ -394,7 +477,8 @@ class MainActivity : AppCompatActivity() {
 
         b.swipeRefresh.setColorSchemeColors(Color.parseColor("#29B6F6"), Color.parseColor("#FFB300"))
         b.swipeRefresh.setOnRefreshListener {
-            mergeFromLaptopIfReachable()   // pull any new sessions from laptop first
+            // All data is local — just re-read it. (The old laptop-server sync was removed;
+            // that server is retired and every call blocked on a network timeout.)
             fetchData()
             fetchTodayPending()
         }
@@ -402,9 +486,9 @@ class MainActivity : AppCompatActivity() {
         b.btnRetry.setOnClickListener { fetchData() }
 
         refreshUserLocations()
+        refreshCompanyProfiles()
         buildScheduleView()
         showTab(1)
-        mergeFromLaptopIfReachable()
         fetchData()
         fetchTodayPending()
         requestLocationPermissions()
@@ -1011,7 +1095,7 @@ class MainActivity : AppCompatActivity() {
     private fun fetchData() {
         val monthStr = currentMonth.format(DateTimeFormatter.ofPattern("yyyy-MM"))
         b.tvMonthLabel.text = currentMonth.format(MONTH_FMT).uppercase()
-        showLoading()
+        // No loading spinner — the data is a small local file, read it and render directly.
         CoroutineScope(Dispatchers.IO).launch {
             val data = readMonthSessions(monthStr)
             withContext(Dispatchers.Main) { renderData(data) }
@@ -1301,6 +1385,12 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
+        container.addView(TextView(this).apply {
+            text = "Tap a company for the monthly grid · long-press to edit its rate"
+            setTextColor(dimmer); textSize = 10f; typeface = mono
+            layoutParams = LinearLayout.LayoutParams(MATCH, WRAP).also { it.setMargins(dp(14), dp(8), dp(14), dp(2)) }
+        })
+
         val byCat   = sessions.groupBy { schoolCategory(it.school) }
         val builtin = listOf(CAT_COMPASS, CAT_STEM, CAT_LOTUS)
         val others  = byCat.keys.filter { it !in builtin }.sorted()
@@ -1334,6 +1424,7 @@ class MainActivity : AppCompatActivity() {
                 layoutParams = LinearLayout.LayoutParams(0, WRAP, 1f)
                 isClickable = true; isFocusable = true
                 setOnClickListener { showCompanyMonthlyBreakdown(cat) }
+                setOnLongClickListener { showCompanyProfileEditor(cat); true }
             }
 
             // Header: company name + chevron, then totals
@@ -1431,7 +1522,8 @@ class MainActivity : AppCompatActivity() {
 
     /** Monthly timekeeping grid for one company: schools (rows) × days (columns),
      *  period counts per cell, Period/Hour totals per school + a grand total row.
-     *  ‹ › navigate between the months that have data so they can be compared. */
+     *  ‹ › navigate between the months that have data so they can be compared.
+     *  The whole grid is one Canvas-drawn View (GridSection) so it opens instantly. */
     private fun showCompanyMonthlyBreakdown(category: String) {
         val white   = Color.WHITE
         val dim     = Color.parseColor("#969696")
@@ -1439,43 +1531,31 @@ class MainActivity : AppCompatActivity() {
         val accent  = categoryColor(category)
         val gridLn  = Color.parseColor("#2A2A2A")
         val headBg  = Color.parseColor("#161616")
+        val cellBg  = Color.parseColor("#0D0D0D")
         val mono    = android.graphics.Typeface.MONOSPACE
+        val sd      = resources.displayMetrics.scaledDensity
+        fun sp(v: Float) = v * sd
 
         val sessions = readAllSessions().filter { schoolCategory(it.school) == category }
-        // Distinct months that have data, ascending
-        val months = sessions.map { it.date.substring(0, 7) }.distinct().sorted()
+        val months   = sessions.map { it.date.substring(0, 7) }.distinct().sorted()
 
-        // Cell dimensions (kept identical between the frozen name column and the day grid so rows align)
-        val ROW_H  = dp(30)
-        val NAME_W = dp(116)
-        val DAY_W  = dp(30)
-        val SUM_W  = dp(52)
-
-        // Flat background + 1px margins (the container's gridLn background shows through as
-        // grid lines). Avoids allocating a GradientDrawable per cell, which made the ~340-cell
-        // grid janky to open and scroll.
-        fun cell(txt: String, w: Int, h: Int, color: Int, bg: Int, bold: Boolean, size: Float, alignStart: Boolean = false): TextView =
-            TextView(this).apply {
-                text = txt; textSize = size; typeface = mono
-                if (bold) setTypeface(typeface, android.graphics.Typeface.BOLD)
-                setTextColor(color)
-                gravity = if (alignStart) (Gravity.CENTER_VERTICAL or Gravity.START) else Gravity.CENTER
-                if (alignStart) { setPadding(dp(6), 0, dp(2), 0); maxLines = 1; ellipsize = android.text.TextUtils.TruncateAt.END }
-                setBackgroundColor(bg)
-                layoutParams = LinearLayout.LayoutParams(w, h).also { it.rightMargin = 1; it.bottomMargin = 1 }
-            }
+        val ROW_H    = dp(30)
+        val NAME_W   = dp(116)
+        val DAY_W    = dp(30)
+        val SUM_W    = dp(52)
+        val padStart = dp(6).toFloat()
 
         val outer = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
 
-        // ── Month nav ────────────────────────────────────────────────────────────
-        var idx = months.lastIndex   // default = most recent month with data
+        // ── Month nav (large tap targets) ────────────────────────────────────────
+        var idx = months.lastIndex
         val navRow = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL
-            setPadding(dp(16), dp(10), dp(16), dp(8))
+            setPadding(dp(8), dp(8), dp(8), dp(8))
         }
         val btnPrev = TextView(this).apply {
-            text = "‹"; textSize = 22f; typeface = mono; setTextColor(accent)
-            setPadding(dp(14), 0, dp(14), 0); isClickable = true; isFocusable = true
+            text = "‹"; textSize = 24f; typeface = mono; setTextColor(accent)
+            setPadding(dp(22), dp(6), dp(22), dp(6)); isClickable = true; isFocusable = true
         }
         val lblMonth = TextView(this).apply {
             textSize = 13f; typeface = mono; setTextColor(white)
@@ -1484,84 +1564,80 @@ class MainActivity : AppCompatActivity() {
             layoutParams = LinearLayout.LayoutParams(0, WRAP, 1f)
         }
         val btnNext = TextView(this).apply {
-            text = "›"; textSize = 22f; typeface = mono; setTextColor(accent)
-            setPadding(dp(14), 0, dp(14), 0); isClickable = true; isFocusable = true
+            text = "›"; textSize = 24f; typeface = mono; setTextColor(accent)
+            setPadding(dp(22), dp(6), dp(22), dp(6)); isClickable = true; isFocusable = true
         }
         navRow.addView(btnPrev); navRow.addView(lblMonth); navRow.addView(btnNext)
         outer.addView(navRow)
 
-        // ── Grid body: frozen name column + horizontally-scrollable day grid ──────
-        val nameCol = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setBackgroundColor(gridLn) }
-        val gridCol = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setBackgroundColor(gridLn) }
+        // ── Body: frozen name column + horizontally-scrollable day grid ───────────
+        val nameHolder = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        val gridHolder = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         val hScroll = HorizontalScrollView(this).apply {
-            isHorizontalScrollBarEnabled = false
-            addView(gridCol)
+            isHorizontalScrollBarEnabled = false; addView(gridHolder)
             layoutParams = LinearLayout.LayoutParams(0, WRAP, 1f)
         }
         val bodyRow = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            addView(nameCol)
-            addView(hScroll)
+            orientation = LinearLayout.HORIZONTAL; addView(nameHolder); addView(hScroll)
         }
-        val vScroll = ScrollView(this).apply { addView(bodyRow) }
-        outer.addView(vScroll)
+        outer.addView(ScrollView(this).apply { addView(bodyRow) })
 
         fun render() {
-            nameCol.removeAllViews(); gridCol.removeAllViews()
-            if (months.isEmpty()) {
-                lblMonth.text = "No data"
-                nameCol.addView(cell("No sessions", NAME_W + DAY_W, ROW_H, dim, headBg, false, 11f, true))
-                return
-            }
-            val ym       = java.time.YearMonth.parse(months[idx])
-            val days     = ym.lengthOfMonth()
+            nameHolder.removeAllViews(); gridHolder.removeAllViews()
+            if (months.isEmpty()) { lblMonth.text = "No data"; return }
+            val ym   = java.time.YearMonth.parse(months[idx])
+            val days = ym.lengthOfMonth()
             lblMonth.text = ym.format(MONTH_FMT)
             btnPrev.alpha = if (idx > 0) 1f else 0.3f
             btnNext.alpha = if (idx < months.lastIndex) 1f else 0.3f
 
             val monthSessions = sessions.filter { it.date.startsWith(months[idx]) }
-            // school -> (day -> periods), and totals
             val bySchool = monthSessions.groupBy { it.school }
                 .entries.sortedBy { shortName(it.key).lowercase() }
 
-            // Header row
-            nameCol.addView(cell("SCHOOLS", NAME_W, ROW_H, dim, headBg, true, 10f, true))
-            val headRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
-            for (d in 1..days) headRow.addView(cell("$d", DAY_W, ROW_H, dim, headBg, false, 9f))
-            headRow.addView(cell("PER", SUM_W, ROW_H, gold, headBg, true, 9f))
-            headRow.addView(cell("HRS", SUM_W, ROW_H, gold, headBg, true, 9f))
-            gridCol.addView(headRow)
+            val nameRows = ArrayList<List<GridCell>>()
+            val gridRows = ArrayList<List<GridCell>>()
+
+            // Header
+            nameRows.add(listOf(GridCell("SCHOOLS", dim, headBg, sp(10f), true, true)))
+            val hg = ArrayList<GridCell>()
+            for (d in 1..days) hg.add(GridCell("$d", dim, headBg, sp(9f)))
+            hg.add(GridCell("PER", gold, headBg, sp(9f), true))
+            hg.add(GridCell("HRS", gold, headBg, sp(9f), true))
+            gridRows.add(hg)
 
             var totP = 0; var totMins = 0
             for ((school, ss) in bySchool) {
                 val perDay = IntArray(days + 1)
                 for (s in ss) {
-                    val day = s.date.substring(8, 10).toIntOrNull() ?: continue
-                    if (day in 1..days) perDay[day] += s.periods
+                    val d = s.date.substring(8, 10).toIntOrNull() ?: continue
+                    if (d in 1..days) perDay[d] += s.periods
                 }
-                val sp = ss.sumOf { it.periods }
-                val sMins = ss.sumOf { it.totalMins }
-                totP += sp; totMins += sMins
+                val spp = ss.sumOf { it.periods }; val sMins = ss.sumOf { it.totalMins }
+                totP += spp; totMins += sMins
 
-                nameCol.addView(cell(shortName(school), NAME_W, ROW_H, white, Color.parseColor("#0D0D0D"), false, 10f, true))
-                val r = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+                nameRows.add(listOf(GridCell(shortName(school), white, cellBg, sp(10f), false, true)))
+                val rg = ArrayList<GridCell>()
                 for (d in 1..days) {
                     val v = perDay[d]
-                    r.addView(cell(if (v > 0) "$v" else "", DAY_W, ROW_H,
-                        if (v > 0) accent else dim, Color.parseColor("#0D0D0D"), v > 0, 11f))
+                    rg.add(GridCell(if (v > 0) "$v" else "", if (v > 0) accent else dim, cellBg, sp(11f), v > 0))
                 }
-                r.addView(cell("$sp", SUM_W, ROW_H, white, Color.parseColor("#0D0D0D"), true, 10f))
-                r.addView(cell("%.2f".format(sMins / 60.0), SUM_W, ROW_H, dim, Color.parseColor("#0D0D0D"), false, 10f))
-                gridCol.addView(r)
+                rg.add(GridCell("$spp", white, cellBg, sp(10f), true))
+                rg.add(GridCell("%.2f".format(sMins / 60.0), dim, cellBg, sp(10f)))
+                gridRows.add(rg)
             }
 
             // Total row
-            nameCol.addView(cell("TOTAL", NAME_W, ROW_H, gold, headBg, true, 10f, true))
-            val tr = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
-            for (d in 1..days) tr.addView(cell("", DAY_W, ROW_H, dim, headBg, false, 11f))
-            tr.addView(cell("$totP", SUM_W, ROW_H, gold, headBg, true, 11f))
-            tr.addView(cell("%.2f".format(totMins / 60.0), SUM_W, ROW_H, gold, headBg, true, 11f))
-            gridCol.addView(tr)
+            nameRows.add(listOf(GridCell("TOTAL", gold, headBg, sp(10f), true, true)))
+            val tg = ArrayList<GridCell>()
+            for (d in 1..days) tg.add(GridCell("", dim, headBg, sp(11f)))
+            tg.add(GridCell("$totP", gold, headBg, sp(11f), true))
+            tg.add(GridCell("%.2f".format(totMins / 60.0), gold, headBg, sp(11f), true))
+            gridRows.add(tg)
+
+            nameHolder.addView(GridSection(this, intArrayOf(NAME_W), ROW_H, nameRows, gridLn, padStart))
+            val gw = IntArray(days + 2) { if (it < days) DAY_W else SUM_W }
+            gridHolder.addView(GridSection(this, gw, ROW_H, gridRows, gridLn, padStart))
         }
 
         btnPrev.setOnClickListener { if (idx > 0) { idx--; render() } }
@@ -1572,7 +1648,7 @@ class MainActivity : AppCompatActivity() {
             .setTitle("$category · timekeeping")
             .setView(outer)
             .setPositiveButton("CLOSE", null)
-            .show()
+            .let { if (!isFinishing && !isDestroyed) try { it.show() } catch (_: Exception) {} }
     }
 
     private fun showManualAddDialog() {
@@ -1587,7 +1663,11 @@ class MainActivity : AppCompatActivity() {
                 listOf("Tân Thới Hòa", "Lê Văn Việt", "An Lạc", "Tạ Quang Bửu",
                        "STEM Club", "Lotus English Center")
             }
-            withContext(Dispatchers.Main) { buildAndShowAddDialog(allSchoolNames) }
+            withContext(Dispatchers.Main) {
+                // The activity may have been backgrounded/finished while the school list loaded.
+                // Showing a dialog on a dead window throws BadTokenException — guard against it.
+                if (!isFinishing && !isDestroyed) buildAndShowAddDialog(allSchoolNames)
+            }
         }
     }
 
@@ -2118,7 +2198,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             .setNegativeButton("CANCEL", null)
-            .show()
+            .let { if (!isFinishing && !isDestroyed) try { it.show() } catch (_: Exception) {} }
     }
 
     // ── Small UI helpers for the dialog ────────────────────────────────────────
@@ -2154,13 +2234,14 @@ class MainActivity : AppCompatActivity() {
     // ── Long-press context menu for history entries ────────────────────────────
 
     private fun showSessionContextMenu(s: TimesheetSession) {
-        val gold = Color.parseColor("#FFB300")
+        val company = schoolCategory(s.school)
         AlertDialog.Builder(this, R.style.DarkDialog)
             .setTitle("${s.school}  ·  ${s.date}")
-            .setItems(arrayOf("Edit session", "Delete session")) { _, which ->
+            .setItems(arrayOf("Edit session", "Delete session", "Edit $company profile")) { _, which ->
                 when (which) {
                     0 -> editSessionDialog(s)
                     1 -> confirmDeleteSession(s)
+                    2 -> showCompanyProfileEditor(company)
                 }
             }
             .show()
@@ -2361,6 +2442,92 @@ class MainActivity : AppCompatActivity() {
             } else line
         }
         logFile.writeText(lines.joinToString("\n").let { if (it.isNotEmpty()) "$it\n" else "" }, Charsets.UTF_8)
+    }
+
+    // ── Company profiles (editable rate / period length per company) ───────────
+
+    private fun refreshCompanyProfiles() {
+        val f = java.io.File(filesDir, "company_profiles.json")
+        companyProfiles = if (!f.exists()) emptyList() else try {
+            val arr = org.json.JSONArray(f.readText())
+            (0 until arr.length()).map { i ->
+                val o = arr.getJSONObject(i)
+                CompanyProfile(
+                    name          = o.getString("name"),
+                    rateVnd       = o.optLong("rate_vnd", 520_000L),
+                    minsPerPeriod = o.optInt("mins_per_period", 0)
+                )
+            }
+        } catch (_: Exception) { emptyList() }
+    }
+
+    private fun saveCompanyProfile(name: String, rateVnd: Long, minsPerPeriod: Int) {
+        val file = java.io.File(filesDir, "company_profiles.json")
+        val arr  = if (file.exists()) {
+            try { org.json.JSONArray(file.readText()) } catch (_: Exception) { org.json.JSONArray() }
+        } else org.json.JSONArray()
+        fun obj() = org.json.JSONObject().apply {
+            put("name", name); put("rate_vnd", rateVnd); put("mins_per_period", minsPerPeriod)
+        }
+        var replaced = false
+        for (i in 0 until arr.length()) {
+            if (arr.getJSONObject(i).optString("name").equals(name, ignoreCase = true)) {
+                arr.put(i, obj()); replaced = true; break
+            }
+        }
+        if (!replaced) arr.put(obj())
+        file.parentFile?.mkdirs()
+        file.writeText(arr.toString(2), Charsets.UTF_8)
+        refreshCompanyProfiles()
+    }
+
+    /** Editable profile for a company: hourly rate + default period length. */
+    private fun showCompanyProfileEditor(category: String) {
+        val white   = Color.WHITE
+        val dim     = Color.parseColor("#969696")
+        val accent  = categoryColor(category)
+        val mono    = android.graphics.Typeface.MONOSPACE
+
+        val root = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setBackgroundColor(Color.parseColor("#0D0D0D"))
+            setPadding(dp(20), dp(16), dp(20), dp(8))
+        }
+        root.addView(TextView(this).apply {
+            text = "Earnings for every venue under this company use this hourly rate."
+            textSize = 11f; typeface = mono; setTextColor(dim)
+            layoutParams = LinearLayout.LayoutParams(MATCH, WRAP).also { it.bottomMargin = dp(16) }
+        })
+
+        root.addView(label("HOURLY RATE (VND)", dim))
+        val rateInput = EditText(this).apply {
+            setText(companyRate(category).toString()); textSize = 16f; typeface = mono
+            setTextColor(white); inputType = android.text.InputType.TYPE_CLASS_NUMBER
+            layoutParams = LinearLayout.LayoutParams(MATCH, WRAP).also { it.bottomMargin = dp(16) }
+        }
+        root.addView(rateInput)
+
+        root.addView(label("DEFAULT PERIOD LENGTH (MIN)", dim))
+        val minsInput = EditText(this).apply {
+            setText(companyMins(category).toString()); textSize = 16f; typeface = mono
+            setTextColor(white); inputType = android.text.InputType.TYPE_CLASS_NUMBER
+            layoutParams = LinearLayout.LayoutParams(MATCH, WRAP).also { it.bottomMargin = dp(8) }
+        }
+        root.addView(minsInput)
+
+        AlertDialog.Builder(this, R.style.DarkDialog)
+            .setTitle("$category · profile")
+            .setView(root)
+            .setPositiveButton("SAVE") { _, _ ->
+                val rate = rateInput.text.toString().toLongOrNull()?.coerceIn(0, 100_000_000L) ?: companyRate(category)
+                val mins = minsInput.text.toString().toIntOrNull()?.coerceIn(1, 180) ?: companyMins(category)
+                saveCompanyProfile(category, rate, mins)
+                Toast.makeText(this, "$category rate set to ${formatVnd(rate)}/hr", Toast.LENGTH_SHORT).show()
+                if (b.layoutSummary.visibility == View.VISIBLE) buildSummaryView()
+                if (b.layoutHistory.visibility == View.VISIBLE) fetchData()
+            }
+            .setNegativeButton("CANCEL", null)
+            .show()
     }
 
     // ── User location management ───────────────────────────────────────────────

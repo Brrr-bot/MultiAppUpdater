@@ -10,7 +10,7 @@ import java.time.LocalDate
 import java.time.ZoneOffset
 import java.util.Locale
 
-class FinanceDb(context: Context) : SQLiteOpenHelper(context, "finance.db", null, 1) {
+class FinanceDb(context: Context) : SQLiteOpenHelper(context, "finance.db", null, 2) {
 
     override fun onCreate(db: SQLiteDatabase) {
         db.execSQL("""
@@ -20,7 +20,8 @@ class FinanceDb(context: Context) : SQLiteOpenHelper(context, "finance.db", null
                 direction TEXT    NOT NULL,
                 amount    REAL    NOT NULL,
                 what      TEXT    NOT NULL,
-                category  TEXT    NOT NULL
+                category  TEXT    NOT NULL,
+                synced    INTEGER NOT NULL DEFAULT 1
             )
         """)
         db.execSQL("""
@@ -32,15 +33,23 @@ class FinanceDb(context: Context) : SQLiteOpenHelper(context, "finance.db", null
         db.execSQL("INSERT OR IGNORE INTO savings_cache (id, total) VALUES (1, 0)")
     }
 
-    override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) = onCreate(db)
+    override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
+        // v1 -> v2: add the `synced` column (existing rows came from the server, so synced=1)
+        if (oldVersion < 2) {
+            try { db.execSQL("ALTER TABLE entries ADD COLUMN synced INTEGER NOT NULL DEFAULT 1") } catch (_: Exception) {}
+        }
+        onCreate(db)
+    }
 
     // ── Write ─────────────────────────────────────────────────────────────────
 
+    /** Replace the server-synced set with a fresh server snapshot, but KEEP locally-added
+     *  entries that haven't been pushed yet (synced = 0) so offline work is never lost. */
     fun replaceAllEntries(entries: JSONArray) {
         val db = writableDatabase
         db.beginTransaction()
         try {
-            db.execSQL("DELETE FROM entries")
+            db.execSQL("DELETE FROM entries WHERE synced = 1")
             for (i in 0 until entries.length()) {
                 val e = entries.getJSONObject(i)
                 db.insertWithOnConflict("entries", null, entryToValues(e), SQLiteDatabase.CONFLICT_REPLACE)
@@ -54,9 +63,48 @@ class FinanceDb(context: Context) : SQLiteOpenHelper(context, "finance.db", null
     fun insertEntry(id: Int, ts: Long, direction: String, amount: Double, what: String, category: String) {
         val cv = ContentValues().apply {
             put("id", id); put("ts", ts); put("direction", direction)
-            put("amount", amount); put("what", what); put("category", category)
+            put("amount", amount); put("what", what); put("category", category); put("synced", 1)
         }
         writableDatabase.insertWithOnConflict("entries", null, cv, SQLiteDatabase.CONFLICT_REPLACE)
+    }
+
+    /** Save a brand-new entry locally with synced=0 (not yet on the server). Returns its
+     *  local id (a negative number, so it can never collide with a server id). */
+    fun insertLocalEntry(ts: Long, direction: String, amount: Double, what: String, category: String): Int {
+        val db = writableDatabase
+        val minId = db.rawQuery("SELECT MIN(id) FROM entries", null).use {
+            if (it.moveToFirst()) it.getInt(0) else 0
+        }
+        val localId = minOf(minId, 0) - 1
+        val cv = ContentValues().apply {
+            put("id", localId); put("ts", ts); put("direction", direction)
+            put("amount", amount); put("what", what); put("category", category); put("synced", 0)
+        }
+        db.insertWithOnConflict("entries", null, cv, SQLiteDatabase.CONFLICT_REPLACE)
+        return localId
+    }
+
+    /** Entries added locally that still need to be pushed to the server. */
+    fun getUnsyncedEntries(): JSONArray =
+        cursorToArray(readableDatabase.rawQuery(
+            "SELECT * FROM entries WHERE synced = 0 ORDER BY ts ASC", null))
+
+    /** After a successful push: swap the temporary local row for the server-assigned id. */
+    fun markEntrySynced(localId: Int, serverId: Int, serverTs: Long,
+                        direction: String, amount: Double, what: String, category: String) {
+        val db = writableDatabase
+        db.beginTransaction()
+        try {
+            db.delete("entries", "id = ?", arrayOf(localId.toString()))
+            val cv = ContentValues().apply {
+                put("id", serverId); put("ts", serverTs); put("direction", direction)
+                put("amount", amount); put("what", what); put("category", category); put("synced", 1)
+            }
+            db.insertWithOnConflict("entries", null, cv, SQLiteDatabase.CONFLICT_REPLACE)
+            db.setTransactionSuccessful()
+        } finally {
+            db.endTransaction()
+        }
     }
 
     fun deleteEntry(id: Int) {
@@ -130,6 +178,7 @@ class FinanceDb(context: Context) : SQLiteOpenHelper(context, "finance.db", null
         put("amount",    e.getDouble("amount"))
         put("what",      e.getString("what"))
         put("category",  e.getString("category"))
+        put("synced",    1)   // came from the server
     }
 
     private fun cursorToArray(cursor: android.database.Cursor): JSONArray {

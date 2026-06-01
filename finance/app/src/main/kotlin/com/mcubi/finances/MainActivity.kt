@@ -797,55 +797,85 @@ class MainActivity : AppCompatActivity() {
             flash("Pick a category", "#FF1744"); return
         }
 
-        val body = JSONObject().apply {
-            put("direction", direction)
-            put("amount",    amountStr.toDouble())
-            put("what",      what)
-            put("category",  selectedCat)
-            put("date",      selectedDate.toString())
-        }.toString().toRequestBody("application/json".toMediaType())
-
-        val request = Request.Builder().url("$BASE_URL/api/add").post(body).build()
-        val isSalaryEntry = direction == "in" && selectedCat == "Salary"
+        val amount = amountStr.toDouble()
+        val cat    = selectedCat
+        val dir    = direction
+        val date   = selectedDate
+        val isSalaryEntry = dir == "in" && cat == "Salary"
         val prevPeriodStart = periodStart
-        val salaryDate = selectedDate
+        // Local timestamp that lands on the chosen day (noon UTC), or "now" if it's today.
+        val ts = if (date == LocalDate.now()) System.currentTimeMillis()
+                 else date.atTime(12, 0).toInstant(java.time.ZoneOffset.UTC).toEpochMilli()
 
         CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val resp = client.newCall(request).execute()
-                val respBody = resp.body?.string() ?: ""
-                withContext(Dispatchers.Main) {
-                    if (resp.isSuccessful) {
-                        // Cache locally using the server-assigned id
-                        try {
-                            val j = JSONObject(respBody)
-                            val newId = j.optInt("id", 0)
-                            val ts    = j.optLong("ts", System.currentTimeMillis())
-                            if (newId > 0) {
-                                db.insertEntry(newId, ts, direction,
-                                    amountStr.toDouble(), what, selectedCat)
-                            }
-                        } catch (_: Exception) {}
+            // 1) Save locally first — the local DB is the source of truth, so this works
+            //    with no internet at all. The entry is marked unsynced (synced=0).
+            val localId = db.insertLocalEntry(ts, dir, amount, what, cat)
+            withContext(Dispatchers.Main) {
+                flash("✓ saved", "#00E676")
+                b.etAmount.text?.clear()
+                b.etWhat.text?.clear()
+                selectedCat = ""
+                selectedDate = LocalDate.now()
+                buildCategoryButtons()
+                updateDateDisplay()
+                if (isSalaryEntry) handleSalaryEntry(date, prevPeriodStart)
+                else { fetchBalancePill(); fetchSavingsTotal() }
+            }
+            // 2) Best-effort push to the cloud. If it fails (offline / server 500) the entry
+            //    stays queued and is retried later by syncPendingEntries().
+            pushEntry(localId, ts, dir, amount, what, cat, date)
+        }
+    }
 
-                        flash("✓ saved", "#00E676")
-                        b.etAmount.text?.clear()
-                        b.etWhat.text?.clear()
-                        selectedCat = ""
-                        selectedDate = LocalDate.now()
-                        buildCategoryButtons()
-                        updateDateDisplay()
-                        if (isSalaryEntry) {
-                            handleSalaryEntry(salaryDate, prevPeriodStart)
-                        } else {
-                            fetchBalancePill()
-                            fetchSavingsTotal()
-                        }
-                    } else {
-                        flash("Error ${resp.code}", "#FF1744")
-                    }
+    /** Push one locally-saved entry to the cloud; on success swap in the server id. */
+    private fun pushEntry(localId: Int, ts: Long, dir: String, amount: Double,
+                          what: String, cat: String, date: LocalDate) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val body = JSONObject().apply {
+                    put("direction", dir); put("amount", amount); put("what", what)
+                    put("category", cat); put("date", date.toString())
+                }.toString().toRequestBody("application/json".toMediaType())
+                val resp = client.newCall(Request.Builder().url("$BASE_URL/api/add").post(body).build()).execute()
+                if (resp.isSuccessful) {
+                    val j = JSONObject(resp.body?.string() ?: "")
+                    val serverId = j.optInt("id", 0)
+                    val serverTs = j.optLong("ts", ts)
+                    if (serverId > 0) db.markEntrySynced(localId, serverId, serverTs, dir, amount, what, cat)
                 }
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) { flash("Network error", "#FF1744") }
+            } catch (_: Exception) {}   // stays queued (synced=0)
+        }
+    }
+
+    /** Retry pushing every entry that was added while offline. Stops on the first failure
+     *  (e.g. server still down) and tries again on the next sync. */
+    private fun syncPendingEntries() {
+        CoroutineScope(Dispatchers.IO).launch {
+            val pending = db.getUnsyncedEntries()
+            for (i in 0 until pending.length()) {
+                val e = pending.getJSONObject(i)
+                val localId = e.getInt("id")
+                val ts      = e.getLong("ts")
+                val dir     = e.getString("direction")
+                val amount  = e.getDouble("amount")
+                val what    = e.getString("what")
+                val cat     = e.getString("category")
+                val date    = java.time.Instant.ofEpochMilli(ts)
+                    .atZone(java.time.ZoneOffset.UTC).toLocalDate()
+                try {
+                    val body = JSONObject().apply {
+                        put("direction", dir); put("amount", amount); put("what", what)
+                        put("category", cat); put("date", date.toString())
+                    }.toString().toRequestBody("application/json".toMediaType())
+                    val resp = client.newCall(Request.Builder().url("$BASE_URL/api/add").post(body).build()).execute()
+                    if (resp.isSuccessful) {
+                        val j = JSONObject(resp.body?.string() ?: "")
+                        val serverId = j.optInt("id", 0)
+                        val serverTs = j.optLong("ts", ts)
+                        if (serverId > 0) db.markEntrySynced(localId, serverId, serverTs, dir, amount, what, cat)
+                    } else return@launch
+                } catch (_: Exception) { return@launch }
             }
         }
     }
@@ -890,6 +920,10 @@ class MainActivity : AppCompatActivity() {
         CoroutineScope(Dispatchers.IO).launch {
             val local = db.getSavingsTotal()
             withContext(Dispatchers.Main) { updateSavingsDisplay(local) }
+            // Only trust the cloud value when we're fully synced. If there are entries still
+            // queued offline, the local savings includes settlements the cloud doesn't know
+            // about yet — don't let a stale cloud value overwrite it.
+            if (db.getUnsyncedEntries().length() > 0) return@launch
             try {
                 val resp = client.newCall(Request.Builder().url("$BASE_URL/api/savings").build()).execute()
                 if (!resp.isSuccessful) return@launch
@@ -916,7 +950,10 @@ class MainActivity : AppCompatActivity() {
         fetchBalancePill()
         fetchSavingsTotal()
 
-        // Background sync from server — replaces local cache
+        // Push anything added while offline, then sync from server.
+        syncPendingEntries()
+
+        // Background sync from server — replaces the synced cache (keeps unsynced local entries)
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val resp = client.newCall(Request.Builder().url("$BASE_URL/api/entries").build()).execute()
@@ -948,39 +985,31 @@ class MainActivity : AppCompatActivity() {
         // First salary ever: capture all-time balance up to yesterday (catches historical carryover).
         // Subsequent salaries: capture balance since the previous salary date only.
         val isFirstSalary = salaryDates.isEmpty()
-        val summaryUrl = if (isFirstSalary) {
-            "$BASE_URL/api/summary?to=$prevTo"
-        } else {
-            if (prevPeriodStart.isAfter(prevTo)) {
-                // Salary added on same day as previous salary — nothing to settle
-                updateSalaryPeriod(salaryDate)
-                fetchBalancePill()
-                fetchSavingsTotal()
-                return
-            }
-            "$BASE_URL/api/summary?from=$prevPeriodStart&to=$prevTo"
+        if (!isFirstSalary && prevPeriodStart.isAfter(prevTo)) {
+            // Salary added on same day as previous salary — nothing to settle
+            updateSalaryPeriod(salaryDate); fetchBalancePill(); fetchSavingsTotal(); return
         }
         CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val summaryResp = client.newCall(Request.Builder().url(summaryUrl).build()).execute()
-                val summary     = JSONObject(summaryResp.body!!.string())
-                val balance     = summary.getDouble("income") - summary.getDouble("expense")
+            // Compute the previous period's balance from the LOCAL DB so settlement works offline.
+            val (income, expense) =
+                if (isFirstSalary) db.getSummaryForPeriod(null, prevTo)
+                else               db.getSummaryForPeriod(prevPeriodStart, prevTo)
+            val balance = income - expense
 
-                if (balance != 0.0) {
+            if (balance != 0.0) {
+                // Settle into savings locally (source of truth)…
+                db.saveSavingsTotal(db.getSavingsTotal() + balance)
+                // …and tell the cloud too, best-effort (ignored when offline).
+                try {
                     val note = if (isFirstSalary) "All-time to $prevTo" else "Period $prevPeriodStart to $prevTo"
                     val adjustBody = JSONObject().apply {
-                        put("delta", balance)
-                        put("note",  note)
+                        put("delta", balance); put("note", note)
                     }.toString().toRequestBody("application/json".toMediaType())
-                    val adjustResp = client.newCall(
+                    client.newCall(
                         Request.Builder().url("$BASE_URL/api/savings/adjust").post(adjustBody).build()
-                    ).execute()
-                    if (adjustResp.isSuccessful) {
-                        val newTotal = JSONObject(adjustResp.body!!.string()).optDouble("total", db.getSavingsTotal() + balance)
-                        db.saveSavingsTotal(newTotal)
-                    }
-                }
-            } catch (_: Exception) {}
+                    ).execute().close()
+                } catch (_: Exception) {}
+            }
             withContext(Dispatchers.Main) {
                 updateSalaryPeriod(salaryDate)
                 fetchBalancePill()

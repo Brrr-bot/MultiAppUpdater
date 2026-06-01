@@ -240,6 +240,35 @@ private fun schoolRate(name: String): Long {
     return 520_000L
 }
 
+// ─── Company / category grouping ────────────────────────────────────────────────
+// Built-in companies. Every school that isn't STEM or Lotus rolls up to Compass.
+const val CAT_COMPASS = "Compass Education"
+const val CAT_STEM    = "STEM Club"
+const val CAT_LOTUS   = "Lotus English Center"
+
+// Categories that get a colour swatch in the summary
+private val CATEGORY_COLORS = mapOf(
+    CAT_COMPASS to "#29B6F6",
+    CAT_STEM    to "#00E5FF",
+    CAT_LOTUS   to "#FF80AB"
+)
+private fun categoryColor(cat: String): Int =
+    Color.parseColor(CATEGORY_COLORS[cat] ?: "#FFB300")
+
+// Map a school/venue name to its company category. STEM and Lotus match by name;
+// a user-defined location uses whatever category was assigned when it was added;
+// everything else falls under Compass Education.
+private fun schoolCategory(name: String): String {
+    val lower = name.lowercase()
+    if (lower.contains("stem"))  return CAT_STEM
+    if (lower.contains("lotus")) return CAT_LOTUS
+    for (u in userLocations)
+        if (u.category.isNotBlank() &&
+            (lower.contains(u.name.lowercase()) || u.name.lowercase().contains(lower)))
+            return u.category
+    return CAT_COMPASS
+}
+
 // For session history stripe
 private val SESSION_COLORS = mapOf(
     "tân thới hòa" to "#29B6F6", "tan thoi hoa" to "#29B6F6",
@@ -292,7 +321,7 @@ data class PendingSchool(val school: String, val minutes: Int)
 
 // ─── User-defined location config (persisted to filesDir/user_locations.json) ──
 
-data class UserLocationConfig(val name: String, val minsPerPeriod: Int, val rateVnd: Long)
+data class UserLocationConfig(val name: String, val minsPerPeriod: Int, val rateVnd: Long, val category: String = "")
 
 private var userLocations: List<UserLocationConfig> = emptyList()
 
@@ -353,8 +382,9 @@ class MainActivity : AppCompatActivity() {
         setContentView(b.root)
 
         // Tab switching
-        b.btnTabSchedule.setOnClickListener { showTab(schedule = true) }
-        b.btnTabHistory.setOnClickListener  { showTab(schedule = false); fetchTodayPending() }
+        b.btnTabSchedule.setOnClickListener { showTab(0) }
+        b.btnTabHistory.setOnClickListener  { showTab(1); fetchTodayPending() }
+        b.btnTabSummary.setOnClickListener  { showTab(2) }
         b.btnAddSession.setOnClickListener  { showManualAddDialog() }
 
         // Month nav (history only)
@@ -372,7 +402,7 @@ class MainActivity : AppCompatActivity() {
 
         refreshUserLocations()
         buildScheduleView()
-        showTab(schedule = false)
+        showTab(1)
         mergeFromLaptopIfReachable()
         fetchData()
         fetchTodayPending()
@@ -616,7 +646,7 @@ class MainActivity : AppCompatActivity() {
 
         // Switch to history tab so the cards are visible
         if (b.layoutHistory.visibility != View.VISIBLE) {
-            showTab(schedule = false)
+            showTab(1)
         }
     }
 
@@ -876,27 +906,25 @@ class MainActivity : AppCompatActivity() {
 
     // ── Tab management ──────────────────────────────────────────────────────────
 
-    private fun showTab(schedule: Boolean) {
+    // 0 = Schedule, 1 = History, 2 = Summary
+    private fun showTab(tab: Int) {
         val sky     = Color.parseColor("#29B6F6")
         val dimText = Color.parseColor("#646464")
 
-        if (schedule) {
-            b.layoutSchedule.visibility = View.VISIBLE
-            b.layoutHistory.visibility  = View.GONE
-            b.monthNav.visibility       = View.GONE
-            b.btnTabSchedule.setTextColor(sky)
-            b.btnTabHistory.setTextColor(dimText)
-            b.tabIndicatorSchedule.visibility = View.VISIBLE
-            b.tabIndicatorHistory.visibility  = View.INVISIBLE
-        } else {
-            b.layoutSchedule.visibility = View.GONE
-            b.layoutHistory.visibility  = View.VISIBLE
-            b.monthNav.visibility       = View.VISIBLE
-            b.btnTabSchedule.setTextColor(dimText)
-            b.btnTabHistory.setTextColor(sky)
-            b.tabIndicatorSchedule.visibility = View.INVISIBLE
-            b.tabIndicatorHistory.visibility  = View.VISIBLE
-        }
+        b.layoutSchedule.visibility = if (tab == 0) View.VISIBLE else View.GONE
+        b.layoutHistory.visibility  = if (tab == 1) View.VISIBLE else View.GONE
+        b.layoutSummary.visibility  = if (tab == 2) View.VISIBLE else View.GONE
+        // Month nav only applies to the History tab
+        b.monthNav.visibility       = if (tab == 1) View.VISIBLE else View.GONE
+
+        b.btnTabSchedule.setTextColor(if (tab == 0) sky else dimText)
+        b.btnTabHistory.setTextColor (if (tab == 1) sky else dimText)
+        b.btnTabSummary.setTextColor (if (tab == 2) sky else dimText)
+        b.tabIndicatorSchedule.visibility = if (tab == 0) View.VISIBLE else View.INVISIBLE
+        b.tabIndicatorHistory.visibility  = if (tab == 1) View.VISIBLE else View.INVISIBLE
+        b.tabIndicatorSummary.visibility  = if (tab == 2) View.VISIBLE else View.INVISIBLE
+
+        if (tab == 2) buildSummaryView()
     }
 
     // ── Data fetch ──────────────────────────────────────────────────────────────
@@ -1228,6 +1256,269 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // ── Summary tab (all-time, grouped by company) ──────────────────────────────
+
+    /** All [TIMESHEET] sessions in the local log, across every month. */
+    private fun readAllSessions(): List<TimesheetSession> {
+        val pattern = Regex(
+            """\[TIMESHEET\]\s+(\d{4}-\d{2}-\d{2})\s+(.+?)\s+\((\w+)\)\s+(\d+)\s+period.*?×\s*(\d+)min\s*=\s*(\d+)min"""
+        )
+        val sessions = mutableListOf<TimesheetSession>()
+        if (logFile.exists()) {
+            logFile.forEachLine { line ->
+                if ("[TIMESHEET]" !in line) return@forEachLine
+                val m = pattern.find(line) ?: return@forEachLine
+                val (date, school, type, periods, mpp, tmins) = m.destructured
+                val tMins = tmins.toInt()
+                sessions.add(TimesheetSession(date, school, type, periods.toInt(), mpp.toInt(), tMins, tMins / 60.0))
+            }
+        }
+        return sessions
+    }
+
+    private fun sessionEarnings(s: TimesheetSession): Long = (s.totalHours * schoolRate(s.school)).toLong()
+
+    private fun buildSummaryView() {
+        val container = b.summaryContainer
+        container.removeAllViews()
+
+        val white   = Color.WHITE
+        val dim      = Color.parseColor("#969696")
+        val dimmer   = Color.parseColor("#646464")
+        val gold     = Color.parseColor("#FFB300")
+        val cardBg   = Color.parseColor("#0D0D0D")
+        val mono     = android.graphics.Typeface.MONOSPACE
+
+        val sessions = readAllSessions()
+        if (sessions.isEmpty()) {
+            container.addView(TextView(this).apply {
+                text = "No sessions logged yet"
+                setTextColor(dimmer); textSize = 13f; typeface = mono
+                gravity = Gravity.CENTER
+                setPadding(dp(32), dp(48), dp(32), dp(32))
+            })
+            return
+        }
+
+        val byCat   = sessions.groupBy { schoolCategory(it.school) }
+        val builtin = listOf(CAT_COMPASS, CAT_STEM, CAT_LOTUS)
+        val others  = byCat.keys.filter { it !in builtin }.sorted()
+        val orderedCats = (builtin + others).filter { byCat.containsKey(it) }
+
+        var grandPeriods = 0
+        var grandEarn    = 0L
+
+        for (cat in orderedCats) {
+            val catSessions = byCat[cat]!!
+            val accent      = categoryColor(cat)
+            val catPeriods  = catSessions.sumOf { it.periods }
+            val catEarn     = catSessions.sumOf { sessionEarnings(it) }
+            grandPeriods += catPeriods
+            grandEarn    += catEarn
+
+            val card = LinearLayout(this).apply {
+                orientation = LinearLayout.HORIZONTAL
+                setBackgroundColor(cardBg)
+                layoutParams = LinearLayout.LayoutParams(MATCH, WRAP).also {
+                    it.setMargins(dp(12), dp(8), dp(12), dp(4))
+                }
+            }
+            card.addView(View(this).apply {
+                setBackgroundColor(accent)
+                layoutParams = LinearLayout.LayoutParams(dp(3), MATCH)
+            })
+            val col = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                setPadding(dp(14), dp(12), dp(14), dp(12))
+                layoutParams = LinearLayout.LayoutParams(0, WRAP, 1f)
+                isClickable = true; isFocusable = true
+                setOnClickListener { showCompanyMonthlyBreakdown(cat) }
+            }
+
+            // Header: company name + chevron, then totals
+            val headerRow = LinearLayout(this).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = Gravity.CENTER_VERTICAL
+                layoutParams = LinearLayout.LayoutParams(MATCH, WRAP).also { it.bottomMargin = dp(8) }
+            }
+            headerRow.addView(TextView(this).apply {
+                text = cat.uppercase()
+                setTextColor(accent); textSize = 14f; typeface = mono
+                setTypeface(typeface, android.graphics.Typeface.BOLD); letterSpacing = 0.05f
+                layoutParams = LinearLayout.LayoutParams(0, WRAP, 1f)
+            })
+            headerRow.addView(TextView(this).apply {
+                text = "$catPeriods p  ›"
+                setTextColor(dim); textSize = 11f; typeface = mono
+            })
+            col.addView(headerRow)
+
+            col.addView(TextView(this).apply {
+                text = formatVnd(catEarn)
+                setTextColor(gold); textSize = 16f; typeface = mono
+                setTypeface(typeface, android.graphics.Typeface.BOLD)
+                layoutParams = LinearLayout.LayoutParams(MATCH, WRAP).also { it.bottomMargin = dp(8) }
+            })
+
+            // Per-school breakdown within this company
+            val bySchool = catSessions.groupBy { it.school }
+                .entries.sortedByDescending { e -> e.value.sumOf { it.periods } }
+            for ((school, schoolSessions) in bySchool) {
+                val sp = schoolSessions.sumOf { it.periods }
+                val se = schoolSessions.sumOf { sessionEarnings(it) }
+                val row = LinearLayout(this).apply {
+                    orientation = LinearLayout.HORIZONTAL
+                    gravity = Gravity.CENTER_VERTICAL
+                    layoutParams = LinearLayout.LayoutParams(MATCH, WRAP).also { it.topMargin = dp(3) }
+                }
+                row.addView(TextView(this).apply {
+                    text = shortName(school)
+                    setTextColor(white); textSize = 12f; typeface = mono
+                    layoutParams = LinearLayout.LayoutParams(0, WRAP, 1f)
+                    maxLines = 1; ellipsize = android.text.TextUtils.TruncateAt.END
+                })
+                row.addView(TextView(this).apply {
+                    text = "$sp p"
+                    setTextColor(dim); textSize = 11f; typeface = mono
+                    layoutParams = LinearLayout.LayoutParams(dp(54), WRAP)
+                    gravity = Gravity.END
+                })
+                row.addView(TextView(this).apply {
+                    text = formatVnd(se)
+                    setTextColor(dim); textSize = 11f; typeface = mono
+                    gravity = Gravity.END
+                    layoutParams = LinearLayout.LayoutParams(dp(96), WRAP)
+                })
+                col.addView(row)
+            }
+
+            card.addView(col)
+            container.addView(card)
+        }
+
+        // Grand total (all time)
+        val totalCard = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setBackgroundColor(Color.parseColor("#140E00"))
+            setPadding(dp(17), dp(14), dp(17), dp(14))
+            layoutParams = LinearLayout.LayoutParams(MATCH, WRAP).also {
+                it.setMargins(dp(12), dp(10), dp(12), dp(8))
+            }
+        }
+        totalCard.addView(TextView(this).apply {
+            text = "TOTAL ALL TIME"
+            setTextColor(gold); textSize = 12f; typeface = mono
+            setTypeface(typeface, android.graphics.Typeface.BOLD); letterSpacing = 0.08f
+            layoutParams = LinearLayout.LayoutParams(0, WRAP, 1f)
+        })
+        totalCard.addView(TextView(this).apply {
+            text = "$grandPeriods p"
+            setTextColor(dim); textSize = 12f; typeface = mono
+            layoutParams = LinearLayout.LayoutParams(dp(60), WRAP)
+            gravity = Gravity.END
+        })
+        totalCard.addView(TextView(this).apply {
+            text = formatVnd(grandEarn)
+            setTextColor(gold); textSize = 15f; typeface = mono
+            setTypeface(typeface, android.graphics.Typeface.BOLD)
+            gravity = Gravity.END
+            layoutParams = LinearLayout.LayoutParams(WRAP, WRAP)
+        })
+        container.addView(totalCard)
+    }
+
+    /** Month-by-month breakdown for one company, so months can be compared side by side. */
+    private fun showCompanyMonthlyBreakdown(category: String) {
+        val white  = Color.WHITE
+        val dim     = Color.parseColor("#969696")
+        val gold    = Color.parseColor("#FFB300")
+        val accent  = categoryColor(category)
+        val mono    = android.graphics.Typeface.MONOSPACE
+
+        val sessions = readAllSessions().filter { schoolCategory(it.school) == category }
+        val byMonth  = sessions.groupBy { it.date.substring(0, 7) }
+            .entries.sortedByDescending { it.key }
+
+        val root = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(20), dp(12), dp(20), dp(8))
+        }
+
+        if (byMonth.isEmpty()) {
+            root.addView(TextView(this).apply {
+                text = "No sessions for this company yet"
+                setTextColor(dim); textSize = 13f; typeface = mono
+            })
+        }
+
+        for ((month, monthSessions) in byMonth) {
+            val ym       = java.time.YearMonth.parse(month)
+            val mPeriods = monthSessions.sumOf { it.periods }
+            val mEarn    = monthSessions.sumOf { sessionEarnings(it) }
+
+            // Month header
+            val mh = LinearLayout(this).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = Gravity.CENTER_VERTICAL
+                layoutParams = LinearLayout.LayoutParams(MATCH, WRAP).also { it.topMargin = dp(14); it.bottomMargin = dp(4) }
+            }
+            mh.addView(TextView(this).apply {
+                text = ym.format(MONTH_FMT)
+                setTextColor(accent); textSize = 13f; typeface = mono
+                setTypeface(typeface, android.graphics.Typeface.BOLD)
+                layoutParams = LinearLayout.LayoutParams(0, WRAP, 1f)
+            })
+            mh.addView(TextView(this).apply {
+                text = "$mPeriods p   ${formatVnd(mEarn)}"
+                setTextColor(gold); textSize = 12f; typeface = mono
+            })
+            root.addView(mh)
+            root.addView(View(this).apply {
+                setBackgroundColor(Color.parseColor("#222222"))
+                layoutParams = LinearLayout.LayoutParams(MATCH, dp(1)).also { it.bottomMargin = dp(4) }
+            })
+
+            // Per-school rows for this month
+            val bySchool = monthSessions.groupBy { it.school }
+                .entries.sortedByDescending { e -> e.value.sumOf { it.periods } }
+            for ((school, ss) in bySchool) {
+                val sp = ss.sumOf { it.periods }
+                val row = LinearLayout(this).apply {
+                    orientation = LinearLayout.HORIZONTAL
+                    gravity = Gravity.CENTER_VERTICAL
+                    layoutParams = LinearLayout.LayoutParams(MATCH, WRAP).also { it.topMargin = dp(2) }
+                }
+                row.addView(TextView(this).apply {
+                    text = shortName(school)
+                    setTextColor(white); textSize = 12f; typeface = mono
+                    layoutParams = LinearLayout.LayoutParams(0, WRAP, 1f)
+                    maxLines = 1; ellipsize = android.text.TextUtils.TruncateAt.END
+                })
+                row.addView(TextView(this).apply {
+                    text = "$sp p"
+                    setTextColor(dim); textSize = 11f; typeface = mono
+                    gravity = Gravity.END
+                    layoutParams = LinearLayout.LayoutParams(dp(48), WRAP)
+                })
+                row.addView(TextView(this).apply {
+                    text = formatVnd(ss.sumOf { s -> sessionEarnings(s) })
+                    setTextColor(dim); textSize = 11f; typeface = mono
+                    gravity = Gravity.END
+                    layoutParams = LinearLayout.LayoutParams(dp(96), WRAP)
+                })
+                root.addView(row)
+            }
+        }
+
+        val scroll = ScrollView(this).apply { addView(root) }
+        AlertDialog.Builder(this, R.style.DarkDialog)
+            .setTitle(category)
+            .setView(scroll)
+            .setPositiveButton("CLOSE", null)
+            .show()
+    }
+
     private fun showManualAddDialog() {
         // Load school list from the asset on IO, then show dialog on Main
         CoroutineScope(Dispatchers.IO).launch {
@@ -1268,6 +1559,7 @@ class MainActivity : AppCompatActivity() {
         var locRadiusM        = 100.0
         var locMinsPerPeriod  = 45
         var locRateType       = "hourly"
+        var locCategory       = CAT_COMPASS   // which company this venue rolls up to
 
         pendingPickedLat  = null
         pendingPickedLng  = null
@@ -1442,6 +1734,55 @@ class MainActivity : AppCompatActivity() {
         }
         panel2.addView(typeRow)
         refreshTypeBtns()
+
+        // Company / category — which business this venue's earnings roll up under.
+        panel2.addView(label("COMPANY / CATEGORY", dimText).also {
+            (it.layoutParams as LinearLayout.LayoutParams).bottomMargin = dp(8)
+        })
+        val catQuickPicks = listOf(CAT_COMPASS, CAT_STEM, CAT_LOTUS)
+        val catQuickLabels = listOf("COMPASS", "STEM", "LOTUS")
+        val catBtns = mutableListOf<TextView>()
+        val catRow  = LinearLayout(this).apply {
+            orientation  = LinearLayout.HORIZONTAL
+            layoutParams = LinearLayout.LayoutParams(MATCH, WRAP).also { it.bottomMargin = dp(8) }
+        }
+        val customCatInput = EditText(this).apply {
+            hint = "or type a custom company…"; textSize = 13f; typeface = mono
+            setTextColor(white); setHintTextColor(dimText)
+            inputType = android.text.InputType.TYPE_CLASS_TEXT or
+                        android.text.InputType.TYPE_TEXT_FLAG_CAP_WORDS
+            layoutParams = LinearLayout.LayoutParams(MATCH, WRAP).also { it.bottomMargin = dp(16) }
+        }
+        val purple = Color.parseColor("#B47FFF")
+        fun refreshCatBtns() {
+            catBtns.forEachIndexed { i, tv ->
+                val sel = catQuickPicks[i] == locCategory && customCatInput.text.toString().isBlank()
+                tv.background = outlineDrawable(dp(3).toFloat(), purple, if (sel) purple else Color.TRANSPARENT)
+                tv.setTextColor(if (sel) Color.BLACK else purple)
+            }
+        }
+        catQuickLabels.forEachIndexed { i, lbl ->
+            val btn = TextView(this).apply {
+                text = lbl; textSize = 10f; typeface = mono
+                setTypeface(typeface, android.graphics.Typeface.BOLD)
+                setTextColor(purple); gravity = Gravity.CENTER; letterSpacing = 0.06f
+                isClickable = true; isFocusable = true
+                layoutParams = LinearLayout.LayoutParams(0, dp(34), 1f).also { it.setMargins(dp(2), 0, dp(2), 0) }
+                setOnClickListener {
+                    locCategory = catQuickPicks[i]; customCatInput.text.clear(); refreshCatBtns()
+                }
+            }
+            catBtns.add(btn); catRow.addView(btn)
+        }
+        // Typing a custom company overrides the quick-pick selection
+        customCatInput.addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, st: Int, c: Int, a: Int) {}
+            override fun onTextChanged(s: CharSequence?, st: Int, b: Int, c: Int) {}
+            override fun afterTextChanged(s: android.text.Editable?) { refreshCatBtns() }
+        })
+        panel2.addView(catRow)
+        panel2.addView(customCatInput)
+        refreshCatBtns()
 
         // Location picker
         panel2.addView(label("LOCATION", dimText).also {
@@ -1709,8 +2050,11 @@ class MainActivity : AppCompatActivity() {
                         "per_period" -> (rateRaw / (minsPerPeriod / 60.0)).toLong()
                         else         -> rateRaw
                     }
+                    // Custom company text overrides the quick-pick selection
+                    val typedCat = customCatInput.text.toString().trim()
+                    val category = if (typedCat.isNotEmpty()) typedCat else locCategory
                     CoroutineScope(Dispatchers.IO).launch {
-                        saveUserLocation(name, locType, lat, lng, radiusM, minsPerPeriod, rateVnd)
+                        saveUserLocation(name, locType, lat, lng, radiusM, minsPerPeriod, rateVnd, category)
                         withContext(Dispatchers.Main) {
                             Toast.makeText(this@MainActivity, "Location '$name' saved", Toast.LENGTH_SHORT).show()
                         }
@@ -1974,7 +2318,8 @@ class MainActivity : AppCompatActivity() {
                 UserLocationConfig(
                     name          = o.getString("name"),
                     minsPerPeriod = o.optInt("mins_per_period", 45),
-                    rateVnd       = o.optLong("rate_vnd", 520_000L)
+                    rateVnd       = o.optLong("rate_vnd", 520_000L),
+                    category      = o.optString("category", "")
                 )
             }
         } catch (_: Exception) { emptyList() }
@@ -1983,7 +2328,7 @@ class MainActivity : AppCompatActivity() {
     private fun saveUserLocation(
         name: String, type: String,
         lat: Double, lng: Double, radiusM: Double,
-        minsPerPeriod: Int, rateVnd: Long
+        minsPerPeriod: Int, rateVnd: Long, category: String = ""
     ) {
         val file = java.io.File(filesDir, "user_locations.json")
         val arr  = if (file.exists()) {
@@ -1995,12 +2340,12 @@ class MainActivity : AppCompatActivity() {
         for (i in 0 until arr.length()) {
             val o = arr.getJSONObject(i)
             if (o.optString("name").equals(name, ignoreCase = true)) {
-                arr.put(i, buildLocJson(name, type, lat, lng, radiusM, minsPerPeriod, rateVnd))
+                arr.put(i, buildLocJson(name, type, lat, lng, radiusM, minsPerPeriod, rateVnd, category))
                 replaced = true
                 break
             }
         }
-        if (!replaced) arr.put(buildLocJson(name, type, lat, lng, radiusM, minsPerPeriod, rateVnd))
+        if (!replaced) arr.put(buildLocJson(name, type, lat, lng, radiusM, minsPerPeriod, rateVnd, category))
 
         file.parentFile?.mkdirs()
         file.writeText(arr.toString(2), Charsets.UTF_8)
@@ -2011,7 +2356,7 @@ class MainActivity : AppCompatActivity() {
     private fun buildLocJson(
         name: String, type: String,
         lat: Double, lng: Double, radiusM: Double,
-        minsPerPeriod: Int, rateVnd: Long
+        minsPerPeriod: Int, rateVnd: Long, category: String = ""
     ): org.json.JSONObject = org.json.JSONObject().apply {
         put("name",           name)
         put("type",           type)
@@ -2020,6 +2365,7 @@ class MainActivity : AppCompatActivity() {
         put("radius_m",       radiusM)
         put("mins_per_period", minsPerPeriod)
         put("rate_vnd",       rateVnd)
+        put("category",       category)
     }
 
     private fun showLoading() {

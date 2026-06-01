@@ -161,6 +161,38 @@
 
                 </LinearLayout>
 
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center_horizontal">
+
+                    <TextView
+                        android:id="@+id/btnTabSummary"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="SUMMARY"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:fontFamily="monospace"
+                        android:letterSpacing="0.1"
+                        android:paddingTop="6dp"
+                        android:paddingBottom="8dp"
+                        android:paddingStart="12dp"
+                        android:paddingEnd="12dp"
+                        android:background="?attr/selectableItemBackground"/>
+
+                    <View
+                        android:id="@+id/tabIndicatorSummary"
+                        android:layout_width="match_parent"
+                        android:layout_height="2dp"
+                        android:background="@color/neon_sky"
+                        android:visibility="invisible"/>
+
+                </LinearLayout>
+
             </LinearLayout>
 
             <!-- Month nav (history only) -->
@@ -498,6 +530,24 @@
                             android:orientation="vertical"
                             android:paddingTop="4dp"
                             android:paddingBottom="8dp"/>
+
+                    </LinearLayout>
+
+                    <!-- SUMMARY TAB -->
+                    <LinearLayout
+                        android:id="@+id/layoutSummary"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:paddingTop="8dp"
+                        android:paddingBottom="96dp"
+                        android:visibility="gone">
+
+                        <LinearLayout
+                            android:id="@+id/summaryContainer"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"/>
 
                     </LinearLayout>
 

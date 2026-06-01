@@ -3,7 +3,12 @@ package com.homehub.dashboard.ui
 import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.os.Build
+import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.FileProvider
 import java.io.File
 import android.os.Bundle
@@ -80,6 +85,9 @@ class MainActivity : AppCompatActivity() {
         bindAlarms()
         startClock()
         sendLog("Started v${BuildConfig.VERSION_NAME} (build ${BuildConfig.VERSION_CODE}) on ${android.os.Build.MODEL}")
+        createUpdateChannel()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+            ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 9001)
         checkForUpdate()
     }
 
@@ -615,73 +623,67 @@ class MainActivity : AppCompatActivity() {
         }.also(handler::post)
     }
 
+    private fun createUpdateChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            getSystemService(NotificationManager::class.java)
+                .createNotificationChannel(NotificationChannel(UPDATE_CH, "App Updates", NotificationManager.IMPORTANCE_HIGH))
+    }
+
     private fun checkForUpdate() {
         if (updateInProgress) return
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val req = Request.Builder()
+                val resp = client.newCall(Request.Builder()
                     .url("https://app-updates.mcubittbuilders.workers.dev/api/version/dashboard")
-                    .build()
-                val resp = client.newCall(req).execute()
+                    .build()).execute()
                 if (!resp.isSuccessful) return@launch
                 val json = org.json.JSONObject(resp.body?.string() ?: return@launch)
                 val serverCode = json.optInt("versionCode", 0)
                 val apkUrl     = json.optString("apkUrl", "")
                 if (serverCode > BuildConfig.VERSION_CODE && apkUrl.isNotEmpty()) {
                     updateInProgress = true
-                    withContext(Dispatchers.Main) { promptInstall(serverCode, apkUrl) }
+                    downloadAndNotify(serverCode, apkUrl)
                 }
-            } catch (e: Exception) { }
+            } catch (_: Exception) { }
         }
     }
 
-    private fun promptInstall(serverCode: Int, apkUrl: String) {
-        Snackbar.make(binding.root, "Update available (build $serverCode)", Snackbar.LENGTH_INDEFINITE)
-            .setAction("INSTALL") { downloadAndInstall(apkUrl) }
-            .setActionTextColor(Color.parseColor("#FFB300"))
-            .show()
-    }
-
-    private fun downloadAndInstall(apkUrl: String) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
-            !packageManager.canRequestPackageInstalls()) {
-            Toast.makeText(this, "Enable 'Install unknown apps' for this app in Settings", Toast.LENGTH_LONG).show()
-            try { startActivity(Intent(android.provider.Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
-                Uri.parse("package:$packageName"))) } catch (e: Exception) { }
-            return
-        }
+    private fun downloadAndNotify(buildNum: Int, apkUrl: String) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val resp = client.newCall(Request.Builder().url(apkUrl).build()).execute()
-                if (!resp.isSuccessful) {
-                    updateInProgress = false
-                    withContext(Dispatchers.Main) {
-                        Toast.makeText(this@MainActivity, "Download failed: ${resp.code}", Toast.LENGTH_LONG).show()
-                    }
-                    return@launch
-                }
-                val bytes = resp.body?.bytes() ?: run {
-                    updateInProgress = false; return@launch
-                }
+                if (!resp.isSuccessful) { updateInProgress = false; return@launch }
+                val bytes = resp.body?.bytes() ?: run { updateInProgress = false; return@launch }
                 val apkFile = File(cacheDir, "update.apk")
                 apkFile.writeBytes(bytes)
-                val apkUri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                val apkUri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
                     FileProvider.getUriForFile(this@MainActivity, "$packageName.fileprovider", apkFile)
-                } else {
-                    Uri.fromFile(apkFile)
-                }
-                val installIntent = Intent(Intent.ACTION_VIEW).apply {
-                    setDataAndType(apkUri, "application/vnd.android.package-archive")
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
-                }
-                withContext(Dispatchers.Main) { startActivity(installIntent) }
-            } catch (e: Exception) {
-                updateInProgress = false
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(this@MainActivity, "Install failed: ${e.message}", Toast.LENGTH_LONG).show()
-                }
-            }
+                else Uri.fromFile(apkFile)
+                val pending = PendingIntent.getActivity(
+                    this@MainActivity, UPDATE_NOTIF_ID,
+                    Intent(Intent.ACTION_VIEW).apply {
+                        setDataAndType(apkUri, "application/vnd.android.package-archive")
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    },
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
+                )
+                NotificationManagerCompat.from(this@MainActivity).notify(UPDATE_NOTIF_ID,
+                    NotificationCompat.Builder(this@MainActivity, UPDATE_CH)
+                        .setSmallIcon(android.R.drawable.stat_sys_download_done)
+                        .setContentTitle("Dashboard update ready")
+                        .setContentText("Build $buildNum downloaded — tap to install")
+                        .setPriority(NotificationCompat.PRIORITY_HIGH)
+                        .setContentIntent(pending)
+                        .setAutoCancel(true)
+                        .build()
+                )
+            } catch (_: Exception) { updateInProgress = false }
         }
+    }
+
+    companion object {
+        private const val UPDATE_CH       = "app_update"
+        private const val UPDATE_NOTIF_ID = 9001
     }
 
     fun sendLog(msg: String, level: String = "INFO") {

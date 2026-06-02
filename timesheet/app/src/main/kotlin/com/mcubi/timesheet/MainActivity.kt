@@ -395,6 +395,9 @@ private fun formatHours(h: Double): String {
 private val MONTH_FMT = DateTimeFormatter.ofPattern("MMMM yyyy", Locale.ENGLISH)
 private val DATE_FMT  = DateTimeFormatter.ofPattern("EEE d MMM",  Locale.ENGLISH)
 
+// Cloud session backup endpoint (mirror of the local log on the update portal)
+private const val TS_BACKUP_URL = "https://app-updates.mcubittbuilders.workers.dev/api/timesheet/backup"
+
 // (Session list built programmatically in buildHistoryView — no adapter needed)
 
 // ─── Pending school for in-app verification ────────────────────────────────────
@@ -492,6 +495,7 @@ class MainActivity : AppCompatActivity() {
         showTab(1)
         fetchData()
         fetchTodayPending()
+        syncTimesheetBackup()   // pull cloud backup / restore on reinstall, then mirror up
         requestLocationPermissions()
     }
 
@@ -1033,6 +1037,63 @@ class MainActivity : AppCompatActivity() {
         val ts = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).format(java.util.Date())
         logFile.parentFile?.mkdirs()
         logFile.appendText("$ts [timesheet-app] INFO: $msg\n", Charsets.UTF_8)
+        pushBackup()
+    }
+
+    // ── Cloud backup ────────────────────────────────────────────────────────────
+    // Sessions are mirrored to the update portal so a reinstall restores them. The
+    // local log is always the source of truth; the cloud is a best-effort mirror,
+    // so the app keeps working with no internet at all.
+
+    private var cloudBackupReady = false
+
+    /** Every [TIMESHEET] session line currently in the local log. */
+    private fun sessionLinesFromLog(): List<String> =
+        if (!logFile.exists()) emptyList() else logFile.readLines().filter { "[TIMESHEET]" in it }
+
+    /** date|school key used to dedup sessions, or null if the line isn't a session. */
+    private fun sessionKeyOf(line: String): String? {
+        val m = Regex("""\[TIMESHEET\]\s+(\d{4}-\d{2}-\d{2})\s+(.+?)\s+\(""").find(line) ?: return null
+        val (date, school) = m.destructured
+        return "$date|$school"
+    }
+
+    /** On startup: pull the cloud backup, restore any sessions missing locally, then back up. */
+    private fun syncTimesheetBackup() {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val resp = client.newCall(Request.Builder().url(TS_BACKUP_URL).build()).execute()
+                if (!resp.isSuccessful) return@launch
+                val arr = org.json.JSONObject(resp.body?.string() ?: "{}").optJSONArray("sessions")
+                    ?: org.json.JSONArray()
+                val cloudLines = (0 until arr.length()).map { arr.getString(it) }
+                cloudBackupReady = true
+
+                val localKeys = sessionLinesFromLog().mapNotNull { sessionKeyOf(it) }.toSet()
+                // Append any session the cloud has that this device is missing (restore on reinstall).
+                val missing = cloudLines.filter { sessionKeyOf(it)?.let { k -> k !in localKeys } == true }
+                if (missing.isNotEmpty()) {
+                    logFile.parentFile?.mkdirs()
+                    logFile.appendText(missing.joinToString("\n", postfix = "\n"), Charsets.UTF_8)
+                    withContext(Dispatchers.Main) { fetchData() }
+                }
+                pushBackup()   // back up the current local set (incl. anything just restored)
+            } catch (_: Exception) {}
+        }
+    }
+
+    /** Overwrite the cloud mirror with this device's current sessions (propagates edits/deletes).
+     *  Never runs until we've confirmed the cloud state, so an empty fresh install can't wipe it. */
+    private fun pushBackup() {
+        if (!cloudBackupReady) return
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val body = org.json.JSONObject().apply {
+                    put("sessions", org.json.JSONArray(sessionLinesFromLog()))
+                }.toString().toRequestBody("application/json".toMediaType())
+                client.newCall(Request.Builder().url(TS_BACKUP_URL).post(body).build()).execute().close()
+            } catch (_: Exception) {}
+        }
     }
 
     private fun readMonthSessions(monthStr: String): TimesheetResponse {
@@ -2283,6 +2344,7 @@ class MainActivity : AppCompatActivity() {
         val lines = logFile.readLines(Charsets.UTF_8)
         val filtered = lines.filter { line -> !matchPat.containsMatchIn(line) }
         logFile.writeText(filtered.joinToString("\n").let { if (it.isNotEmpty()) "$it\n" else "" }, Charsets.UTF_8)
+        pushBackup()
     }
 
     private fun editSessionDialog(original: TimesheetSession) {
@@ -2453,6 +2515,7 @@ class MainActivity : AppCompatActivity() {
             } else line
         }
         logFile.writeText(lines.joinToString("\n").let { if (it.isNotEmpty()) "$it\n" else "" }, Charsets.UTF_8)
+        pushBackup()
     }
 
     // ── Company profiles (editable rate / period length per company) ───────────

@@ -558,12 +558,17 @@ class MainActivity : AppCompatActivity() {
                 val apkUri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
                     FileProvider.getUriForFile(this@MainActivity, "$packageName.fileprovider", apkFile)
                 else Uri.fromFile(apkFile)
+                val installIntent = Intent(Intent.ACTION_VIEW).apply {
+                    setDataAndType(apkUri, "application/vnd.android.package-archive")
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
+                }
+                // Force the system package installer so Android doesn't show an installer chooser.
+                packageManager.queryIntentActivities(installIntent, 0)
+                    .map { it.activityInfo.packageName }
+                    .firstOrNull { it.contains("packageinstaller", ignoreCase = true) }
+                    ?.let { installIntent.setPackage(it) }
                 val pending = PendingIntent.getActivity(
-                    this@MainActivity, UPDATE_NOTIF_ID,
-                    Intent(Intent.ACTION_VIEW).apply {
-                        setDataAndType(apkUri, "application/vnd.android.package-archive")
-                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
-                    },
+                    this@MainActivity, UPDATE_NOTIF_ID, installIntent,
                     PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
                 )
                 NotificationManagerCompat.from(this@MainActivity).notify(UPDATE_NOTIF_ID,

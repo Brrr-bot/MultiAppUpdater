@@ -27,4 +27,19 @@
         <item name="colorSurface">@color/card_bg</item>
         <item name="colorOnSurface">@color/text_primary</item>
     </style>
+
+    <!-- Dialog-style theme for QuickAddActivity (launched from home screen widget) -->
+    <style name="Theme.Finance.QuickAdd" parent="Theme.MaterialComponents.Dialog">
+        <item name="android:windowBackground">@color/card_bg</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowMinWidthMajor">92%</item>
+        <item name="android:windowMinWidthMinor">92%</item>
+        <item name="colorPrimary">@color/neon_sky</item>
+        <item name="colorPrimaryVariant">@color/neon_sky</item>
+        <item name="colorOnPrimary">@color/bg_space</item>
+        <item name="colorSurface">@color/card_bg</item>
+        <item name="colorOnSurface">@color/text_primary</item>
+        <item name="android:textColorPrimary">@color/text_primary</item>
+        <item name="android:statusBarColor">#00000000</item>
+    </style>
 </resources>

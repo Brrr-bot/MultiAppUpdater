@@ -138,8 +138,9 @@ class MainActivity : AppCompatActivity() {
         db = FinanceDb(this)
 
         // Tab buttons
-        b.btnTabAdd.setOnClickListener     { showTab(add = true) }
-        b.btnTabHistory.setOnClickListener { showTab(add = false) }
+        b.btnTabAdd.setOnClickListener     { showTab(0) }
+        b.btnTabHistory.setOnClickListener { showTab(1) }
+        b.btnTabSummary.setOnClickListener { showTab(2) }
 
         // Direction toggle
         b.btnDirIn.setOnClickListener  { setDirection("in") }
@@ -194,7 +195,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         setDirection("out")
-        showTab(add = true)
+        showTab(0)
         initPeriodFromSalaries()
         sendLog("Started v${BuildConfig.VERSION_NAME} (build ${BuildConfig.VERSION_CODE}) on ${android.os.Build.MODEL}")
         createUpdateChannel()
@@ -1272,18 +1273,152 @@ class MainActivity : AppCompatActivity() {
 
     // ── Tab management ────────────────────────────────────────────────────────
 
-    private fun showTab(add: Boolean) {
+    // 0 = Add, 1 = History, 2 = Summary
+    private fun showTab(tab: Int) {
         val sky = Color.parseColor("#29B6F6")
         val dim = Color.parseColor("#646464")
 
-        b.layoutAdd.visibility          = if (add) View.VISIBLE else View.GONE
-        b.layoutHistory.visibility      = if (add) View.GONE    else View.VISIBLE
-        b.btnTabAdd.setTextColor(        if (add) sky            else dim)
-        b.btnTabHistory.setTextColor(    if (add) dim            else sky)
-        b.tabIndicatorAdd.visibility     = if (add) View.VISIBLE  else View.INVISIBLE
-        b.tabIndicatorHistory.visibility = if (add) View.INVISIBLE else View.VISIBLE
+        b.layoutAdd.visibility     = if (tab == 0) View.VISIBLE else View.GONE
+        b.layoutHistory.visibility = if (tab == 1) View.VISIBLE else View.GONE
+        b.layoutSummary.visibility = if (tab == 2) View.VISIBLE else View.GONE
+        b.btnTabAdd.setTextColor(    if (tab == 0) sky else dim)
+        b.btnTabHistory.setTextColor(if (tab == 1) sky else dim)
+        b.btnTabSummary.setTextColor(if (tab == 2) sky else dim)
+        b.tabIndicatorAdd.visibility     = if (tab == 0) View.VISIBLE else View.INVISIBLE
+        b.tabIndicatorHistory.visibility = if (tab == 1) View.VISIBLE else View.INVISIBLE
+        b.tabIndicatorSummary.visibility = if (tab == 2) View.VISIBLE else View.INVISIBLE
 
-        if (!add) fetchHistory()
+        if (tab == 1) fetchHistory()
+        if (tab == 2) buildFinanceSummary()
+    }
+
+    // ── Summary tab: previous-month spending by category ────────────────────────
+
+    private var summaryMonth: java.time.YearMonth = java.time.YearMonth.now().minusMonths(1)
+
+    private fun buildFinanceSummary() {
+        val container = b.summaryContainer
+        container.removeAllViews()
+        val mono   = android.graphics.Typeface.MONOSPACE
+        val white  = Color.WHITE
+        val dim     = Color.parseColor("#969696")
+        val green   = Color.parseColor("#00E676")
+        val red      = Color.parseColor("#FF1744")
+        val gold     = Color.parseColor("#FFB300")
+        val cardBg   = Color.parseColor("#0D0D0D")
+
+        fun dp(v: Int) = (v * resources.displayMetrics.density).toInt()
+
+        // Month nav row
+        val nav = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL
+            setPadding(dp(8), dp(10), dp(8), dp(6))
+        }
+        val prev = TextView(this).apply {
+            text = "‹"; textSize = 24f; typeface = mono; setTextColor(Color.parseColor("#29B6F6"))
+            setPadding(dp(22), dp(4), dp(22), dp(4)); isClickable = true
+            setOnClickListener { summaryMonth = summaryMonth.minusMonths(1); buildFinanceSummary() }
+        }
+        val lbl = TextView(this).apply {
+            text = summaryMonth.format(java.time.format.DateTimeFormatter.ofPattern("MMMM yyyy", Locale.ENGLISH))
+            textSize = 14f; typeface = mono; setTextColor(white); setTypeface(typeface, android.graphics.Typeface.BOLD)
+            gravity = Gravity.CENTER; layoutParams = LinearLayout.LayoutParams(0, WRAP, 1f)
+        }
+        val next = TextView(this).apply {
+            text = "›"; textSize = 24f; typeface = mono; setTextColor(Color.parseColor("#29B6F6"))
+            setPadding(dp(22), dp(4), dp(22), dp(4)); isClickable = true
+            setOnClickListener {
+                if (summaryMonth.isBefore(java.time.YearMonth.now())) { summaryMonth = summaryMonth.plusMonths(1); buildFinanceSummary() }
+            }
+        }
+        nav.addView(prev); nav.addView(lbl); nav.addView(next)
+        container.addView(nav)
+
+        CoroutineScope(Dispatchers.IO).launch {
+            val from = summaryMonth.atDay(1)
+            val to   = summaryMonth.atEndOfMonth()
+            val arr  = db.getCategoryBreakdown(from, to)
+            var totalIn = 0.0; var totalOut = 0.0
+            val rows = ArrayList<Triple<String, DoubleArray, IntArray>>()
+            for (i in 0 until arr.length()) {
+                val o = arr.getJSONObject(i)
+                val cIn = o.getDouble("in"); val cOut = o.getDouble("out")
+                totalIn += cIn; totalOut += cOut
+                rows.add(Triple(o.getString("category"),
+                    doubleArrayOf(cIn, cOut), intArrayOf(o.getInt("inCount"), o.getInt("outCount"))))
+            }
+            withContext(Dispatchers.Main) {
+                if (rows.isEmpty()) {
+                    container.addView(TextView(this@MainActivity).apply {
+                        text = "No entries this month"; setTextColor(dim); textSize = 13f; typeface = mono
+                        gravity = Gravity.CENTER; setPadding(dp(32), dp(48), dp(32), dp(32))
+                    })
+                    return@withContext
+                }
+                // Totals card
+                val totalsCard = LinearLayout(this@MainActivity).apply {
+                    orientation = LinearLayout.HORIZONTAL
+                    setBackgroundColor(Color.parseColor("#140E00"))
+                    setPadding(dp(16), dp(12), dp(16), dp(12))
+                    layoutParams = LinearLayout.LayoutParams(MATCH, WRAP).also { it.setMargins(dp(12), dp(4), dp(12), dp(8)) }
+                }
+                fun totCol(label: String, value: Double, color: Int): LinearLayout = LinearLayout(this@MainActivity).apply {
+                    orientation = LinearLayout.VERTICAL; layoutParams = LinearLayout.LayoutParams(0, WRAP, 1f)
+                    addView(TextView(this@MainActivity).apply { text = label; setTextColor(dim); textSize = 9f; typeface = mono; letterSpacing = 0.1f })
+                    addView(TextView(this@MainActivity).apply { text = fmt(value); setTextColor(color); textSize = 14f; typeface = mono; setTypeface(typeface, android.graphics.Typeface.BOLD) })
+                }
+                totalsCard.addView(totCol("IN", totalIn, green))
+                totalsCard.addView(totCol("OUT", totalOut, red))
+                totalsCard.addView(totCol("NET", totalIn - totalOut, gold))
+                container.addView(totalsCard)
+
+                // Category rows (expenses emphasised; show count + amount, with a bar)
+                val maxOut = rows.maxOf { it.second[1] }.coerceAtLeast(1.0)
+                for ((cat, amounts, counts) in rows) {
+                    val cIn = amounts[0]; val cOut = amounts[1]
+                    val card = LinearLayout(this@MainActivity).apply {
+                        orientation = LinearLayout.VERTICAL
+                        setBackgroundColor(cardBg)
+                        setPadding(dp(14), dp(10), dp(14), dp(10))
+                        layoutParams = LinearLayout.LayoutParams(MATCH, WRAP).also { it.setMargins(dp(12), dp(4), dp(12), 0) }
+                    }
+                    val top = LinearLayout(this@MainActivity).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
+                    top.addView(TextView(this@MainActivity).apply {
+                        text = cat; setTextColor(white); textSize = 13f; typeface = mono
+                        setTypeface(typeface, android.graphics.Typeface.BOLD)
+                        layoutParams = LinearLayout.LayoutParams(0, WRAP, 1f)
+                    })
+                    top.addView(TextView(this@MainActivity).apply {
+                        val n = counts[1] + counts[0]
+                        text = "$n ×"; setTextColor(dim); textSize = 10f; typeface = mono
+                        layoutParams = LinearLayout.LayoutParams(WRAP, WRAP).also { it.marginEnd = dp(10) }
+                    })
+                    top.addView(TextView(this@MainActivity).apply {
+                        text = if (cOut > 0) fmt(cOut) else "+${fmt(cIn)}"
+                        setTextColor(if (cOut > 0) red else green); textSize = 13f; typeface = mono
+                        setTypeface(typeface, android.graphics.Typeface.BOLD)
+                    })
+                    card.addView(top)
+                    // proportion bar (expense share)
+                    if (cOut > 0) {
+                        val barBg = LinearLayout(this@MainActivity).apply {
+                            setBackgroundColor(Color.parseColor("#222222"))
+                            layoutParams = LinearLayout.LayoutParams(MATCH, dp(3)).also { it.topMargin = dp(6) }
+                        }
+                        val fillW = ((cOut / maxOut) * 100).toInt().coerceIn(2, 100)
+                        barBg.addView(View(this@MainActivity).apply {
+                            setBackgroundColor(red)
+                            layoutParams = LinearLayout.LayoutParams(0, MATCH, fillW.toFloat())
+                        })
+                        barBg.addView(View(this@MainActivity).apply {
+                            layoutParams = LinearLayout.LayoutParams(0, MATCH, (100 - fillW).toFloat())
+                        })
+                        card.addView(barBg)
+                    }
+                    container.addView(card)
+                }
+            }
+        }
     }
 
     // ── Formatting ────────────────────────────────────────────────────────────

@@ -169,6 +169,38 @@ class FinanceDb(context: Context) : SQLiteOpenHelper(context, "finance.db", null
         return cursor.use { if (it.moveToFirst()) it.getDouble(0) else 0.0 }
     }
 
+    /** Per-category totals for a date range, split into income (in) and expense (out).
+     *  Returns an array of {category, in, out} objects, sorted by out desc. */
+    fun getCategoryBreakdown(from: LocalDate, to: LocalDate): JSONArray {
+        val start = from.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
+        val end   = to.plusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
+        val cursor = readableDatabase.rawQuery(
+            """SELECT category, direction, SUM(amount) AS total, COUNT(*) AS cnt
+               FROM entries WHERE ts >= ? AND ts < ?
+               GROUP BY category, direction""",
+            arrayOf(start.toString(), end.toString())
+        )
+        // category -> [in, out, inCount, outCount]
+        val map = LinkedHashMap<String, DoubleArray>()
+        cursor.use {
+            while (it.moveToNext()) {
+                val cat = it.getString(0); val dir = it.getString(1)
+                val total = it.getDouble(2); val cnt = it.getDouble(3)
+                val row = map.getOrPut(cat) { DoubleArray(4) }
+                if (dir == "in") { row[0] = total; row[2] = cnt } else { row[1] = total; row[3] = cnt }
+            }
+        }
+        val list = map.entries.sortedByDescending { it.value[1] }   // by expense desc
+        val out = JSONArray()
+        for ((cat, v) in list) {
+            out.put(JSONObject().apply {
+                put("category", cat); put("in", v[0]); put("out", v[1])
+                put("inCount", v[2].toInt()); put("outCount", v[3].toInt())
+            })
+        }
+        return out
+    }
+
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     private fun entryToValues(e: JSONObject) = ContentValues().apply {

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:background="#0D0D0D"
+    android:padding="6dp">
+
+    <TextView
+        android:id="@+id/btnWidgetIn"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:text="▲ MONEY IN"
+        android:gravity="center"
+        android:textSize="12sp"
+        android:fontFamily="monospace"
+        android:textStyle="bold"
+        android:textColor="#00E676"
+        android:background="#0A2018"
+        android:layout_marginEnd="3dp" />
+
+    <TextView
+        android:id="@+id/btnWidgetOut"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:text="▼ MONEY OUT"
+        android:gravity="center"
+        android:textSize="12sp"
+        android:fontFamily="monospace"
+        android:textStyle="bold"
+        android:textColor="#FF1744"
+        android:background="#1A0808"
+        android:layout_marginStart="3dp" />
+
+</LinearLayout>

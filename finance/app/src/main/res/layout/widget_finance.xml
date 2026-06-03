@@ -5,34 +5,45 @@
     android:layout_height="match_parent"
     android:orientation="horizontal"
     android:background="#0D0D0D"
-    android:padding="6dp">
+    android:padding="4dp">
 
     <TextView
         android:id="@+id/btnWidgetIn"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:text="▲ MONEY IN"
+        android:text="▲ IN"
         android:gravity="center"
-        android:textSize="12sp"
+        android:textSize="11sp"
         android:fontFamily="monospace"
         android:textStyle="bold"
         android:textColor="#00E676"
         android:background="#0A2018"
-        android:layout_marginEnd="3dp" />
+        android:layout_marginEnd="2dp" />
 
     <TextView
         android:id="@+id/btnWidgetOut"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:text="▼ MONEY OUT"
+        android:text="▼ OUT"
         android:gravity="center"
-        android:textSize="12sp"
+        android:textSize="11sp"
         android:fontFamily="monospace"
         android:textStyle="bold"
         android:textColor="#FF1744"
         android:background="#1A0808"
-        android:layout_marginStart="3dp" />
+        android:layout_marginStart="2dp"
+        android:layout_marginEnd="2dp" />
+
+    <TextView
+        android:id="@+id/btnWidgetGear"
+        android:layout_width="26dp"
+        android:layout_height="match_parent"
+        android:text="⚙"
+        android:gravity="center"
+        android:textSize="10sp"
+        android:textColor="#444444"
+        android:background="#111111" />
 
 </LinearLayout>

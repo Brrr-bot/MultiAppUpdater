@@ -51,12 +51,18 @@
             </intent-filter>
         </activity>
 
-        <!-- Launched from widget buttons -->
+        <!-- Launched from widget IN/OUT buttons -->
         <activity
             android:name=".QuickAddActivity"
             android:exported="false"
             android:theme="@style/Theme.Finance.QuickAdd"
             android:windowSoftInputMode="adjustResize" />
+
+        <!-- Widget size settings -->
+        <activity
+            android:name=".WidgetSettingsActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Finance.QuickAdd" />
 
     </application>
 

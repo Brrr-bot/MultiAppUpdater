@@ -4,45 +4,82 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="horizontal"
-    android:background="#0D0D0D"
+    android:background="#0A0A0A"
     android:padding="4dp">
 
-    <TextView
+    <!-- MONEY IN button -->
+    <LinearLayout
         android:id="@+id/btnWidgetIn"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:text="▲ IN"
+        android:orientation="vertical"
         android:gravity="center"
-        android:textSize="11sp"
-        android:fontFamily="monospace"
-        android:textStyle="bold"
-        android:textColor="#00E676"
         android:background="#0A2018"
-        android:layout_marginEnd="2dp" />
+        android:layout_marginEnd="2dp"
+        android:padding="4dp">
 
-    <TextView
+        <ImageView
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/ic_arrow_up"
+            android:scaleType="fitCenter" />
+
+        <TextView
+            android:id="@+id/tvWidgetInLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="MONEY IN"
+            android:textSize="9sp"
+            android:fontFamily="monospace"
+            android:textStyle="bold"
+            android:textColor="#00E676"
+            android:layout_marginTop="3dp"
+            android:letterSpacing="0.05" />
+
+    </LinearLayout>
+
+    <!-- MONEY OUT button -->
+    <LinearLayout
         android:id="@+id/btnWidgetOut"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:text="▼ OUT"
+        android:orientation="vertical"
         android:gravity="center"
-        android:textSize="11sp"
-        android:fontFamily="monospace"
-        android:textStyle="bold"
-        android:textColor="#FF1744"
         android:background="#1A0808"
         android:layout_marginStart="2dp"
-        android:layout_marginEnd="2dp" />
+        android:layout_marginEnd="2dp"
+        android:padding="4dp">
 
+        <ImageView
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/ic_arrow_down"
+            android:scaleType="fitCenter" />
+
+        <TextView
+            android:id="@+id/tvWidgetOutLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="MONEY OUT"
+            android:textSize="9sp"
+            android:fontFamily="monospace"
+            android:textStyle="bold"
+            android:textColor="#FF1744"
+            android:layout_marginTop="3dp"
+            android:letterSpacing="0.05" />
+
+    </LinearLayout>
+
+    <!-- Gear / settings -->
     <TextView
         android:id="@+id/btnWidgetGear"
         android:layout_width="26dp"
         android:layout_height="match_parent"
-        android:text="⚙"
+        android:text="&#9881;"
         android:gravity="center"
-        android:textSize="10sp"
+        android:textSize="11sp"
         android:textColor="#444444"
         android:background="#111111" />
 

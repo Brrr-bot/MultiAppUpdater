@@ -28,12 +28,19 @@
         <item name="colorOnSurface">@color/text_primary</item>
     </style>
 
-    <!-- Dialog-style theme for QuickAddActivity (launched from home screen widget) -->
+    <!-- Animation style for the widget popup -->
+    <style name="WidgetPopupAnimation" parent="@android:style/Animation.Dialog">
+        <item name="android:windowEnterAnimation">@anim/slide_up</item>
+        <item name="android:windowExitAnimation">@anim/slide_down</item>
+    </style>
+
+    <!-- Dialog-style theme for QuickAddActivity and WidgetSettingsActivity -->
     <style name="Theme.Finance.QuickAdd" parent="Theme.MaterialComponents.Dialog">
         <item name="android:windowBackground">@color/card_bg</item>
         <item name="android:windowIsFloating">true</item>
         <item name="android:windowMinWidthMajor">92%</item>
         <item name="android:windowMinWidthMinor">92%</item>
+        <item name="android:windowAnimationStyle">@style/WidgetPopupAnimation</item>
         <item name="colorPrimary">@color/neon_sky</item>
         <item name="colorPrimaryVariant">@color/neon_sky</item>
         <item name="colorOnPrimary">@color/bg_space</item>

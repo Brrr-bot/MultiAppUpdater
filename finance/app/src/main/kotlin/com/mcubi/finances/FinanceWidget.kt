@@ -18,10 +18,10 @@ class FinanceWidget : AppWidgetProvider() {
         fun updateWidget(context: Context, manager: AppWidgetManager, widgetId: Int) {
             val views = RemoteViews(context.packageName, R.layout.widget_finance)
 
-            // Apply saved text size preference
+            // Apply saved text size to labels
             val sp = WidgetSettingsActivity.getTextSize(context).toFloat()
-            views.setTextViewTextSize(R.id.btnWidgetIn,  TypedValue.COMPLEX_UNIT_SP, sp)
-            views.setTextViewTextSize(R.id.btnWidgetOut, TypedValue.COMPLEX_UNIT_SP, sp)
+            views.setTextViewTextSize(R.id.tvWidgetInLabel,  TypedValue.COMPLEX_UNIT_SP, sp)
+            views.setTextViewTextSize(R.id.tvWidgetOutLabel, TypedValue.COMPLEX_UNIT_SP, sp)
 
             fun pending(dir: String, reqCode: Int): PendingIntent {
                 val i = Intent(context, QuickAddActivity::class.java).apply {
@@ -44,6 +44,7 @@ class FinanceWidget : AppWidgetProvider() {
                 )
             }
 
+            // Clicks on the whole LinearLayout blocks
             views.setOnClickPendingIntent(R.id.btnWidgetIn,   pending("in",  1))
             views.setOnClickPendingIntent(R.id.btnWidgetOut,  pending("out", 2))
             views.setOnClickPendingIntent(R.id.btnWidgetGear, gearPending())

@@ -7,7 +7,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="208dp"
+        android:layout_height="152dp"
         android:layout_gravity="center_vertical"
         android:orientation="horizontal"
         android:gravity="center"
@@ -17,21 +17,21 @@
         <ImageView
             android:id="@+id/btnWidgetIn"
             android:layout_width="0dp"
-            android:layout_height="188dp"
+            android:layout_height="132dp"
             android:layout_weight="1"
             android:background="@drawable/widget_button_in_bg"
-            android:padding="34dp"
+            android:padding="24dp"
             android:src="@drawable/ic_wallet_in"
             android:contentDescription="Money in" />
 
         <ImageView
             android:id="@+id/btnWidgetOut"
             android:layout_width="0dp"
-            android:layout_height="188dp"
+            android:layout_height="132dp"
             android:layout_weight="1"
             android:layout_marginStart="10dp"
             android:background="@drawable/widget_button_out_bg"
-            android:padding="34dp"
+            android:padding="24dp"
             android:src="@drawable/ic_wallet_out"
             android:contentDescription="Money out" />
 

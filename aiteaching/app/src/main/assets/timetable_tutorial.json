@@ -1,0 +1,1168 @@
+{
+  "tutorialId": "timetable-vietnam",
+  "title": {
+    "en": "Build a Neon Timetable with AI",
+    "vn": "Xây dựng Thời Khóa Biểu Neon với AI"
+  },
+  "steps": [
+    {
+      "stepNumber": 1,
+      "type": "lesson",
+      "title": {
+        "en": "Step 1: Describe the app and make a plan",
+        "vn": "Bước 1: Mô tả app và lập kế hoạch"
+      },
+      "instruction": {
+        "en": "Every school day has the same shape: periods, a break, more periods, lunch, then afternoon periods. We're going to build an app that draws YOUR weekly timetable — and lets you tap any period to add homework with a reminder before it's due.\n\nYou don't write code first. You DESCRIBE the app in plain words, and let the AI turn your description into a plan. The most important skill today is thinking about the WORKFLOW: what does the user do first, second, third?",
+        "vn": "Mỗi ngày học đều có cùng một hình dạng: các tiết học, giờ ra chơi, thêm tiết nữa, giờ ăn trưa, rồi các tiết buổi chiều. Chúng ta sẽ xây một app vẽ thời khóa biểu tuần CỦA BẠN — và cho phép chạm vào bất kỳ tiết nào để thêm bài tập kèm nhắc nhở trước hạn nộp.\n\nBạn không viết code trước. Bạn MÔ TẢ app bằng lời thường, rồi để AI biến mô tả thành kế hoạch. Kỹ năng quan trọng nhất hôm nay là suy nghĩ về QUY TRÌNH: người dùng làm gì trước, gì tiếp theo, gì sau đó?"
+      },
+      "promptText": {
+        "en": "Hi! I've never built an app before and I have zero programming experience. I want to build an Android app that shows a weekly school timetable. Each day has class periods, plus break-time and lunch-time bars between them. The user can tap any period to add homework with a due date, and the app reminds them before the homework is due. Can you help me build this step by step? Before any code, what are the main pieces this app needs, and in what order should we build them?",
+        "vn": "Xin chào! Tôi chưa bao giờ làm app và hoàn toàn không có kinh nghiệm lập trình. Tôi muốn xây một app Android hiển thị thời khóa biểu tuần. Mỗi ngày có các tiết học, cùng các thanh giờ ra chơi và giờ ăn trưa xen giữa. Người dùng có thể chạm vào tiết bất kỳ để thêm bài tập kèm hạn nộp, và app nhắc trước khi tới hạn. Bạn giúp tôi xây từng bước nhé? Trước khi viết code, app này cần những phần chính nào, và nên xây theo thứ tự nào?"
+      },
+      "promptRationale": {
+        "en": "Notice we ask for the PLAN before the code. A good first prompt names the goal, says you're a beginner, and asks the AI to break the work into ordered pieces. That ordered list IS the workflow you'll build.",
+        "vn": "Để ý ta hỏi KẾ HOẠCH trước khi viết code. Một prompt đầu tốt nêu mục tiêu, nói rõ bạn là người mới, và nhờ AI chia công việc thành các phần có thứ tự. Danh sách có thứ tự đó CHÍNH LÀ quy trình bạn sẽ xây."
+      },
+      "aiResponse": {
+        "en": "Great idea — a timetable + homework reminder app is a perfect first project because every feature links to the next. Here's the plan, in build order:\n\n1) Decide the LOOK (colour theme, card style, break-bar style) — design first so everything matches.\n2) Model the DATA — what is a 'period'? What is a 'break'? What is a piece of 'homework'?\n3) Draw the DAY — a scrolling column of period cards with break/lunch bars between them.\n4) ADD a period — a form that creates a new card.\n5) SAVE everything so it survives closing the app.\n6) Tap a period to ADD HOMEWORK with a due date.\n7) SCHEDULE a reminder notification before the due date.\n8) Polish and connect it all.\n\nEach piece feeds the next: the data model feeds the day view, the day view lets you add periods, periods hold homework, homework drives reminders. Ready? Let's start with the look.",
+        "vn": "Ý tưởng tuyệt — app thời khóa biểu + nhắc bài tập là dự án đầu hoàn hảo vì mọi tính năng đều liên kết với nhau. Đây là kế hoạch, theo thứ tự xây:\n\n1) Quyết định DIỆN MẠO (bảng màu, kiểu thẻ, kiểu thanh giờ nghỉ) — thiết kế trước để mọi thứ đồng bộ.\n2) Mô hình hóa DỮ LIỆU — 'tiết học' là gì? 'giờ nghỉ' là gì? một 'bài tập' là gì?\n3) Vẽ MỘT NGÀY — một cột cuộn gồm các thẻ tiết học với thanh giờ nghỉ/ăn trưa xen giữa.\n4) THÊM một tiết — biểu mẫu tạo thẻ mới.\n5) LƯU mọi thứ để không mất khi đóng app.\n6) Chạm vào tiết để THÊM BÀI TẬP kèm hạn nộp.\n7) ĐẶT thông báo nhắc trước hạn nộp.\n8) Hoàn thiện và kết nối tất cả.\n\nMỗi phần nuôi phần kế: mô hình dữ liệu nuôi màn hình ngày, màn hình ngày cho phép thêm tiết, tiết chứa bài tập, bài tập điều khiển nhắc nhở. Sẵn sàng chưa? Bắt đầu với diện mạo."
+      },
+      "codeSnippets": [
+        {
+          "fileName": "Project Plan",
+          "code": "// Neon Timetable — Build Order\n//\n// LANGUAGE:  Kotlin\n// UI:        Jetpack Compose (declarative)\n// STORAGE:   SharedPreferences + JSON (no server needed)\n// REMINDERS: AlarmManager + Notifications\n//\n// FEATURES & HOW THEY LINK:\n//   Theme ........ colours every card & bar\n//   Period ....... one class block (subject, time, room)\n//   Break/Lunch .. a 'breakbar' between periods\n//   Day View ..... shows periods + breakbars in time order\n//   Add Period ... form -> creates a Period -> saved\n//   Homework ..... attached to a Period, has a due date\n//   Reminder ..... fires a notification before due date\n//\n// app/src/main/java/com/example/timetable/\n//   MainActivity.kt        <- app entry\n//   models/Models.kt       <- Period, Break, Homework\n//   data/Storage.kt        <- save & load\n//   ui/TimetableScreen.kt  <- the day view\n//   ui/AddPeriodDialog.kt  <- the add form\n//   reminder/Reminder.kt   <- schedules notifications"
+        }
+      ],
+      "answerChoices": [
+        {
+          "en": "Design the look first, then build the features",
+          "vn": "Thiết kế diện mạo trước, rồi xây tính năng"
+        },
+        {
+          "en": "Build features first, add the look at the end",
+          "vn": "Xây tính năng trước, thêm diện mạo ở cuối"
+        }
+      ],
+      "clawdExplanation": {
+        "en": "You just did what real developers do: you turned a vague idea into an ordered PLAN before writing a single line. Notice the AI explained how each feature links to the next — keep that linking in your head, because by the end you'll explain the whole app yourself. Next: choosing the colours.",
+        "vn": "Bạn vừa làm điều mà lập trình viên thật làm: biến ý tưởng mơ hồ thành KẾ HOẠCH có thứ tự trước khi viết dòng nào. Để ý AI giải thích mỗi tính năng liên kết với phần kế ra sao — hãy giữ liên kết đó trong đầu, vì đến cuối bạn sẽ tự giải thích toàn bộ app. Tiếp theo: chọn màu sắc."
+      },
+      "vocabTerms": [
+        {
+          "term": "Workflow",
+          "color": "#60A5FA",
+          "explanation": {
+            "en": "The ordered steps a user (or builder) takes — first this, then that. Planning the workflow is half the work.",
+            "vn": "Chuỗi bước có thứ tự mà người dùng (hoặc người xây) thực hiện — đầu tiên cái này, rồi cái kia. Lập quy trình là một nửa công việc."
+          }
+        },
+        {
+          "term": "Jetpack Compose",
+          "color": "#FBBF24",
+          "explanation": {
+            "en": "Android's modern way to build screens by DESCRIBING what they look like, instead of dragging boxes.",
+            "vn": "Cách hiện đại của Android để xây màn hình bằng cách MÔ TẢ chúng trông thế nào, thay vì kéo thả hộp."
+          }
+        },
+        {
+          "term": "Data model",
+          "color": "#A78BFA",
+          "explanation": {
+            "en": "How you describe a real thing (a period, a homework) as data the app can store and use.",
+            "vn": "Cách bạn mô tả một vật thật (tiết học, bài tập) thành dữ liệu mà app có thể lưu và dùng."
+          }
+        }
+      ],
+      "codeExplainer": {
+        "en": "This isn't code yet — it's a map. It lists every file the app will need and, more importantly, how the features connect: the theme colours the cards, periods hold homework, homework drives reminders. Whenever you feel lost later, come back to this map.",
+        "vn": "Đây chưa phải code — đây là bản đồ. Nó liệt kê mọi file app cần và, quan trọng hơn, cách các tính năng kết nối: theme tô màu thẻ, tiết chứa bài tập, bài tập điều khiển nhắc nhở. Khi nào thấy lạc lối sau này, hãy quay lại bản đồ này."
+      }
+    },
+    {
+      "stepNumber": 2,
+      "type": "lesson",
+      "title": {
+        "en": "Step 2: Choose your colour theme",
+        "vn": "Bước 2: Chọn bảng màu của bạn"
+      },
+      "instruction": {
+        "en": "Design first. A timetable is something you'll stare at every day, so the colours matter. The AI can build ANY palette you like — your job is to choose one and describe it clearly.\n\nPick the theme that feels right to you. There's no wrong answer — but notice how each palette uses ONE dark background and a few bright 'accent' colours. That's a pro trick: a calm background makes the accents glow.",
+        "vn": "Thiết kế trước. Thời khóa biểu là thứ bạn nhìn mỗi ngày, nên màu sắc rất quan trọng. AI có thể xây BẤT KỲ bảng màu nào bạn thích — việc của bạn là chọn một và mô tả rõ ràng.\n\nHãy chọn theme bạn thấy hợp. Không có đáp án sai — nhưng để ý mỗi bảng màu dùng MỘT nền tối và vài màu 'điểm nhấn' tươi sáng. Đó là mẹo chuyên nghiệp: nền dịu làm điểm nhấn nổi bật."
+      },
+      "promptText": {
+        "en": "Let's set the colour theme first. I want a dark app with bright neon accent colours, like a glowing dashboard. Create a Colors.kt file in Jetpack Compose with a Theme object that holds: a very dark background, a slightly lighter card surface, a card border colour, and four bright accent colours I can assign to different subjects. Use the 'Neon Night' palette: background #03040A, surface #0D0D0D, border #1E1E1E, accents sky #29B6F6, green #00E676, gold #FFB300, purple #CE93D8.",
+        "vn": "Hãy đặt bảng màu trước. Tôi muốn app nền tối với màu điểm nhấn neon tươi sáng, như một bảng điều khiển phát sáng. Tạo file Colors.kt trong Jetpack Compose với một object Theme chứa: nền rất tối, mặt thẻ sáng hơn chút, màu viền thẻ, và bốn màu điểm nhấn tươi để gán cho các môn khác nhau. Dùng bảng 'Neon Night': nền #03040A, mặt #0D0D0D, viền #1E1E1E, điểm nhấn xanh trời #29B6F6, xanh lá #00E676, vàng #FFB300, tím #CE93D8."
+      },
+      "promptRationale": {
+        "en": "Whatever theme you tapped, the prompt names the EXACT hex codes. AI can't read your mind about colour — '#29B6F6' is precise, 'a nice blue' is not. Naming a background + surface + border + accents is the standard recipe for a clean dark UI.",
+        "vn": "Dù bạn chạm theme nào, prompt nêu CHÍNH XÁC mã hex. AI không đọc được ý bạn về màu — '#29B6F6' thì chính xác, 'một màu xanh đẹp' thì không. Nêu nền + mặt + viền + điểm nhấn là công thức chuẩn cho giao diện tối gọn gàng."
+      },
+      "aiResponse": {
+        "en": "Theme locked in. I've made a single `Theme` object so every screen reads its colours from ONE place — change a colour here and the whole app updates. The four accents let you colour-code subjects (Maths = sky, English = green, and so on), which makes the timetable instantly readable.\n\nKeeping all colours in one file is called a 'single source of truth'. It's why pros never type a raw colour code twice.",
+        "vn": "Đã chốt theme. Tôi tạo một object `Theme` duy nhất để mọi màn hình đọc màu từ MỘT nơi — đổi màu ở đây thì cả app cập nhật. Bốn điểm nhấn cho phép bạn mã màu các môn (Toán = xanh trời, Anh = xanh lá, v.v.), giúp thời khóa biểu dễ đọc ngay.\n\nGiữ mọi màu trong một file gọi là 'nguồn chân lý duy nhất'. Đó là lý do dân chuyên không bao giờ gõ mã màu thô hai lần."
+      },
+      "codeSnippets": [
+        {
+          "fileName": "ui/theme/Colors.kt",
+          "code": "package com.example.timetable.ui.theme\n\nimport androidx.compose.ui.graphics.Color\n\n// Single source of truth for every colour in the app.\nobject Theme {\n    val background = Color(0xFF03040A)   // near-black space\n    val surface    = Color(0xFF0D0D0D)   // card fill\n    val border     = Color(0xFF1E1E1E)   // card outline\n    val textMain   = Color(0xFFFFFFFF)\n    val textDim    = Color(0xFF969696)\n\n    // Accent colours — assign one per subject\n    val sky    = Color(0xFF29B6F6)\n    val green  = Color(0xFF00E676)\n    val gold   = Color(0xFFFFB300)\n    val purple = Color(0xFFCE93D8)\n\n    val accents = listOf(sky, green, gold, purple)\n}"
+        }
+      ],
+      "answerChoices": [
+        {
+          "en": "Neon Night — black background, sky/green/gold/purple",
+          "vn": "Neon Night — nền đen, xanh trời/xanh lá/vàng/tím"
+        },
+        {
+          "en": "Ocean Deep — navy background, teal/aqua/blue accents",
+          "vn": "Ocean Deep — nền xanh navy, điểm nhấn ngọc/aqua/xanh dương"
+        },
+        {
+          "en": "Sunset Warm — plum background, coral/peach/violet accents",
+          "vn": "Sunset Warm — nền mận, điểm nhấn san hô/đào/tím violet"
+        },
+        {
+          "en": "Forest Calm — dark-green background, leaf/lime/moss accents",
+          "vn": "Forest Calm — nền xanh rừng, điểm nhấn lá/chanh/rêu"
+        }
+      ],
+      "clawdExplanation": {
+        "en": "You made your first DESIGN decision. The key idea: all colours live in ONE `Theme` object, so the whole app stays consistent and is easy to re-skin later. If you picked a different palette, you'd just swap the hex codes in this one file. Next: the shape of the cards.",
+        "vn": "Bạn vừa ra quyết định THIẾT KẾ đầu tiên. Ý chính: mọi màu nằm trong MỘT object `Theme`, nên cả app luôn nhất quán và dễ đổi giao diện sau. Nếu chọn bảng màu khác, bạn chỉ cần đổi mã hex trong đúng file này. Tiếp theo: hình dạng của thẻ."
+      },
+      "vocabTerms": [
+        {
+          "term": "Theme object",
+          "color": "#29B6F6",
+          "explanation": {
+            "en": "One Kotlin object holding every colour. Change it once, the whole app changes.",
+            "vn": "Một object Kotlin chứa mọi màu. Đổi một lần, cả app đổi theo."
+          }
+        },
+        {
+          "term": "Accent colour",
+          "color": "#00E676",
+          "explanation": {
+            "en": "A bright colour used sparingly to draw the eye — here, one per subject.",
+            "vn": "Màu tươi dùng tiết chế để hút mắt — ở đây, mỗi môn một màu."
+          }
+        },
+        {
+          "term": "Single source of truth",
+          "color": "#FFB300",
+          "explanation": {
+            "en": "Storing each fact in exactly one place so it can never disagree with itself.",
+            "vn": "Lưu mỗi thông tin ở đúng một nơi để nó không bao giờ tự mâu thuẫn."
+          }
+        }
+      ],
+      "codeExplainer": {
+        "en": "This file defines the app's whole palette as named colours: background, surface, border, and four accents. Every card and bar you build later will read from here. That's why changing the theme is so easy — there's only one file to touch.",
+        "vn": "File này định nghĩa toàn bộ bảng màu của app thành các màu có tên: nền, mặt, viền, và bốn điểm nhấn. Mọi thẻ và thanh bạn xây sau sẽ đọc từ đây. Đó là lý do đổi theme dễ đến vậy — chỉ có một file để sửa."
+      }
+    },
+    {
+      "stepNumber": 3,
+      "type": "lesson",
+      "title": {
+        "en": "Step 3: Choose your period-card design",
+        "vn": "Bước 3: Chọn kiểu thẻ tiết học"
+      },
+      "instruction": {
+        "en": "Each class period will be a 'card' — a box holding the subject, time and room. The SHAPE of that box sets the whole mood of the app.\n\nLook at the options. A 'card' in Compose is just a `Surface` with three choices: how round are the corners? does it have a glowing border? is it filled solid or see-through? Pick the style you want and the AI will build a reusable `PeriodCard` you'll use everywhere.",
+        "vn": "Mỗi tiết học sẽ là một 'thẻ' — hộp chứa môn học, giờ và phòng. HÌNH DẠNG của hộp đó định cả tâm trạng app.\n\nNhìn các lựa chọn. Một 'thẻ' trong Compose chỉ là một `Surface` với ba lựa chọn: góc bo tròn bao nhiêu? có viền phát sáng không? tô đặc hay trong suốt? Chọn kiểu bạn muốn và AI sẽ xây một `PeriodCard` tái dùng cho mọi nơi."
+      },
+      "promptText": {
+        "en": "Now build a reusable PeriodCard composable. Style: rounded corners (16dp), filled with the surface colour, and a thin 1dp border in the subject's accent colour so it looks like it's glowing. Inside, show the subject name in bold white, and a smaller dim row with the time and room. The card takes a Period as input and an onClick lambda. Make the left edge a 4dp-wide stripe in the subject's accent colour.",
+        "vn": "Giờ xây một composable PeriodCard tái dùng. Kiểu: góc bo tròn (16dp), tô bằng màu mặt, và viền mảnh 1dp theo màu điểm nhấn của môn để trông như phát sáng. Bên trong, hiện tên môn chữ trắng đậm, và một hàng nhỏ mờ hơn với giờ và phòng. Thẻ nhận một Period làm đầu vào và một lambda onClick. Làm cạnh trái thành sọc rộng 4dp theo màu điểm nhấn của môn."
+      },
+      "promptRationale": {
+        "en": "We describe the box in measurable terms: '16dp corners', '1dp border', '4dp stripe'. Designers think in these numbers. We also say the card is REUSABLE and takes a Period + onClick — so the same card works for every subject and can be tapped later to add homework.",
+        "vn": "Ta mô tả hộp bằng số đo cụ thể: 'góc 16dp', 'viền 1dp', 'sọc 4dp'. Nhà thiết kế tư duy bằng những con số này. Ta cũng nói thẻ TÁI DÙNG và nhận một Period + onClick — nên cùng một thẻ chạy cho mọi môn và có thể chạm sau để thêm bài tập."
+      },
+      "aiResponse": {
+        "en": "Here's your `PeriodCard`. Built once, used for every period on the timetable. The accent colour comes from the Period itself, so a Maths card glows sky-blue and an English card glows green automatically.\n\nNotice the `onClick` parameter — right now it does nothing, but in Step 6 it's the hook that opens the 'add homework' screen. We design the card to be tappable from the start, even before the feature exists. That's planning ahead.",
+        "vn": "Đây là `PeriodCard` của bạn. Xây một lần, dùng cho mọi tiết trên thời khóa biểu. Màu điểm nhấn đến từ chính Period, nên thẻ Toán phát sáng xanh trời và thẻ Anh phát sáng xanh lá một cách tự động.\n\nĐể ý tham số `onClick` — bây giờ nó chưa làm gì, nhưng ở Bước 6 nó là móc mở màn hình 'thêm bài tập'. Ta thiết kế thẻ có thể chạm ngay từ đầu, kể cả trước khi tính năng tồn tại. Đó là lập kế hoạch trước."
+      },
+      "codeSnippets": [
+        {
+          "fileName": "ui/PeriodCard.kt",
+          "code": "@Composable\nfun PeriodCard(period: Period, onClick: () -> Unit) {\n    val accent = period.accentColor()\n    Surface(\n        onClick = onClick,                       // <- hook for 'add homework' later\n        shape = RoundedCornerShape(16.dp),        // rounded box\n        color = Theme.surface,\n        border = BorderStroke(1.dp, accent),      // glowing outline\n        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)\n    ) {\n        Row(Modifier.height(IntrinsicSize.Min)) {\n            Box(Modifier.width(4.dp).fillMaxHeight().background(accent)) // left stripe\n            Column(Modifier.padding(12.dp)) {\n                Text(period.subject, color = Theme.textMain,\n                     fontWeight = FontWeight.Bold, fontSize = 16.sp)\n                Text(\"${period.startTime}–${period.endTime}  •  ${period.room}\",\n                     color = Theme.textDim, fontSize = 13.sp)\n            }\n        }\n    }\n}"
+        }
+      ],
+      "answerChoices": [
+        {
+          "en": "Rounded Neon — soft corners + glowing accent border",
+          "vn": "Rounded Neon — góc mềm + viền điểm nhấn phát sáng"
+        },
+        {
+          "en": "Flat Card — sharp corners, solid accent fill",
+          "vn": "Flat Card — góc vuông, tô đặc màu điểm nhấn"
+        },
+        {
+          "en": "Pill — fully rounded ends, like a capsule",
+          "vn": "Pill — bo tròn hai đầu, như viên nang"
+        },
+        {
+          "en": "Glass — translucent fill with a faint outline",
+          "vn": "Glass — tô trong mờ với viền nhạt"
+        }
+      ],
+      "clawdExplanation": {
+        "en": "Big idea here: you built ONE `PeriodCard` and you'll reuse it for every single class. Build-once-reuse-everywhere is the heart of clean apps. And you added an `onClick` for a feature that doesn't exist yet — that's how features LINK: today's card is tomorrow's homework button. Next: the bars between periods.",
+        "vn": "Ý lớn ở đây: bạn xây MỘT `PeriodCard` và sẽ tái dùng cho mọi tiết học. Xây-một-lần-dùng-mọi-nơi là cốt lõi của app sạch. Và bạn thêm một `onClick` cho tính năng chưa tồn tại — đó là cách các tính năng LIÊN KẾT: thẻ hôm nay là nút bài tập ngày mai. Tiếp theo: các thanh giữa các tiết."
+      },
+      "vocabTerms": [
+        {
+          "term": "Composable",
+          "color": "#29B6F6",
+          "explanation": {
+            "en": "A reusable piece of screen in Compose. PeriodCard is one — write it once, place it many times.",
+            "vn": "Một mảnh màn hình tái dùng trong Compose. PeriodCard là một — viết một lần, đặt nhiều lần."
+          }
+        },
+        {
+          "term": "onClick lambda",
+          "color": "#CE93D8",
+          "explanation": {
+            "en": "A little instruction you hand the card: 'when tapped, do THIS'. We wire it up later.",
+            "vn": "Một chỉ dẫn nhỏ bạn trao cho thẻ: 'khi chạm, làm ĐIỀU NÀY'. Ta nối nó sau."
+          }
+        },
+        {
+          "term": "dp",
+          "color": "#FFB300",
+          "explanation": {
+            "en": "Density-independent pixel — a size unit that looks the same on every screen. '16dp corners'.",
+            "vn": "Pixel độc lập mật độ — đơn vị kích thước trông như nhau trên mọi màn hình. 'góc 16dp'."
+          }
+        }
+      ],
+      "codeExplainer": {
+        "en": "This builds the box that represents one class. It reads the subject's accent colour, draws a rounded glowing border, a coloured left stripe, and the subject/time/room text. Because it takes a Period and an onClick, the SAME card works for every subject and is ready to be tapped later.",
+        "vn": "Đoạn này xây hộp đại diện một tiết. Nó đọc màu điểm nhấn của môn, vẽ viền bo tròn phát sáng, một sọc trái có màu, và chữ môn/giờ/phòng. Vì nhận một Period và một onClick, CÙNG một thẻ chạy cho mọi môn và sẵn sàng được chạm sau."
+      }
+    },
+    {
+      "stepNumber": 4,
+      "type": "lesson",
+      "title": {
+        "en": "Step 4: Choose your break-bar design",
+        "vn": "Bước 4: Chọn kiểu thanh giờ nghỉ"
+      },
+      "instruction": {
+        "en": "Between periods come BREAKS — short break-time and longer lunch-time. On a real school timetable these are wide bars that say 'BREAK TIME' or 'LUNCH TIME'. We call them 'breakbars'.\n\nHere's an important thinking point: a breakbar is NOT a period. It has no subject, no homework — it's just a label and a duration. So it needs its OWN look, clearly different from a period card. Pick the breakbar style you like.",
+        "vn": "Giữa các tiết là GIỜ NGHỈ — giờ ra chơi ngắn và giờ ăn trưa dài hơn. Trên thời khóa biểu thật, đây là các thanh rộng ghi 'BREAK TIME' hay 'LUNCH TIME'. Ta gọi chúng là 'breakbar' (thanh giờ nghỉ).\n\nĐây là điểm cần suy nghĩ: breakbar KHÔNG phải tiết học. Nó không có môn, không có bài tập — chỉ là nhãn và khoảng thời gian. Nên nó cần diện mạo RIÊNG, khác rõ với thẻ tiết. Hãy chọn kiểu breakbar bạn thích."
+      },
+      "promptText": {
+        "en": "Now build a BreakBar composable for breaks between periods. Style it as a full-width bar, shorter than a period card, with a soft rounded background. For a normal break use a dim grey fill with the label 'BREAK' centred; for lunch use the gold accent fill with 'LUNCH' centred. It takes a Break object (which has a label, start time, end time, and an isLunch flag) and shows the time range in small text on the right. No onClick — breaks aren't tappable.",
+        "vn": "Giờ xây một composable BreakBar cho giờ nghỉ giữa các tiết. Tạo kiểu thanh rộng hết bề ngang, thấp hơn thẻ tiết, với nền bo tròn dịu. Giờ nghỉ thường dùng nền xám mờ với nhãn 'BREAK' canh giữa; giờ ăn trưa dùng nền vàng điểm nhấn với 'LUNCH' canh giữa. Nó nhận một object Break (có nhãn, giờ bắt đầu, giờ kết thúc, và cờ isLunch) và hiện khoảng giờ bằng chữ nhỏ bên phải. Không có onClick — giờ nghỉ không chạm được."
+      },
+      "promptRationale": {
+        "en": "Notice we tell the AI WHY a breakbar differs from a period: no onClick, no subject. We also reuse the SAME accent colour (gold) for lunch that we defined in the theme — staying consistent. The 'isLunch flag' is a tiny decision that makes one component handle two cases.",
+        "vn": "Để ý ta nói AI VÌ SAO breakbar khác tiết học: không onClick, không môn. Ta cũng tái dùng CÙNG màu điểm nhấn (vàng) cho giờ ăn trưa đã định trong theme — giữ nhất quán. 'cờ isLunch' là quyết định nhỏ giúp một thành phần xử lý hai trường hợp."
+      },
+      "aiResponse": {
+        "en": "Done. The `BreakBar` is deliberately plainer and shorter than a period card, so your eye instantly knows 'this is a gap, not a class'. The same component handles both break and lunch via the `isLunch` flag — one piece of code, two looks.\n\nThis is the first time you can SEE the difference between two data types on screen: periods are tall, tappable, colour-coded; breaks are short, flat labels. Same list, different shapes.",
+        "vn": "Xong. `BreakBar` cố tình đơn giản và thấp hơn thẻ tiết, để mắt bạn biết ngay 'đây là khoảng trống, không phải tiết học'. Cùng một thành phần xử lý cả giờ nghỉ và ăn trưa qua cờ `isLunch` — một đoạn code, hai diện mạo.\n\nĐây là lần đầu bạn THẤY khác biệt giữa hai loại dữ liệu trên màn hình: tiết thì cao, chạm được, mã màu; giờ nghỉ thì thấp, nhãn phẳng. Cùng danh sách, khác hình dạng."
+      },
+      "codeSnippets": [
+        {
+          "fileName": "ui/BreakBar.kt",
+          "code": "@Composable\nfun BreakBar(brk: Break) {\n    val fill = if (brk.isLunch) Theme.gold.copy(alpha = 0.18f)\n               else Theme.border\n    val label = if (brk.isLunch) Theme.gold else Theme.textDim\n    Surface(\n        shape = RoundedCornerShape(10.dp),\n        color = fill,\n        modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp)\n    ) {\n        Row(\n            Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp),\n            horizontalArrangement = Arrangement.SpaceBetween\n        ) {\n            Text(brk.label.uppercase(), color = label,\n                 fontWeight = FontWeight.Medium, fontSize = 13.sp)\n            Text(\"${brk.startTime}–${brk.endTime}\",\n                 color = Theme.textDim, fontSize = 12.sp)\n        }\n    }\n}"
+        }
+      ],
+      "answerChoices": [
+        {
+          "en": "Gold Bar — full-width filled bar with centred label",
+          "vn": "Gold Bar — thanh tô đầy hết ngang với nhãn canh giữa"
+        },
+        {
+          "en": "Dashed Divider — thin dashed line with a small label",
+          "vn": "Dashed Divider — đường gạch đứt mảnh với nhãn nhỏ"
+        },
+        {
+          "en": "Icon Chip — small rounded chip with a coffee/lunch icon",
+          "vn": "Icon Chip — chip bo tròn nhỏ với biểu tượng cà phê/bữa trưa"
+        }
+      ],
+      "clawdExplanation": {
+        "en": "Crucial idea you just met: a break is a DIFFERENT KIND of thing from a period, so it gets a different shape. Same list on screen, two visual languages. Keep asking yourself: 'how is this thing different from that thing?' — that question drives every data model. Next: writing the actual data behind these cards.",
+        "vn": "Ý quan trọng bạn vừa gặp: giờ nghỉ là LOẠI khác với tiết học, nên nó có hình dạng khác. Cùng danh sách trên màn hình, hai ngôn ngữ thị giác. Hãy luôn tự hỏi: 'thứ này khác thứ kia chỗ nào?' — câu hỏi đó dẫn dắt mọi mô hình dữ liệu. Tiếp theo: viết dữ liệu thật sau những thẻ này."
+      },
+      "vocabTerms": [
+        {
+          "term": "Breakbar",
+          "color": "#FFB300",
+          "explanation": {
+            "en": "Our name for the bar between periods — break or lunch. It's a label, not a class.",
+            "vn": "Tên của ta cho thanh giữa các tiết — giờ nghỉ hoặc ăn trưa. Nó là nhãn, không phải tiết học."
+          }
+        },
+        {
+          "term": "Flag (Boolean)",
+          "color": "#00E676",
+          "explanation": {
+            "en": "A true/false switch. isLunch=true makes the bar gold; false makes it grey.",
+            "vn": "Một công tắc đúng/sai. isLunch=true làm thanh màu vàng; sai làm nó xám."
+          }
+        },
+        {
+          "term": "alpha",
+          "color": "#CE93D8",
+          "explanation": {
+            "en": "How see-through a colour is. alpha 0.18 means a faint, tinted gold — not solid.",
+            "vn": "Độ trong suốt của màu. alpha 0.18 nghĩa là vàng nhạt, hơi phớt — không đặc."
+          }
+        }
+      ],
+      "codeExplainer": {
+        "en": "This builds the bar shown between classes. One component covers both cases: if isLunch it fills faint gold and says LUNCH; otherwise it's grey and says BREAK. It shows the time range on the right and has no onClick, because a break is never tappable.",
+        "vn": "Đoạn này xây thanh hiện giữa các tiết. Một thành phần lo cả hai trường hợp: nếu isLunch thì tô vàng nhạt và ghi LUNCH; ngược lại màu xám và ghi BREAK. Nó hiện khoảng giờ bên phải và không có onClick, vì giờ nghỉ không bao giờ chạm được."
+      }
+    },
+    {
+      "stepNumber": 5,
+      "type": "lesson",
+      "title": {
+        "en": "Step 5: Model the data — Period and Break",
+        "vn": "Bước 5: Mô hình hóa dữ liệu — Period và Break"
+      },
+      "instruction": {
+        "en": "We've designed how things LOOK. Now we define what they ARE. The cards on screen are useless without data behind them.\n\nThink it through before reading the prompt: what does ONE period need to know about itself? A subject name, a start and end time, a room, and a colour. What does a break need? A label, a start/end time, and whether it's lunch. Modelling data is just writing down those answers.",
+        "vn": "Ta đã thiết kế mọi thứ TRÔNG thế nào. Giờ ta định nghĩa chúng LÀ gì. Các thẻ trên màn hình vô dụng nếu không có dữ liệu phía sau.\n\nHãy nghĩ kỹ trước khi đọc prompt: MỘT tiết học cần biết gì về chính nó? Tên môn, giờ bắt đầu và kết thúc, phòng, và một màu. Giờ nghỉ cần gì? Một nhãn, giờ bắt đầu/kết thúc, và có phải giờ ăn trưa không. Mô hình hóa dữ liệu chỉ là viết ra những câu trả lời đó."
+      },
+      "promptText": {
+        "en": "Create the data models in Kotlin. A Period data class with: id (String), subject (String), startTime (String like \"07:15\"), endTime (String), room (String), day (Int, 0=Monday), and accentIndex (Int, 0–3, which picks a colour from Theme.accents). Add a function accentColor() that returns Theme.accents[accentIndex]. Also create a Break data class with: id, label (String), startTime, endTime, day (Int), and isLunch (Boolean).",
+        "vn": "Tạo các mô hình dữ liệu trong Kotlin. Một data class Period với: id (String), subject (String), startTime (String như \"07:15\"), endTime (String), room (String), day (Int, 0=Thứ Hai), và accentIndex (Int, 0–3, chọn màu từ Theme.accents). Thêm hàm accentColor() trả về Theme.accents[accentIndex]. Cũng tạo data class Break với: id, label (String), startTime, endTime, day (Int), và isLunch (Boolean)."
+      },
+      "promptRationale": {
+        "en": "Every field answers a real question the screen asks. 'What colour is this card?' → accentIndex. 'Which day is this on?' → day. We store the time as a simple \"07:15\" string for now — start simple, improve later. Giving each item an `id` will matter when we save and delete things.",
+        "vn": "Mỗi trường trả lời một câu hỏi thật mà màn hình đặt ra. 'Thẻ này màu gì?' → accentIndex. 'Tiết này thứ mấy?' → day. Ta lưu giờ thành chuỗi đơn giản \"07:15\" lúc này — bắt đầu đơn giản, cải tiến sau. Cho mỗi item một `id` sẽ quan trọng khi ta lưu và xóa."
+      },
+      "aiResponse": {
+        "en": "Both models defined. See how each field maps directly to something on the card you built in Step 3? `subject` → the bold title, `startTime`/`endTime` → the dim row, `accentIndex` → the glow colour. The data and the design are two halves of the same feature.\n\n`Period` and `Break` are separate types ON PURPOSE — they behave differently, so they're modelled differently. Next we'll put both into one ordered day.",
+        "vn": "Cả hai mô hình đã định nghĩa. Thấy mỗi trường ánh xạ trực tiếp tới thứ gì đó trên thẻ bạn xây ở Bước 3 chứ? `subject` → tiêu đề đậm, `startTime`/`endTime` → hàng mờ, `accentIndex` → màu phát sáng. Dữ liệu và thiết kế là hai nửa của cùng một tính năng.\n\n`Period` và `Break` là hai loại riêng CÓ CHỦ Ý — chúng hành xử khác nhau, nên được mô hình khác nhau. Tiếp theo ta đặt cả hai vào một ngày có thứ tự."
+      },
+      "codeSnippets": [
+        {
+          "fileName": "models/Models.kt",
+          "code": "package com.example.timetable.models\n\nimport com.example.timetable.ui.theme.Theme\nimport androidx.compose.ui.graphics.Color\n\ndata class Period(\n    val id: String,\n    val subject: String,\n    val startTime: String,   // \"07:15\"\n    val endTime: String,     // \"08:00\"\n    val room: String,\n    val day: Int,            // 0 = Monday\n    val accentIndex: Int     // 0..3 -> Theme.accents\n) {\n    fun accentColor(): Color = Theme.accents[accentIndex % Theme.accents.size]\n}\n\ndata class Break(\n    val id: String,\n    val label: String,       // \"Break\" or \"Lunch\"\n    val startTime: String,\n    val endTime: String,\n    val day: Int,\n    val isLunch: Boolean\n)"
+        }
+      ],
+      "answerChoices": [
+        {
+          "en": "Because a Period and a Break behave differently, they should be separate data types",
+          "vn": "Vì Period và Break hành xử khác nhau, chúng nên là hai loại dữ liệu riêng"
+        },
+        {
+          "en": "Both are just boxes, so one data type with a 'kind' field would also work",
+          "vn": "Cả hai chỉ là hộp, nên một loại dữ liệu với trường 'kind' cũng được"
+        }
+      ],
+      "clawdExplanation": {
+        "en": "You just connected DESIGN to DATA. Every field you defined (`subject`, `startTime`, `accentIndex`) is something the card displays. If you can look at a screen and list the data behind it, you're thinking like a developer. Next puzzle: periods and breaks live in the SAME day — how do we order them together?",
+        "vn": "Bạn vừa nối THIẾT KẾ với DỮ LIỆU. Mỗi trường bạn định nghĩa (`subject`, `startTime`, `accentIndex`) là thứ thẻ hiển thị. Nếu nhìn một màn hình và liệt kê được dữ liệu phía sau, bạn đang tư duy như lập trình viên. Câu đố tiếp: tiết và giờ nghỉ ở CÙNG một ngày — làm sao ta sắp xếp chúng cùng nhau?"
+      },
+      "vocabTerms": [
+        {
+          "term": "data class",
+          "color": "#29B6F6",
+          "explanation": {
+            "en": "A Kotlin class whose only job is to hold fields of data — perfect for a Period or Break.",
+            "vn": "Một class Kotlin chỉ có nhiệm vụ chứa các trường dữ liệu — hoàn hảo cho Period hay Break."
+          }
+        },
+        {
+          "term": "id",
+          "color": "#00E676",
+          "explanation": {
+            "en": "A unique label for each item, like a fingerprint. Lets us find, update, or delete exactly one.",
+            "vn": "Một nhãn duy nhất cho mỗi item, như dấu vân tay. Cho phép tìm, cập nhật, hay xóa đúng một cái."
+          }
+        },
+        {
+          "term": "field",
+          "color": "#CE93D8",
+          "explanation": {
+            "en": "One piece of information inside a data class — subject, startTime, room are all fields.",
+            "vn": "Một mẩu thông tin trong data class — subject, startTime, room đều là trường."
+          }
+        }
+      ],
+      "codeExplainer": {
+        "en": "This defines what a Period and a Break really are, as data. A Period knows its subject, times, room, day, and colour index; accentColor() turns that index into a real colour. A Break knows its label, times, day, and whether it's lunch. These objects are what the cards and bars display.",
+        "vn": "Đoạn này định nghĩa Period và Break thực sự là gì, dưới dạng dữ liệu. Period biết môn, giờ, phòng, ngày, và chỉ số màu; accentColor() biến chỉ số đó thành màu thật. Break biết nhãn, giờ, ngày, và có phải giờ ăn trưa. Những object này là thứ thẻ và thanh hiển thị."
+      }
+    },
+    {
+      "stepNumber": 6,
+      "type": "lesson",
+      "title": {
+        "en": "Step 6: Build the day view — periods and breaks in order",
+        "vn": "Bước 6: Xây màn hình ngày — tiết và giờ nghỉ theo thứ tự"
+      },
+      "instruction": {
+        "en": "Now the workflow gets interesting. A day contains BOTH periods and breaks, mixed together, and they must appear in TIME ORDER: period, period, break, period, lunch, period...\n\nHow do you sort two different types into one list? The trick: every item — period OR break — has a startTime. We put them all in one list, sort by startTime, and draw a PeriodCard or a BreakBar depending on the type. This is the moment all your earlier pieces snap together.",
+        "vn": "Giờ quy trình trở nên thú vị. Một ngày chứa CẢ tiết học VÀ giờ nghỉ, trộn lẫn, và chúng phải xuất hiện theo THỨ TỰ GIỜ: tiết, tiết, nghỉ, tiết, ăn trưa, tiết...\n\nLàm sao sắp hai loại khác nhau vào một danh sách? Mẹo: mọi item — tiết HAY nghỉ — đều có startTime. Ta cho tất cả vào một danh sách, sắp theo startTime, và vẽ PeriodCard hoặc BreakBar tùy loại. Đây là lúc mọi mảnh trước đó khớp vào nhau."
+      },
+      "promptText": {
+        "en": "Create a TimetableScreen composable that shows one day. It takes a list of Period and a list of Break for that day. Merge them into one list sorted by startTime, then render with LazyColumn: for each item, if it's a Period draw PeriodCard, if it's a Break draw BreakBar. Use a sealed interface DayItem with Period and Break as the two cases so the list can hold both. Add a day-of-week header at the top and a floating '+' button at the bottom-right (onClick empty for now).",
+        "vn": "Tạo một composable TimetableScreen hiện một ngày. Nó nhận một danh sách Period và một danh sách Break cho ngày đó. Gộp chúng thành một danh sách sắp theo startTime, rồi vẽ bằng LazyColumn: với mỗi item, nếu là Period thì vẽ PeriodCard, nếu là Break thì vẽ BreakBar. Dùng sealed interface DayItem với Period và Break là hai trường hợp để danh sách chứa được cả hai. Thêm tiêu đề thứ trong tuần ở trên cùng và một nút '+' nổi ở góc dưới phải (onClick để trống tạm)."
+      },
+      "promptRationale": {
+        "en": "The 'sealed interface' is the key concept: it lets one list hold two types safely, and forces us to handle BOTH cases when we draw. We sort by `startTime` so the timeline is always correct no matter what order things were added. The '+' button is a placeholder hook for Step 7 — design the doorway before the room.",
+        "vn": "'sealed interface' là khái niệm then chốt: nó cho một danh sách chứa hai loại một cách an toàn, và buộc ta xử lý CẢ HAI trường hợp khi vẽ. Ta sắp theo `startTime` để dòng thời gian luôn đúng dù thêm theo thứ tự nào. Nút '+' là móc chỗ trống cho Bước 7 — thiết kế cửa trước khi xây phòng."
+      },
+      "aiResponse": {
+        "en": "The day comes alive. Watch what happened: your `Period` and `Break` types, your `PeriodCard` and `BreakBar` designs, and your `Theme` colours ALL meet here in one scrolling column. The `when` block reads each item's type and picks the matching design.\n\nThis screen is the SPINE of the app. Everything you build next — adding periods, adding homework, reminders — hangs off this view. The '+' button is the next thread to pull.",
+        "vn": "Ngày trở nên sống động. Xem điều gì đã xảy ra: các loại `Period` và `Break`, các thiết kế `PeriodCard` và `BreakBar`, và màu `Theme` TẤT CẢ gặp nhau ở đây trong một cột cuộn. Khối `when` đọc loại của mỗi item và chọn thiết kế khớp.\n\nMàn hình này là XƯƠNG SỐNG của app. Mọi thứ bạn xây tiếp — thêm tiết, thêm bài tập, nhắc nhở — đều móc vào màn hình này. Nút '+' là sợi chỉ kế tiếp để kéo."
+      },
+      "codeSnippets": [
+        {
+          "fileName": "ui/TimetableScreen.kt",
+          "code": "// One list that can hold either type:\nsealed interface DayItem {\n    val startTime: String\n    data class P(val period: Period) : DayItem { override val startTime get() = period.startTime }\n    data class B(val brk: Break)     : DayItem { override val startTime get() = brk.startTime }\n}\n\n@Composable\nfun TimetableScreen(periods: List<Period>, breaks: List<Break>, onAdd: () -> Unit) {\n    val items = (periods.map { DayItem.P(it) } + breaks.map { DayItem.B(it) })\n        .sortedBy { it.startTime }          // <- the timeline is always correct\n\n    Box(Modifier.fillMaxSize().background(Theme.background)) {\n        LazyColumn(Modifier.padding(12.dp)) {\n            items(items) { item ->\n                when (item) {\n                    is DayItem.P -> PeriodCard(item.period) { /* add homework (Step 8) */ }\n                    is DayItem.B -> BreakBar(item.brk)\n                }\n            }\n        }\n        FloatingActionButton(onClick = onAdd,\n            containerColor = Theme.sky,\n            modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp)) {\n            Text(\"+\", fontSize = 24.sp)\n        }\n    }\n}"
+        }
+      ],
+      "answerChoices": [
+        {
+          "en": "They all share a startTime, so we merge them into one list and sort by it",
+          "vn": "Tất cả đều có startTime, nên ta gộp vào một danh sách và sắp theo nó"
+        },
+        {
+          "en": "We keep two separate lists and show breaks below all the periods",
+          "vn": "Ta giữ hai danh sách riêng và hiện giờ nghỉ bên dưới tất cả các tiết"
+        }
+      ],
+      "clawdExplanation": {
+        "en": "This was the big convergence: theme + period + break + card + bar all met in ONE screen. The lesson about WORKFLOW: the day view is the spine, and every future feature plugs into it. The `when` block is where the app decides 'card or bar?' — that's a decision point you'll reuse all over. Next: making that '+' button actually add a period.",
+        "vn": "Đây là điểm hội tụ lớn: theme + tiết + giờ nghỉ + thẻ + thanh tất cả gặp nhau trong MỘT màn hình. Bài học về QUY TRÌNH: màn hình ngày là xương sống, và mọi tính năng tương lai cắm vào nó. Khối `when` là nơi app quyết định 'thẻ hay thanh?' — đó là điểm quyết định bạn sẽ tái dùng khắp nơi. Tiếp theo: làm nút '+' thật sự thêm một tiết."
+      },
+      "vocabTerms": [
+        {
+          "term": "sealed interface",
+          "color": "#29B6F6",
+          "explanation": {
+            "en": "A type that says 'the answer is one of THESE exact options' — here, a DayItem is either a Period or a Break, nothing else.",
+            "vn": "Một loại nói 'câu trả lời là một trong NHỮNG lựa chọn chính xác này' — ở đây, một DayItem là Period hoặc Break, không gì khác."
+          }
+        },
+        {
+          "term": "LazyColumn",
+          "color": "#00E676",
+          "explanation": {
+            "en": "A scrolling list that only draws what's on screen — fast even with hundreds of items.",
+            "vn": "Một danh sách cuộn chỉ vẽ thứ trên màn hình — nhanh kể cả với hàng trăm item."
+          }
+        },
+        {
+          "term": "when block",
+          "color": "#CE93D8",
+          "explanation": {
+            "en": "Kotlin's way of choosing a path based on a value: 'when it's a Period do this, when it's a Break do that'.",
+            "vn": "Cách Kotlin chọn đường dựa trên một giá trị: 'khi là Period làm cái này, khi là Break làm cái kia'."
+          }
+        }
+      ],
+      "codeExplainer": {
+        "en": "This is the heart of the app. It wraps each Period and Break in a DayItem, merges them into one list, and sorts by start time so the day reads top to bottom correctly. The when block draws a PeriodCard for periods and a BreakBar for breaks. The floating + button is the doorway to adding new periods.",
+        "vn": "Đây là trái tim của app. Nó bọc mỗi Period và Break trong một DayItem, gộp thành một danh sách, và sắp theo giờ bắt đầu để ngày đọc từ trên xuống đúng. Khối when vẽ PeriodCard cho tiết và BreakBar cho giờ nghỉ. Nút + nổi là cánh cửa để thêm tiết mới."
+      }
+    },
+    {
+      "stepNumber": 7,
+      "type": "lesson",
+      "title": {
+        "en": "Step 7: Add a period with a form",
+        "vn": "Bước 7: Thêm một tiết bằng biểu mẫu"
+      },
+      "instruction": {
+        "en": "Time to make the '+' button do its job. The workflow you're building: user taps '+' → a form pops up → they fill in subject, time, room, colour → they tap Save → a new PeriodCard appears in the right place on the timeline.\n\nFollow that chain in your head. Each arrow (→) is a wire you have to connect. Forgetting any one arrow is the most common beginner bug.",
+        "vn": "Đến lúc làm nút '+' đúng việc của nó. Quy trình bạn đang xây: người dùng chạm '+' → một biểu mẫu hiện lên → họ điền môn, giờ, phòng, màu → họ chạm Lưu → một PeriodCard mới xuất hiện đúng chỗ trên dòng thời gian.\n\nHãy theo chuỗi đó trong đầu. Mỗi mũi tên (→) là một dây bạn phải nối. Quên bất kỳ mũi tên nào là lỗi phổ biến nhất của người mới."
+      },
+      "promptText": {
+        "en": "Create an AddPeriodDialog composable. It's a dark dialog with text fields for subject, start time, end time and room, plus a row of four colour dots (the Theme.accents) where the user taps to choose accentIndex. It has Cancel and Save buttons. Save builds a new Period (generate a random id with java.util.UUID, set day to the current day) and calls an onSave(period) lambda, then closes. Wire it into TimetableScreen so the '+' button opens it and onSave adds the period to the list.",
+        "vn": "Tạo một composable AddPeriodDialog. Đó là một hộp thoại tối với các ô nhập môn, giờ bắt đầu, giờ kết thúc và phòng, cùng một hàng bốn chấm màu (Theme.accents) để người dùng chạm chọn accentIndex. Nó có nút Hủy và Lưu. Lưu tạo một Period mới (sinh id ngẫu nhiên bằng java.util.UUID, đặt day là ngày hiện tại) và gọi lambda onSave(period), rồi đóng. Nối vào TimetableScreen để nút '+' mở nó và onSave thêm tiết vào danh sách."
+      },
+      "promptRationale": {
+        "en": "We describe the WHOLE chain in one prompt: the fields, what Save builds, and how it connects back to the screen. Generating a UUID for the `id` means every period is unique — essential for editing and deleting later. We let the dialog 'report back' through onSave rather than touching the list directly: the form's job is to collect, not to store.",
+        "vn": "Ta mô tả TOÀN BỘ chuỗi trong một prompt: các ô, Lưu tạo gì, và nó nối lại màn hình ra sao. Sinh UUID cho `id` nghĩa là mỗi tiết là duy nhất — thiết yếu để sửa và xóa sau. Ta để hộp thoại 'báo lại' qua onSave thay vì chạm trực tiếp danh sách: việc của biểu mẫu là thu thập, không phải lưu trữ."
+      },
+      "aiResponse": {
+        "en": "The add flow works end to end. Tap '+', fill the form, pick a colour dot, hit Save — and a freshly coloured card slides into the timeline at the right time, because the day view re-sorts by startTime automatically.\n\nNotice the separation of jobs: the dialog COLLECTS data, the screen STORES it, the day view DISPLAYS it. Each part has one responsibility. When you can name each part's job in one sentence, your app is well organised.",
+        "vn": "Luồng thêm chạy trọn vẹn. Chạm '+', điền biểu mẫu, chọn chấm màu, nhấn Lưu — và một thẻ vừa tô màu trượt vào dòng thời gian đúng giờ, vì màn hình ngày tự sắp lại theo startTime.\n\nĐể ý sự phân chia công việc: hộp thoại THU THẬP dữ liệu, màn hình LƯU nó, màn hình ngày HIỂN THỊ nó. Mỗi phần có một trách nhiệm. Khi bạn gọi tên được công việc của từng phần trong một câu, app của bạn được tổ chức tốt."
+      },
+      "codeSnippets": [
+        {
+          "fileName": "ui/AddPeriodDialog.kt",
+          "code": "@Composable\nfun AddPeriodDialog(day: Int, onSave: (Period) -> Unit, onDismiss: () -> Unit) {\n    var subject by remember { mutableStateOf(\"\") }\n    var start by remember { mutableStateOf(\"\") }\n    var end by remember { mutableStateOf(\"\") }\n    var room by remember { mutableStateOf(\"\") }\n    var accent by remember { mutableStateOf(0) }\n\n    AlertDialog(\n        onDismissRequest = onDismiss,\n        containerColor = Theme.surface,\n        title = { Text(\"Add period\", color = Theme.textMain) },\n        text = {\n            Column {\n                DarkField(\"Subject\", subject) { subject = it }\n                DarkField(\"Start (07:15)\", start) { start = it }\n                DarkField(\"End (08:00)\", end) { end = it }\n                DarkField(\"Room\", room) { room = it }\n                Row { Theme.accents.forEachIndexed { i, c ->\n                    ColorDot(c, selected = i == accent) { accent = i } } }\n            }\n        },\n        confirmButton = { TextButton(onClick = {\n            onSave(Period(UUID.randomUUID().toString(), subject, start, end, room, day, accent))\n            onDismiss()\n        }) { Text(\"Save\", color = Theme.sky) } },\n        dismissButton = { TextButton(onClick = onDismiss) { Text(\"Cancel\", color = Theme.textDim) } }\n    )\n}"
+        }
+      ],
+      "clawdExplanation": {
+        "en": "You just wired a full chain: tap → form → build object → save → re-sort → display. The deep lesson is SEPARATION OF JOBS: the dialog only collects, the screen only stores, the day view only shows. Each piece does one thing. Next problem: close the app and everything vanishes — let's make it remember.",
+        "vn": "Bạn vừa nối một chuỗi đầy đủ: chạm → biểu mẫu → tạo object → lưu → sắp lại → hiển thị. Bài học sâu là PHÂN CHIA CÔNG VIỆC: hộp thoại chỉ thu thập, màn hình chỉ lưu, màn hình ngày chỉ hiện. Mỗi mảnh làm một việc. Vấn đề tiếp: đóng app là mọi thứ biến mất — hãy làm nó ghi nhớ."
+      },
+      "vocabTerms": [
+        {
+          "term": "remember / mutableStateOf",
+          "color": "#29B6F6",
+          "explanation": {
+            "en": "How Compose holds a value that can change (what the user typed) and redraws when it changes.",
+            "vn": "Cách Compose giữ một giá trị có thể đổi (thứ người dùng gõ) và vẽ lại khi nó đổi."
+          }
+        },
+        {
+          "term": "UUID",
+          "color": "#00E676",
+          "explanation": {
+            "en": "A randomly generated unique id, so two periods are never confused with each other.",
+            "vn": "Một id duy nhất sinh ngẫu nhiên, để hai tiết không bao giờ bị nhầm với nhau."
+          }
+        },
+        {
+          "term": "callback (onSave)",
+          "color": "#CE93D8",
+          "explanation": {
+            "en": "A lambda the dialog calls to hand its result back up to the screen — 'here's the new period'.",
+            "vn": "Một lambda hộp thoại gọi để trao kết quả lên màn hình — 'đây là tiết mới'."
+          }
+        }
+      ],
+      "codeExplainer": {
+        "en": "This builds the form for adding a class. It keeps what the user types in remember-state, shows four colour dots to pick the accent, and on Save it builds a brand-new Period with a unique id and reports it through onSave. The screen then adds it to the list and the timeline re-sorts itself.",
+        "vn": "Đoạn này xây biểu mẫu thêm tiết. Nó giữ thứ người dùng gõ trong remember-state, hiện bốn chấm màu để chọn điểm nhấn, và khi Lưu nó tạo một Period mới tinh với id duy nhất rồi báo qua onSave. Màn hình sau đó thêm vào danh sách và dòng thời gian tự sắp lại."
+      }
+    },
+    {
+      "stepNumber": 8,
+      "type": "lesson",
+      "title": {
+        "en": "Step 8: Save the timetable so it survives",
+        "vn": "Bước 8: Lưu thời khóa biểu để không mất"
+      },
+      "instruction": {
+        "en": "Right now your timetable lives only in the phone's short-term memory. Close the app and it's gone. To keep it, we must WRITE the data to storage and READ it back when the app opens.\n\nThe workflow: convert your lists of periods and breaks into text (JSON), save that text, and on startup read the text and turn it back into objects. This 'save on change, load on start' pattern powers almost every app you use.",
+        "vn": "Hiện thời khóa biểu chỉ sống trong bộ nhớ ngắn hạn của điện thoại. Đóng app là mất. Để giữ, ta phải GHI dữ liệu vào bộ nhớ và ĐỌC lại khi app mở.\n\nQuy trình: chuyển danh sách tiết và giờ nghỉ thành văn bản (JSON), lưu văn bản đó, và khi khởi động đọc văn bản rồi biến lại thành object. Mẫu 'lưu khi thay đổi, đọc khi mở' này vận hành hầu hết app bạn dùng."
+      },
+      "promptText": {
+        "en": "Create a TimetableStorage class that takes a Context. Use SharedPreferences named 'timetable'. Use Gson to save and load. savePeriods(list) converts the list to a JSON string under key 'periods'; loadPeriods() reads it back to a List<Period> (empty if none). Do the same for breaks: saveBreaks / loadBreaks under key 'breaks'. In TimetableScreen, call savePeriods every time a period is added, and call loadPeriods/loadBreaks once when the screen first appears.",
+        "vn": "Tạo một class TimetableStorage nhận một Context. Dùng SharedPreferences tên 'timetable'. Dùng Gson để lưu và đọc. savePeriods(list) chuyển danh sách thành chuỗi JSON dưới khóa 'periods'; loadPeriods() đọc lại thành List<Period> (rỗng nếu không có). Làm tương tự cho giờ nghỉ: saveBreaks / loadBreaks dưới khóa 'breaks'. Trong TimetableScreen, gọi savePeriods mỗi khi thêm một tiết, và gọi loadPeriods/loadBreaks một lần khi màn hình xuất hiện lần đầu."
+      },
+      "promptRationale": {
+        "en": "We name the exact tool (SharedPreferences + Gson), the exact keys, and exactly WHEN to call save and load. The 'when' matters as much as the 'how': save AFTER every change, load ONCE at startup. Get the timing wrong and you either lose data or wipe it on every launch.",
+        "vn": "Ta nêu chính xác công cụ (SharedPreferences + Gson), khóa chính xác, và chính xác KHI NÀO gọi lưu và đọc. 'Khi nào' quan trọng ngang 'như thế nào': lưu SAU mỗi thay đổi, đọc MỘT lần khi khởi động. Sai thời điểm là bạn hoặc mất dữ liệu hoặc xóa sạch mỗi lần mở."
+      },
+      "aiResponse": {
+        "en": "Persistence done. The cycle is now complete: add a period → save to storage → close app → reopen → load from storage → see your timetable exactly as you left it.\n\nGson does the heavy lifting — it turns a `Period` object into JSON text and back, automatically, because we kept the data class simple. This is why a clean data model in Step 5 pays off now: simple data is easy to save.",
+        "vn": "Lưu trữ xong. Vòng lặp giờ hoàn chỉnh: thêm tiết → lưu vào bộ nhớ → đóng app → mở lại → đọc từ bộ nhớ → thấy thời khóa biểu y như lúc rời đi.\n\nGson làm phần nặng — nó biến object `Period` thành văn bản JSON và ngược lại, tự động, vì ta giữ data class đơn giản. Đây là lý do mô hình dữ liệu sạch ở Bước 5 đem lại lợi ích bây giờ: dữ liệu đơn giản thì dễ lưu."
+      },
+      "codeSnippets": [
+        {
+          "fileName": "data/TimetableStorage.kt",
+          "code": "class TimetableStorage(context: Context) {\n    private val prefs = context.getSharedPreferences(\"timetable\", Context.MODE_PRIVATE)\n    private val gson = Gson()\n\n    fun savePeriods(list: List<Period>) {\n        prefs.edit().putString(\"periods\", gson.toJson(list)).apply()\n    }\n    fun loadPeriods(): List<Period> {\n        val json = prefs.getString(\"periods\", null) ?: return emptyList()\n        val type = object : TypeToken<List<Period>>() {}.type\n        return gson.fromJson(json, type)\n    }\n\n    fun saveBreaks(list: List<Break>) {\n        prefs.edit().putString(\"breaks\", gson.toJson(list)).apply()\n    }\n    fun loadBreaks(): List<Break> {\n        val json = prefs.getString(\"breaks\", null) ?: return emptyList()\n        val type = object : TypeToken<List<Break>>() {}.type\n        return gson.fromJson(json, type)\n    }\n}"
+        }
+      ],
+      "clawdExplanation": {
+        "en": "You closed the loop: save-on-change, load-on-start. That pattern is in almost every app on your phone. Notice it only worked because your data model was simple — past decisions keep paying off. Now the timetable is solid, we add the feature that makes it USEFUL: homework on a period.",
+        "vn": "Bạn vừa khép vòng: lưu-khi-đổi, đọc-khi-mở. Mẫu đó có trong hầu hết app trên điện thoại bạn. Để ý nó chỉ chạy được vì mô hình dữ liệu của bạn đơn giản — các quyết định trước tiếp tục đem lại lợi ích. Giờ thời khóa biểu vững rồi, ta thêm tính năng làm nó HỮU ÍCH: bài tập trên một tiết."
+      },
+      "vocabTerms": [
+        {
+          "term": "SharedPreferences",
+          "color": "#29B6F6",
+          "explanation": {
+            "en": "Android's built-in box for saving small data as key→value pairs. Survives app restarts.",
+            "vn": "Hộp tích hợp của Android để lưu dữ liệu nhỏ dạng khóa→giá trị. Sống qua các lần khởi động lại."
+          }
+        },
+        {
+          "term": "JSON",
+          "color": "#00E676",
+          "explanation": {
+            "en": "A simple text format for data, like {\"subject\":\"Maths\"}. Easy to store and read back.",
+            "vn": "Một định dạng văn bản đơn giản cho dữ liệu, như {\"subject\":\"Maths\"}. Dễ lưu và đọc lại."
+          }
+        },
+        {
+          "term": "serialization",
+          "color": "#CE93D8",
+          "explanation": {
+            "en": "Turning an object into text (to save) and back into an object (to use). Gson does both.",
+            "vn": "Biến object thành văn bản (để lưu) và ngược lại thành object (để dùng). Gson làm cả hai."
+          }
+        }
+      ],
+      "codeExplainer": {
+        "en": "This class is the app's memory. Gson converts your lists of periods and breaks into JSON text, SharedPreferences stores that text on the phone, and the load functions read it back into real objects. Save after every change, load once on start, and the timetable persists forever.",
+        "vn": "Class này là bộ nhớ của app. Gson chuyển danh sách tiết và giờ nghỉ thành văn bản JSON, SharedPreferences lưu văn bản đó trên điện thoại, và các hàm load đọc lại thành object thật. Lưu sau mỗi thay đổi, đọc một lần khi mở, và thời khóa biểu tồn tại mãi mãi."
+      }
+    },
+    {
+      "stepNumber": 9,
+      "type": "lesson",
+      "title": {
+        "en": "Step 9: Tap a period to add homework",
+        "vn": "Bước 9: Chạm vào tiết để thêm bài tập"
+      },
+      "instruction": {
+        "en": "Remember the `onClick` we left empty on every PeriodCard back in Step 3? Now we use it. The workflow: tap a period → a homework sheet opens → type what's due and pick a due date → save → the card shows a little badge with how many homeworks it has.\n\nThink about the link: a piece of homework BELONGS to a period. So a Homework needs to remember which period it's attached to — by that period's `id`. This is how two pieces of data connect.",
+        "vn": "Nhớ `onClick` ta để trống trên mọi PeriodCard ở Bước 3 chứ? Giờ ta dùng nó. Quy trình: chạm một tiết → một bảng bài tập mở ra → gõ nội dung cần làm và chọn hạn nộp → lưu → thẻ hiện một huy hiệu nhỏ cho biết có bao nhiêu bài tập.\n\nHãy nghĩ về liên kết: một bài tập THUỘC về một tiết. Nên một Homework cần nhớ nó gắn với tiết nào — qua `id` của tiết đó. Đây là cách hai mẩu dữ liệu kết nối với nhau."
+      },
+      "promptText": {
+        "en": "Create a Homework data class: id (String), periodId (String — which Period it belongs to), title (String, e.g. 'Read chapter 4'), dueDate (Long — epoch millis), and done (Boolean, default false). Add save/load for a List<Homework> in TimetableStorage under key 'homework' (same Gson pattern). Then change PeriodCard's onClick so tapping a period opens an AddHomeworkSheet for that period, and show a small badge on the card with the count of not-done homework for that periodId.",
+        "vn": "Tạo một data class Homework: id (String), periodId (String — thuộc về Period nào), title (String, ví dụ 'Đọc chương 4'), dueDate (Long — epoch millis), và done (Boolean, mặc định false). Thêm save/load cho List<Homework> trong TimetableStorage dưới khóa 'homework' (cùng mẫu Gson). Rồi đổi onClick của PeriodCard để chạm một tiết mở một AddHomeworkSheet cho tiết đó, và hiện một huy hiệu nhỏ trên thẻ với số bài tập chưa làm cho periodId đó."
+      },
+      "promptRationale": {
+        "en": "The single most important field here is `periodId` — it's the WIRE that links a homework to its period. Without it, the app couldn't know which class the homework belongs to. We store the due date as a Long (epoch millis) because that's the format reminders need in Step 11 — planning ahead again.",
+        "vn": "Trường quan trọng nhất ở đây là `periodId` — đó là DÂY nối một bài tập với tiết của nó. Không có nó, app không biết bài tập thuộc lớp nào. Ta lưu hạn nộp dạng Long (epoch millis) vì đó là định dạng nhắc nhở cần ở Bước 11 — lại lập kế hoạch trước."
+      },
+      "aiResponse": {
+        "en": "Homework is now linked to periods. The connection is the `periodId` field: each homework carries the id of the period it belongs to, like a luggage tag. To show the badge, the card filters the homework list for items whose `periodId` matches its own id and counts the unfinished ones.\n\nThis is the same linking trick used by huge systems — an order knows its customer's id, a comment knows its post's id. Master this one idea and databases stop being scary.",
+        "vn": "Bài tập giờ được liên kết với tiết. Kết nối là trường `periodId`: mỗi bài tập mang id của tiết nó thuộc về, như thẻ hành lý. Để hiện huy hiệu, thẻ lọc danh sách bài tập tìm các item có `periodId` khớp id của chính nó và đếm số chưa xong.\n\nĐây là cùng mẹo liên kết mà các hệ thống khổng lồ dùng — một đơn hàng biết id khách hàng, một bình luận biết id bài viết. Nắm ý này thì cơ sở dữ liệu hết đáng sợ."
+      },
+      "codeSnippets": [
+        {
+          "fileName": "models/Homework.kt",
+          "code": "data class Homework(\n    val id: String,\n    val periodId: String,   // <- links this homework to ONE Period\n    val title: String,       // \"Read chapter 4\"\n    val dueDate: Long,       // epoch millis -> reminders use this\n    val done: Boolean = false\n)\n\n// On the card, count this period's unfinished homework:\nval count = allHomework.count { it.periodId == period.id && !it.done }\nif (count > 0) {\n    Surface(shape = CircleShape, color = period.accentColor()) {\n        Text(\"$count\", color = Theme.background,\n             modifier = Modifier.padding(horizontal = 6.dp))\n    }\n}"
+        }
+      ],
+      "answerChoices": [
+        {
+          "en": "The periodId field — each homework stores the id of the period it belongs to",
+          "vn": "Trường periodId — mỗi bài tập lưu id của tiết nó thuộc về"
+        },
+        {
+          "en": "Their position in the list — homework #1 belongs to period #1",
+          "vn": "Vị trí của chúng trong danh sách — bài tập #1 thuộc tiết #1"
+        }
+      ],
+      "clawdExplanation": {
+        "en": "You just learned the most important idea in app data: LINKING by id. A homework holds its period's id, so the app always knows which class it belongs to — that's exactly how orders link to customers and comments link to posts. The empty onClick from Step 3 finally has a job. Next: letting the user actually pick the due date.",
+        "vn": "Bạn vừa học ý quan trọng nhất trong dữ liệu app: LIÊN KẾT bằng id. Một bài tập giữ id của tiết, nên app luôn biết nó thuộc lớp nào — đúng cách đơn hàng nối khách hàng và bình luận nối bài viết. onClick trống từ Bước 3 cuối cùng có việc. Tiếp theo: cho người dùng thật sự chọn hạn nộp."
+      },
+      "vocabTerms": [
+        {
+          "term": "periodId (foreign key)",
+          "color": "#29B6F6",
+          "explanation": {
+            "en": "An id stored on one item that points to another item. The link between homework and its period.",
+            "vn": "Một id lưu trên item này trỏ tới item khác. Liên kết giữa bài tập và tiết của nó."
+          }
+        },
+        {
+          "term": "epoch millis",
+          "color": "#00E676",
+          "explanation": {
+            "en": "A date stored as one big number: milliseconds since 1 Jan 1970. Easy for the phone to compare and schedule.",
+            "vn": "Một ngày lưu thành một số lớn: số mili-giây từ 1/1/1970. Dễ cho điện thoại so sánh và lên lịch."
+          }
+        },
+        {
+          "term": "filter / count",
+          "color": "#CE93D8",
+          "explanation": {
+            "en": "Going through a list and keeping (or counting) only items that match a rule — here, homework for this period.",
+            "vn": "Duyệt một danh sách và giữ (hoặc đếm) chỉ các item khớp một quy tắc — ở đây, bài tập cho tiết này."
+          }
+        }
+      ],
+      "codeExplainer": {
+        "en": "This defines a piece of homework and links it to a period through periodId. The badge code filters all homework down to the ones belonging to THIS period that aren't done yet, counts them, and draws a small coloured circle with that number on the card. dueDate is stored as a number so reminders can use it next.",
+        "vn": "Đoạn này định nghĩa một bài tập và liên kết nó với một tiết qua periodId. Code huy hiệu lọc tất cả bài tập xuống còn các bài thuộc tiết NÀY mà chưa xong, đếm chúng, và vẽ một vòng tròn nhỏ có màu với con số đó trên thẻ. dueDate lưu dạng số để nhắc nhở dùng tiếp theo."
+      }
+    },
+    {
+      "stepNumber": 10,
+      "type": "lesson",
+      "title": {
+        "en": "Step 10: Pick a due date for the homework",
+        "vn": "Bước 10: Chọn hạn nộp cho bài tập"
+      },
+      "instruction": {
+        "en": "A due date is the whole point of homework — without it, there's nothing to remind. The workflow: in the homework sheet, the user taps a 'Due date' button → Android's calendar picker opens → they pick a day → we store it as epoch millis on the Homework.\n\nWe use Android's BUILT-IN date picker rather than building one ourselves. A core skill is knowing when to reuse the platform's tools instead of reinventing them.",
+        "vn": "Hạn nộp là toàn bộ ý nghĩa của bài tập — không có nó, chẳng có gì để nhắc. Quy trình: trong bảng bài tập, người dùng chạm nút 'Hạn nộp' → bộ chọn lịch của Android mở ra → họ chọn một ngày → ta lưu nó dạng epoch millis trên Homework.\n\nTa dùng bộ chọn ngày CÓ SẴN của Android thay vì tự xây. Một kỹ năng cốt lõi là biết khi nào tái dùng công cụ của nền tảng thay vì phát minh lại."
+      },
+      "promptText": {
+        "en": "In the AddHomeworkSheet, add a 'Due date' button that opens Android's DatePickerDialog. When the user picks a date, store it as a Long (epoch millis at that day's start) and show the chosen date on the button label (format like 'Due: 12 Jun'). The Save button builds a Homework with title, the chosen dueDate, the periodId passed in, a UUID id, and done=false, then calls onSave(homework). Keep the dark theme styling.",
+        "vn": "Trong AddHomeworkSheet, thêm nút 'Hạn nộp' mở DatePickerDialog của Android. Khi người dùng chọn ngày, lưu dạng Long (epoch millis lúc đầu ngày đó) và hiện ngày đã chọn trên nhãn nút (định dạng như 'Hạn: 12 thg 6'). Nút Lưu tạo một Homework với title, dueDate đã chọn, periodId được truyền vào, một id UUID, và done=false, rồi gọi onSave(homework). Giữ kiểu giao diện tối."
+      },
+      "promptRationale": {
+        "en": "We ask for the platform's `DatePickerDialog` — reliable, familiar to users, and free. We're explicit that the picked date becomes `dueDate` as epoch millis: that exact value flows straight into the reminder in the next step. Notice how the homework object collects everything the reminder will need before the reminder even exists.",
+        "vn": "Ta yêu cầu `DatePickerDialog` của nền tảng — đáng tin, quen thuộc với người dùng, và miễn phí. Ta nói rõ ngày chọn trở thành `dueDate` dạng epoch millis: đúng giá trị đó chảy thẳng vào nhắc nhở ở bước kế. Để ý object bài tập thu thập mọi thứ nhắc nhở cần trước cả khi nhắc nhở tồn tại."
+      },
+      "aiResponse": {
+        "en": "Due dates work. The user picks a day from the familiar calendar, and we tuck the result into `dueDate` as a number. The homework object is now complete: it knows its title, its period, its deadline, and whether it's done.\n\nLook at what you've assembled — the homework now carries EVERYTHING a reminder needs: what (title), when (dueDate), and where it lives (periodId). The next step just reads these and sets an alarm.",
+        "vn": "Hạn nộp chạy rồi. Người dùng chọn một ngày từ lịch quen thuộc, và ta nhét kết quả vào `dueDate` dạng số. Object bài tập giờ hoàn chỉnh: nó biết tiêu đề, tiết của nó, hạn chót, và đã xong chưa.\n\nNhìn thứ bạn vừa lắp ráp — bài tập giờ mang MỌI THỨ một nhắc nhở cần: cái gì (title), khi nào (dueDate), và nó sống ở đâu (periodId). Bước kế chỉ đọc những thứ này và đặt báo thức."
+      },
+      "codeSnippets": [
+        {
+          "fileName": "ui/AddHomeworkSheet.kt",
+          "code": "var dueMillis by remember { mutableStateOf(0L) }\nval ctx = LocalContext.current\n\nfun openDatePicker() {\n    val now = Calendar.getInstance()\n    DatePickerDialog(ctx, { _, y, m, d ->\n        val c = Calendar.getInstance().apply { set(y, m, d, 8, 0, 0) }\n        dueMillis = c.timeInMillis            // <- epoch millis the reminder will use\n    }, now.get(Calendar.YEAR), now.get(Calendar.MONTH), now.get(Calendar.DAY_OF_MONTH)).show()\n}\n\nTextButton(onClick = { openDatePicker() }) {\n    val label = if (dueMillis == 0L) \"Pick due date\"\n                else \"Due: \" + SimpleDateFormat(\"d MMM\", Locale.getDefault()).format(Date(dueMillis))\n    Text(label, color = Theme.gold)\n}"
+        }
+      ],
+      "clawdExplanation": {
+        "en": "Two lessons here. First: REUSE the platform — Android already has a great date picker, so you didn't build one. Second: the homework object now holds everything a reminder needs (what, when, where) BEFORE the reminder exists. Gathering inputs before you need them is smooth workflow design. Next: turning that due date into an actual alarm.",
+        "vn": "Hai bài học ở đây. Thứ nhất: TÁI DÙNG nền tảng — Android đã có bộ chọn ngày tuyệt vời, nên bạn không xây. Thứ hai: object bài tập giờ giữ mọi thứ nhắc nhở cần (cái gì, khi nào, ở đâu) TRƯỚC khi nhắc nhở tồn tại. Gom đầu vào trước khi cần là thiết kế quy trình mượt. Tiếp theo: biến hạn nộp đó thành báo thức thật."
+      },
+      "vocabTerms": [
+        {
+          "term": "DatePickerDialog",
+          "color": "#29B6F6",
+          "explanation": {
+            "en": "Android's ready-made calendar popup. Reuse it instead of building your own.",
+            "vn": "Cửa sổ lịch dựng sẵn của Android. Tái dùng thay vì tự xây."
+          }
+        },
+        {
+          "term": "Calendar / millis",
+          "color": "#00E676",
+          "explanation": {
+            "en": "Calendar turns a day-month-year into the single millis number we store as dueDate.",
+            "vn": "Calendar biến ngày-tháng-năm thành con số millis duy nhất ta lưu thành dueDate."
+          }
+        },
+        {
+          "term": "platform reuse",
+          "color": "#FFB300",
+          "explanation": {
+            "en": "Using tools the operating system already gives you, instead of reinventing them.",
+            "vn": "Dùng công cụ hệ điều hành đã cho sẵn, thay vì phát minh lại."
+          }
+        }
+      ],
+      "codeExplainer": {
+        "en": "This adds the due-date button. Tapping it opens Android's built-in calendar; when the user picks a day, we convert it to epoch millis (set to 8am that day) and store it in dueMillis. The button label updates to show the chosen date. That dueMillis value is exactly what the reminder alarm will fire on.",
+        "vn": "Đoạn này thêm nút hạn nộp. Chạm nó mở lịch có sẵn của Android; khi người dùng chọn ngày, ta chuyển thành epoch millis (đặt 8 giờ sáng ngày đó) và lưu vào dueMillis. Nhãn nút cập nhật để hiện ngày đã chọn. Giá trị dueMillis đó chính là thứ báo thức nhắc nhở sẽ kích hoạt."
+      }
+    },
+    {
+      "stepNumber": 11,
+      "type": "lesson",
+      "title": {
+        "en": "Step 11: Schedule a reminder before the due date",
+        "vn": "Bước 11: Đặt nhắc nhở trước hạn nộp"
+      },
+      "instruction": {
+        "en": "Here's where it all pays off. We take the homework's `dueDate`, subtract one day, and ask Android to wake our app at that moment to show a notification: 'Maths homework due tomorrow: Read chapter 4'.\n\nTrace the full chain one last time: period (Step 5) → tap it (Step 3+9) → homework with a due date (Steps 9-10) → reminder one day before (now) → notification appears (Step 12). Every earlier step was preparing for this.",
+        "vn": "Đây là lúc mọi thứ đơm hoa kết trái. Ta lấy `dueDate` của bài tập, trừ một ngày, và nhờ Android đánh thức app vào thời điểm đó để hiện thông báo: 'Bài tập Toán đến hạn ngày mai: Đọc chương 4'.\n\nHãy lần lại toàn bộ chuỗi lần cuối: tiết (Bước 5) → chạm vào (Bước 3+9) → bài tập có hạn nộp (Bước 9-10) → nhắc nhở một ngày trước (bây giờ) → thông báo hiện (Bước 12). Mỗi bước trước đều đang chuẩn bị cho điều này."
+      },
+      "promptText": {
+        "en": "Create a ReminderScheduler that uses AlarmManager. Add a function schedule(homework: Homework, subject: String): it computes triggerTime = homework.dueDate minus 24 hours, builds an Intent for a ReminderReceiver carrying the homework title and subject and homework.id (use it as the request code so each reminder is unique), wraps it in a PendingIntent with FLAG_IMMUTABLE, and calls alarmManager.setExactAndAllowWhileIdle at triggerTime. Call schedule(...) right after a homework is saved in the AddHomeworkSheet onSave.",
+        "vn": "Tạo một ReminderScheduler dùng AlarmManager. Thêm hàm schedule(homework: Homework, subject: String): nó tính triggerTime = homework.dueDate trừ 24 giờ, tạo một Intent cho ReminderReceiver mang tiêu đề bài tập và môn và homework.id (dùng làm request code để mỗi nhắc nhở là duy nhất), bọc trong PendingIntent với FLAG_IMMUTABLE, và gọi alarmManager.setExactAndAllowWhileIdle tại triggerTime. Gọi schedule(...) ngay sau khi một bài tập được lưu trong onSave của AddHomeworkSheet."
+      },
+      "promptRationale": {
+        "en": "We connect the inputs we gathered earlier: `dueDate` becomes the alarm time, `homework.id` becomes the unique request code so two reminders never collide, and the title+subject ride along to fill the notification text. 'Subtract 24 hours' is a business decision — remind the day before, not the moment it's due.",
+        "vn": "Ta nối các đầu vào đã gom trước đó: `dueDate` thành giờ báo thức, `homework.id` thành request code duy nhất để hai nhắc nhở không đụng nhau, và tiêu đề+môn đi kèm để điền nội dung thông báo. 'Trừ 24 giờ' là quyết định nghiệp vụ — nhắc trước một ngày, không phải đúng lúc tới hạn."
+      },
+      "aiResponse": {
+        "en": "The reminder is scheduled. AlarmManager will wake your app one day before each homework is due, even if the app is closed. Each alarm is tagged with the homework's `id` as its request code, so rescheduling or cancelling one never touches the others.\n\nThis is the climax of the whole app: a chain that started with you typing a subject name now ends with the phone buzzing the night before a deadline. Every feature handed off to the next.",
+        "vn": "Nhắc nhở đã được đặt lịch. AlarmManager sẽ đánh thức app một ngày trước mỗi hạn nộp, kể cả khi app đóng. Mỗi báo thức được gắn `id` của bài tập làm request code, nên đặt lại hay hủy một cái không bao giờ chạm cái khác.\n\nĐây là cao trào của cả app: một chuỗi bắt đầu từ việc bạn gõ tên môn giờ kết thúc bằng điện thoại rung vào đêm trước hạn chót. Mỗi tính năng bàn giao cho tính năng kế."
+      },
+      "codeSnippets": [
+        {
+          "fileName": "reminder/ReminderScheduler.kt",
+          "code": "class ReminderScheduler(private val ctx: Context) {\n    fun schedule(homework: Homework, subject: String) {\n        val triggerTime = homework.dueDate - 24L * 60 * 60 * 1000   // 1 day before\n        if (triggerTime < System.currentTimeMillis()) return        // already too late\n\n        val intent = Intent(ctx, ReminderReceiver::class.java).apply {\n            putExtra(\"title\", homework.title)\n            putExtra(\"subject\", subject)\n        }\n        val pi = PendingIntent.getBroadcast(\n            ctx, homework.id.hashCode(), intent,            // <- unique per homework\n            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)\n\n        val am = ctx.getSystemService(Context.ALARM_SERVICE) as AlarmManager\n        am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerTime, pi)\n    }\n}"
+        }
+      ],
+      "clawdExplanation": {
+        "en": "This is the climax — the chain you've built since Step 1 finally fires. dueDate became the alarm time, periodId/id keep reminders from colliding, title+subject fill the message. The 'remind 24h before' choice is a real product decision, not code. One piece left: Android must be ALLOWED to show that notification. Let's handle permission, then watch it fire.",
+        "vn": "Đây là cao trào — chuỗi bạn xây từ Bước 1 cuối cùng kích hoạt. dueDate thành giờ báo thức, periodId/id giữ các nhắc nhở không đụng nhau, title+subject điền nội dung. Lựa chọn 'nhắc trước 24h' là quyết định sản phẩm thật, không phải code. Còn một mảnh: Android phải được PHÉP hiện thông báo đó. Hãy lo quyền, rồi xem nó kích hoạt."
+      },
+      "vocabTerms": [
+        {
+          "term": "AlarmManager",
+          "color": "#29B6F6",
+          "explanation": {
+            "en": "Android's service that wakes your app at an exact future time — even if it's closed.",
+            "vn": "Dịch vụ của Android đánh thức app vào một thời điểm tương lai chính xác — kể cả khi đã đóng."
+          }
+        },
+        {
+          "term": "PendingIntent",
+          "color": "#00E676",
+          "explanation": {
+            "en": "A sealed instruction you hand Android: 'when the alarm fires, run THIS'. The id keeps each one unique.",
+            "vn": "Một chỉ dẫn niêm phong bạn trao Android: 'khi báo thức kêu, chạy CÁI NÀY'. id giữ mỗi cái duy nhất."
+          }
+        },
+        {
+          "term": "request code",
+          "color": "#CE93D8",
+          "explanation": {
+            "en": "A number that tags each alarm. Using the homework id means reminders never overwrite each other.",
+            "vn": "Một con số gắn nhãn mỗi báo thức. Dùng id bài tập nghĩa là các nhắc nhở không ghi đè nhau."
+          }
+        }
+      ],
+      "codeExplainer": {
+        "en": "This schedules the reminder. It takes the homework's due date, subtracts 24 hours to remind a day early, and skips if that time has already passed. It packs the title and subject into an Intent, wraps it in a PendingIntent tagged with the homework's unique id, and asks AlarmManager to fire it at exactly that time — even if the app is closed.",
+        "vn": "Đoạn này đặt lịch nhắc nhở. Nó lấy hạn nộp của bài tập, trừ 24 giờ để nhắc sớm một ngày, và bỏ qua nếu thời điểm đó đã trôi qua. Nó gói tiêu đề và môn vào một Intent, bọc trong PendingIntent gắn id duy nhất của bài tập, và nhờ AlarmManager kích hoạt đúng giờ đó — kể cả khi app đóng."
+      }
+    },
+    {
+      "stepNumber": 12,
+      "type": "lesson",
+      "title": {
+        "en": "Step 12: Show the notification (and ask permission)",
+        "vn": "Bước 12: Hiện thông báo (và xin quyền)"
+      },
+      "instruction": {
+        "en": "The alarm wakes a ReminderReceiver, whose only job is to post the notification. But on Android 13+ the app must first ASK the user for permission to send notifications — no permission, no reminder.\n\nThe workflow: app starts → request notification permission once → alarm fires later → receiver builds and posts the notification → user taps it → app opens. Three separate moments in time, all connected by one feature.",
+        "vn": "Báo thức đánh thức một ReminderReceiver, với nhiệm vụ duy nhất là đăng thông báo. Nhưng trên Android 13+ app phải XIN quyền gửi thông báo trước — không quyền, không nhắc nhở.\n\nQuy trình: app khởi động → xin quyền thông báo một lần → báo thức kêu sau đó → receiver tạo và đăng thông báo → người dùng chạm → app mở. Ba thời điểm riêng biệt, tất cả nối bởi một tính năng."
+      },
+      "promptText": {
+        "en": "Create a ReminderReceiver (BroadcastReceiver). In onReceive, read the title and subject extras, build a notification on a channel 'homework' (create the channel if needed) with the text 'subject homework due tomorrow: title', a small icon, and post it with NotificationManagerCompat. In MainActivity onCreate, request the POST_NOTIFICATIONS permission on Android 13+ using a permission launcher. Add the POST_NOTIFICATIONS permission and the receiver to the AndroidManifest.",
+        "vn": "Tạo một ReminderReceiver (BroadcastReceiver). Trong onReceive, đọc các extra title và subject, tạo một thông báo trên kênh 'homework' (tạo kênh nếu cần) với nội dung 'môn bài tập đến hạn ngày mai: title', một icon nhỏ, và đăng bằng NotificationManagerCompat. Trong MainActivity onCreate, xin quyền POST_NOTIFICATIONS trên Android 13+ dùng một permission launcher. Thêm quyền POST_NOTIFICATIONS và receiver vào AndroidManifest."
+      },
+      "promptRationale": {
+        "en": "We name the channel, the exact text, AND the permission, because all three are required for a notification to actually appear on a modern phone. Forgetting the permission is the #1 reason reminders 'silently' fail — so we ask for it up front, at app start, long before the alarm needs it.",
+        "vn": "Ta nêu tên kênh, nội dung chính xác, VÀ quyền, vì cả ba đều cần để thông báo thật sự xuất hiện trên điện thoại hiện đại. Quên quyền là lý do số 1 khiến nhắc nhở 'âm thầm' thất bại — nên ta xin trước, lúc app khởi động, từ rất lâu trước khi báo thức cần."
+      },
+      "aiResponse": {
+        "en": "Notifications are live. When the alarm fires, the receiver builds a message from the title and subject you stored and drops it into the notification tray. Because you requested permission at startup, the system actually shows it.\n\nThat completes the core app. Trace it once more: you typed a subject → it became a period → you tapped it and added homework with a date → that scheduled an alarm → the alarm posted this notification. Every feature is a link in one chain.",
+        "vn": "Thông báo hoạt động rồi. Khi báo thức kêu, receiver tạo nội dung từ tiêu đề và môn bạn đã lưu và thả vào khay thông báo. Vì bạn xin quyền lúc khởi động, hệ thống thật sự hiện nó.\n\nĐiều đó hoàn tất app lõi. Lần lại một lần nữa: bạn gõ một môn → nó thành một tiết → bạn chạm vào và thêm bài tập kèm ngày → việc đó đặt lịch một báo thức → báo thức đăng thông báo này. Mỗi tính năng là một mắt xích trong một chuỗi."
+      },
+      "codeSnippets": [
+        {
+          "fileName": "reminder/ReminderReceiver.kt",
+          "code": "class ReminderReceiver : BroadcastReceiver() {\n    override fun onReceive(ctx: Context, intent: Intent) {\n        val title = intent.getStringExtra(\"title\") ?: \"Homework\"\n        val subject = intent.getStringExtra(\"subject\") ?: \"\"\n\n        val mgr = ctx.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager\n        if (Build.VERSION.SDK_INT >= 26) {\n            mgr.createNotificationChannel(\n                NotificationChannel(\"homework\", \"Homework reminders\",\n                    NotificationManager.IMPORTANCE_HIGH))\n        }\n        val notif = NotificationCompat.Builder(ctx, \"homework\")\n            .setSmallIcon(R.drawable.ic_book)\n            .setContentTitle(\"$subject homework due tomorrow\")\n            .setContentText(title)\n            .setAutoCancel(true)\n            .build()\n        NotificationManagerCompat.from(ctx).notify(title.hashCode(), notif)\n    }\n}"
+        }
+      ],
+      "answerChoices": [
+        {
+          "en": "The app never asked for POST_NOTIFICATIONS permission on Android 13+",
+          "vn": "App chưa bao giờ xin quyền POST_NOTIFICATIONS trên Android 13+"
+        },
+        {
+          "en": "The phone was simply turned off at that exact second",
+          "vn": "Điện thoại chỉ đơn giản bị tắt vào đúng giây đó"
+        }
+      ],
+      "clawdExplanation": {
+        "en": "The core app is DONE — and you can see the whole chain: subject → period → homework → due date → alarm → notification. The lesson: a feature can span THREE moments (ask permission at start, fire later, tap later still) and still be one connected idea. If a reminder ever fails silently, the missing permission is suspect #1. Next: a real bug to debug.",
+        "vn": "App lõi XONG — và bạn thấy được cả chuỗi: môn → tiết → bài tập → hạn nộp → báo thức → thông báo. Bài học: một tính năng có thể trải qua BA thời điểm (xin quyền lúc đầu, kích hoạt sau, chạm sau nữa) mà vẫn là một ý liên kết. Nếu nhắc nhở âm thầm hỏng, quyền bị thiếu là nghi phạm số 1. Tiếp theo: một lỗi thật để gỡ."
+      },
+      "vocabTerms": [
+        {
+          "term": "BroadcastReceiver",
+          "color": "#29B6F6",
+          "explanation": {
+            "en": "A small component that wakes up to handle one event — here, the alarm firing.",
+            "vn": "Một thành phần nhỏ thức dậy để xử lý một sự kiện — ở đây, báo thức kêu."
+          }
+        },
+        {
+          "term": "notification channel",
+          "color": "#00E676",
+          "explanation": {
+            "en": "A category for notifications (Android 8+). 'Homework reminders' is ours; users can mute it.",
+            "vn": "Một danh mục cho thông báo (Android 8+). 'Homework reminders' là của ta; người dùng có thể tắt tiếng."
+          }
+        },
+        {
+          "term": "runtime permission",
+          "color": "#FFB300",
+          "explanation": {
+            "en": "Permission the user must grant while the app runs. POST_NOTIFICATIONS is required on Android 13+.",
+            "vn": "Quyền người dùng phải cấp khi app chạy. POST_NOTIFICATIONS bắt buộc trên Android 13+."
+          }
+        }
+      ],
+      "codeExplainer": {
+        "en": "This is what actually shows the reminder. When the alarm fires, the receiver reads the title and subject, makes sure the 'homework' notification channel exists, builds a notification saying the homework is due tomorrow, and posts it. It only appears if the app requested notification permission at startup.",
+        "vn": "Đây là thứ thật sự hiện nhắc nhở. Khi báo thức kêu, receiver đọc tiêu đề và môn, đảm bảo kênh thông báo 'homework' tồn tại, tạo một thông báo nói bài tập đến hạn ngày mai, và đăng nó. Nó chỉ xuất hiện nếu app đã xin quyền thông báo lúc khởi động."
+      }
+    },
+    {
+      "stepNumber": 13,
+      "type": "bug",
+      "bugNumber": 1,
+      "title": {
+        "en": "Step 13: Fix the bug — the breakbar appears in the wrong place",
+        "vn": "Bước 13: Sửa lỗi — thanh giờ nghỉ hiện sai chỗ"
+      },
+      "instruction": {
+        "en": "A real bug appeared. A student added a lunch break at '13:00' but it shows up at the TOP of the day, above the 07:15 period. The timeline is out of order!\n\nThis is a debugging workflow: don't panic, reproduce it, then reason about WHERE the order is decided. We sort by `startTime`, and startTime is a String. Think: how does a computer sort the strings \"7:15\" and \"13:00\"? Paste the bug into the AI and ask it to explain the cause before fixing.",
+        "vn": "Một lỗi thật xuất hiện. Một học sinh thêm giờ ăn trưa lúc '13:00' nhưng nó hiện ở TRÊN CÙNG của ngày, phía trên tiết 07:15. Dòng thời gian sai thứ tự!\n\nĐây là quy trình gỡ lỗi: đừng hoảng, tái hiện nó, rồi suy luận xem thứ tự được quyết định Ở ĐÂU. Ta sắp theo `startTime`, và startTime là một String. Hãy nghĩ: máy tính sắp các chuỗi \"7:15\" và \"13:00\" thế nào? Dán lỗi vào AI và nhờ giải thích nguyên nhân trước khi sửa."
+      },
+      "promptText": {
+        "en": "Bug: my timetable items appear in the wrong order. A period at '7:15' shows BELOW a break at '13:00'. I sort with .sortedBy { it.startTime } where startTime is a String like '7:15' or '13:00'. Why is the order wrong, and how do I fix it so items sort by real time of day? Please explain the cause first, then give the fix.",
+        "vn": "Lỗi: các item thời khóa biểu của tôi hiện sai thứ tự. Một tiết lúc '7:15' hiện DƯỚI một giờ nghỉ lúc '13:00'. Tôi sắp bằng .sortedBy { it.startTime } với startTime là String như '7:15' hoặc '13:00'. Vì sao thứ tự sai, và làm sao sửa để các item sắp theo giờ thật trong ngày? Hãy giải thích nguyên nhân trước, rồi đưa cách sửa."
+      },
+      "promptRationale": {
+        "en": "When debugging, give the AI the SYMPTOM ('7:15 below 13:00'), the relevant CODE (the sortedBy line), and the DATA TYPE (String). Ask for the cause before the fix — understanding why beats blindly pasting a patch. This trains you to debug, not just to copy.",
+        "vn": "Khi gỡ lỗi, đưa AI TRIỆU CHỨNG ('7:15 dưới 13:00'), CODE liên quan (dòng sortedBy), và KIỂU DỮ LIỆU (String). Hỏi nguyên nhân trước cách sửa — hiểu vì sao hơn là dán bản vá mù quáng. Điều này luyện bạn gỡ lỗi, không chỉ sao chép."
+      },
+      "aiResponse": {
+        "en": "Found it. You're sorting times as TEXT, not as time. Alphabetically, '13:00' comes before '7:15' because the character '1' is smaller than '7'. The computer isn't reading them as clock times at all — it's comparing letter by letter.\n\nThe fix: sort by a real number. Convert 'HH:mm' into total minutes since midnight (7:15 → 435, 13:00 → 780) and sort by that. I also zero-pad single-digit hours so the data is clean. Now the timeline is always correct.",
+        "vn": "Tìm ra rồi. Bạn đang sắp giờ như VĂN BẢN, không phải như thời gian. Theo bảng chữ cái, '13:00' đứng trước '7:15' vì ký tự '1' nhỏ hơn '7'. Máy tính không đọc chúng như giờ đồng hồ — nó so sánh từng ký tự.\n\nCách sửa: sắp theo một số thật. Chuyển 'HH:mm' thành tổng số phút từ nửa đêm (7:15 → 435, 13:00 → 780) và sắp theo đó. Tôi cũng thêm số 0 cho giờ một chữ số để dữ liệu sạch. Giờ dòng thời gian luôn đúng."
+      },
+      "codeSnippets": [
+        {
+          "fileName": "Fix: sort by minutes, not text",
+          "code": "// BEFORE (buggy): sorts \"13:00\" before \"7:15\" alphabetically\n// val items = (...).sortedBy { it.startTime }\n\n// AFTER: turn \"HH:mm\" into minutes-since-midnight, then sort by the number\nfun String.toMinutes(): Int {\n    val parts = this.split(\":\")\n    val h = parts[0].trim().toIntOrNull() ?: 0\n    val m = parts.getOrNull(1)?.trim()?.toIntOrNull() ?: 0\n    return h * 60 + m\n}\n\nval items = (periods.map { DayItem.P(it) } + breaks.map { DayItem.B(it) })\n    .sortedBy { it.startTime.toMinutes() }   // 7:15 -> 435, 13:00 -> 780 ✓"
+        }
+      ],
+      "answerChoices": [
+        {
+          "en": "Strings sort alphabetically, so '1' beats '7' — we must sort by minutes-since-midnight instead",
+          "vn": "Chuỗi sắp theo bảng chữ cái, nên '1' thắng '7' — ta phải sắp theo số phút từ nửa đêm"
+        },
+        {
+          "en": "The phone's clock was wrong and needs resetting",
+          "vn": "Đồng hồ điện thoại sai và cần đặt lại"
+        }
+      ],
+      "clawdExplanation": {
+        "en": "Classic beginner trap: comparing times as TEXT. '13:00' < '7:15' alphabetically because '1' < '7'. The fix — convert to minutes-since-midnight and sort by that number — also teaches the debugging workflow: reproduce, find WHERE the decision is made, fix the root cause not the symptom. Next: polish and make the app feel finished.",
+        "vn": "Bẫy kinh điển của người mới: so sánh giờ như VĂN BẢN. '13:00' < '7:15' theo bảng chữ cái vì '1' < '7'. Cách sửa — chuyển thành số phút từ nửa đêm và sắp theo số đó — cũng dạy quy trình gỡ lỗi: tái hiện, tìm NƠI quyết định, sửa gốc rễ chứ không phải triệu chứng. Tiếp theo: hoàn thiện và làm app trông xong xuôi."
+      },
+      "vocabTerms": [
+        {
+          "term": "string vs number sort",
+          "color": "#29B6F6",
+          "explanation": {
+            "en": "Text sorts letter-by-letter ('13' before '7'); numbers sort by value (435 before 780). Pick the right one.",
+            "vn": "Văn bản sắp từng ký tự ('13' trước '7'); số sắp theo giá trị (435 trước 780). Chọn đúng loại."
+          }
+        },
+        {
+          "term": "root cause",
+          "color": "#00E676",
+          "explanation": {
+            "en": "The real source of a bug, not just its symptom. Here, the cause is sorting text, not the visible wrong order.",
+            "vn": "Nguồn gốc thật của lỗi, không chỉ triệu chứng. Ở đây, nguyên nhân là sắp văn bản, không phải thứ tự sai nhìn thấy."
+          }
+        },
+        {
+          "term": "reproduce",
+          "color": "#FFB300",
+          "explanation": {
+            "en": "Making a bug happen on purpose so you can study it. The first step of every fix.",
+            "vn": "Làm lỗi xảy ra có chủ ý để nghiên cứu. Bước đầu của mọi lần sửa."
+          }
+        }
+      ],
+      "codeExplainer": {
+        "en": "The fix converts each 'HH:mm' time string into a single number — minutes since midnight — and sorts by that. 7:15 becomes 435, 13:00 becomes 780, so morning always comes before afternoon. The root cause was sorting times as text; sorting by a real number fixes the whole timeline at once.",
+        "vn": "Cách sửa chuyển mỗi chuỗi giờ 'HH:mm' thành một con số — số phút từ nửa đêm — và sắp theo đó. 7:15 thành 435, 13:00 thành 780, nên buổi sáng luôn trước buổi chiều. Nguyên nhân gốc là sắp giờ như văn bản; sắp theo số thật sửa cả dòng thời gian cùng lúc."
+      }
+    },
+    {
+      "stepNumber": 14,
+      "type": "lesson",
+      "title": {
+        "en": "Step 14: Polish — empty states and a week pager",
+        "vn": "Bước 14: Hoàn thiện — trạng thái trống và bộ chuyển tuần"
+      },
+      "instruction": {
+        "en": "A working app and a FINISHED app are different. What does a brand-new user see on Monday with nothing added yet? A blank black screen feels broken. And right now we only show one day — a timetable needs all seven.\n\nPolish is empathy: imagine the user's first five seconds. We'll add a friendly empty message and let the user swipe between days of the week.",
+        "vn": "Một app chạy được và một app HOÀN THIỆN là khác nhau. Một người dùng mới toanh thấy gì vào thứ Hai khi chưa thêm gì? Một màn hình đen trống trơn trông như hỏng. Và hiện ta chỉ hiện một ngày — thời khóa biểu cần cả bảy.\n\nHoàn thiện là sự đồng cảm: tưởng tượng năm giây đầu của người dùng. Ta sẽ thêm một lời nhắn trống thân thiện và cho người dùng vuốt giữa các ngày trong tuần."
+      },
+      "promptText": {
+        "en": "Two polish changes. (1) In TimetableScreen, if the merged items list is empty, show a centred friendly message: 'No classes yet — tap + to add your first period' in dim text with the book icon above it. (2) Wrap the day view in a HorizontalPager with 7 pages (Mon–Sun), with a row of day tabs at the top that highlights the current day in the Theme.sky colour. Each page filters periods and breaks by their day field.",
+        "vn": "Hai thay đổi hoàn thiện. (1) Trong TimetableScreen, nếu danh sách items gộp rỗng, hiện một lời nhắn thân thiện canh giữa: 'Chưa có tiết nào — chạm + để thêm tiết đầu tiên' bằng chữ mờ với icon sách phía trên. (2) Bọc màn hình ngày trong một HorizontalPager với 7 trang (T2–CN), với một hàng tab ngày ở trên cùng làm nổi bật ngày hiện tại bằng màu Theme.sky. Mỗi trang lọc tiết và giờ nghỉ theo trường day của chúng."
+      },
+      "promptRationale": {
+        "en": "Two small touches that change everything: an empty state tells a lost user what to do, and the week pager turns a one-day demo into a real weekly planner. Notice the pager uses the `day` field we added back in Step 5 — yet another payoff from modelling the data well early.",
+        "vn": "Hai chi tiết nhỏ thay đổi mọi thứ: trạng thái trống nói cho người dùng lạc lối biết làm gì, và bộ chuyển tuần biến bản demo một ngày thành một cuốn lịch tuần thật. Để ý bộ chuyển dùng trường `day` ta thêm từ Bước 5 — lại một lợi ích từ việc mô hình dữ liệu tốt sớm."
+      },
+      "aiResponse": {
+        "en": "Now it feels finished. New users get a gentle nudge instead of a void, and swiping across the week makes the app feel like a real planner. The day tabs read the `day` field on each period and break — the same field that's quietly powered the data since Step 5.\n\nGood polish is invisible: users won't notice the empty state or the smooth pager, they'll just feel the app is 'nice'. That feeling is built from a dozen small, deliberate choices.",
+        "vn": "Giờ nó trông xong xuôi. Người dùng mới được nhắc nhẹ nhàng thay vì khoảng trống, và vuốt qua tuần làm app trông như một cuốn lịch thật. Các tab ngày đọc trường `day` trên mỗi tiết và giờ nghỉ — cùng trường đã âm thầm vận hành dữ liệu từ Bước 5.\n\nHoàn thiện tốt thì vô hình: người dùng không để ý trạng thái trống hay bộ chuyển mượt, họ chỉ cảm thấy app 'đẹp'. Cảm giác đó được xây từ hàng tá lựa chọn nhỏ, có chủ ý."
+      },
+      "codeSnippets": [
+        {
+          "fileName": "ui/TimetableScreen.kt (polish)",
+          "code": "@OptIn(ExperimentalFoundationApi::class)\n@Composable\nfun WeekScreen(allPeriods: List<Period>, allBreaks: List<Break>, onAdd: (Int) -> Unit) {\n    val days = listOf(\"Mon\",\"Tue\",\"Wed\",\"Thu\",\"Fri\",\"Sat\",\"Sun\")\n    val pager = rememberPagerState(pageCount = { 7 })\n\n    Column(Modifier.background(Theme.background)) {\n        Row { days.forEachIndexed { i, d ->\n            Text(d, color = if (i == pager.currentPage) Theme.sky else Theme.textDim,\n                 modifier = Modifier.padding(12.dp)) } }\n        HorizontalPager(state = pager) { day ->\n            val p = allPeriods.filter { it.day == day }\n            val b = allBreaks.filter { it.day == day }\n            if (p.isEmpty() && b.isEmpty())\n                EmptyDay()                       // friendly 'tap + to start'\n            else\n                DayList(p, b) { onAdd(day) }\n        }\n    }\n}"
+        }
+      ],
+      "clawdExplanation": {
+        "en": "Polish is empathy turned into code: the empty state guides a lost user, the week pager makes it a real planner. And it leaned entirely on the `day` field you defined back in Step 5 — early data decisions keep paying dividends. One step left, and it's the most important: explaining the whole app yourself.",
+        "vn": "Hoàn thiện là sự đồng cảm biến thành code: trạng thái trống dẫn dắt người dùng lạc lối, bộ chuyển tuần biến nó thành cuốn lịch thật. Và nó dựa hoàn toàn vào trường `day` bạn định nghĩa từ Bước 5 — quyết định dữ liệu sớm tiếp tục sinh lời. Còn một bước, và đó là bước quan trọng nhất: tự bạn giải thích toàn bộ app."
+      },
+      "vocabTerms": [
+        {
+          "term": "empty state",
+          "color": "#29B6F6",
+          "explanation": {
+            "en": "What a screen shows when there's no data yet — a chance to guide the user, not a blank void.",
+            "vn": "Thứ một màn hình hiện khi chưa có dữ liệu — cơ hội dẫn dắt người dùng, không phải khoảng trống."
+          }
+        },
+        {
+          "term": "HorizontalPager",
+          "color": "#00E676",
+          "explanation": {
+            "en": "A swipeable row of full-screen pages — here, one per day of the week.",
+            "vn": "Một hàng các trang toàn màn hình vuốt được — ở đây, mỗi ngày trong tuần một trang."
+          }
+        },
+        {
+          "term": "polish",
+          "color": "#FFB300",
+          "explanation": {
+            "en": "The small, optional touches that make an app feel cared-for and trustworthy.",
+            "vn": "Những chi tiết nhỏ, tùy chọn làm app trông được chăm chút và đáng tin."
+          }
+        }
+      ],
+      "codeExplainer": {
+        "en": "This wraps the day view in a swipeable week. A row of day tabs highlights the current day in sky-blue, and each page filters periods and breaks by their day field. If a day has nothing, it shows a friendly 'tap + to add' message instead of a blank screen.",
+        "vn": "Đoạn này bọc màn hình ngày trong một tuần vuốt được. Một hàng tab ngày làm nổi bật ngày hiện tại bằng xanh trời, và mỗi trang lọc tiết và giờ nghỉ theo trường day. Nếu một ngày không có gì, nó hiện lời nhắn thân thiện 'chạm + để thêm' thay vì màn hình trống."
+      }
+    },
+    {
+      "stepNumber": 15,
+      "type": "lesson",
+      "title": {
+        "en": "Step 15: Explain how the features link together",
+        "vn": "Bước 15: Giải thích các tính năng liên kết ra sao"
+      },
+      "instruction": {
+        "en": "Before the final build, stop and EXPLAIN. The real test of understanding isn't writing code — it's being able to say, in plain words, how the parts connect.\n\nHere's the question to answer in your head: if you DELETE a period, what should happen to the homework attached to it, and to the reminders for that homework? Trace the chain. Then read the prompt — we'll ask the AI to add exactly that 'cascade', because a good app keeps its data consistent.",
+        "vn": "Trước lần build cuối, hãy dừng lại và GIẢI THÍCH. Bài kiểm tra thật của sự hiểu không phải viết code — mà là nói được, bằng lời thường, các phần kết nối ra sao.\n\nĐây là câu hỏi để trả lời trong đầu: nếu bạn XÓA một tiết, điều gì nên xảy ra với bài tập gắn với nó, và với các nhắc nhở cho bài tập đó? Lần theo chuỗi. Rồi đọc prompt — ta sẽ nhờ AI thêm đúng 'hiệu ứng dây chuyền' đó, vì một app tốt giữ dữ liệu nhất quán."
+      },
+      "promptText": {
+        "en": "Add a deletePeriod(periodId) function that keeps all data consistent. It must: (1) remove the Period from the periods list and save; (2) find every Homework whose periodId matches and cancel its scheduled reminder (recreate the same PendingIntent and call alarmManager.cancel); (3) remove those homework items and save. Explain in comments how this 'cascade' mirrors the way the features link: period -> its homework -> their reminders.",
+        "vn": "Thêm một hàm deletePeriod(periodId) giữ mọi dữ liệu nhất quán. Nó phải: (1) xóa Period khỏi danh sách periods và lưu; (2) tìm mọi Homework có periodId khớp và hủy nhắc nhở đã đặt (tạo lại cùng PendingIntent và gọi alarmManager.cancel); (3) xóa các bài tập đó và lưu. Giải thích trong comment cách 'dây chuyền' này phản ánh cách các tính năng liên kết: tiết -> bài tập của nó -> nhắc nhở của chúng."
+      },
+      "promptRationale": {
+        "en": "This prompt is really a comprehension check disguised as a feature. Deleting a period FORCES you to name every downstream link: homework points to the period (periodId), reminders point to the homework (id). If you can describe the cascade, you truly understand the app's architecture.",
+        "vn": "Prompt này thực ra là bài kiểm tra hiểu biết ngụy trang thành tính năng. Xóa một tiết BUỘC bạn gọi tên mọi liên kết xuôi dòng: bài tập trỏ tới tiết (periodId), nhắc nhở trỏ tới bài tập (id). Nếu mô tả được dây chuyền, bạn thật sự hiểu kiến trúc app."
+      },
+      "aiResponse": {
+        "en": "Cascade delete added. Watch how the data links drive the logic: we delete the period, then use its `id` to find every homework with a matching `periodId`, then use each homework's `id` to cancel its reminder. We follow the SAME wires you built, just in reverse.\n\nThis is the truest sign you understand an app: you can predict what one action ripples into. Period → homework → reminder, forwards when adding, backwards when deleting. Same chain, both directions.",
+        "vn": "Đã thêm xóa dây chuyền. Xem các liên kết dữ liệu điều khiển logic ra sao: ta xóa tiết, rồi dùng `id` của nó tìm mọi bài tập có `periodId` khớp, rồi dùng `id` mỗi bài tập hủy nhắc nhở của nó. Ta đi theo CÙNG những dây bạn đã xây, chỉ là ngược lại.\n\nĐây là dấu hiệu chân thật nhất rằng bạn hiểu một app: bạn dự đoán được một hành động lan tỏa thành gì. Tiết → bài tập → nhắc nhở, xuôi khi thêm, ngược khi xóa. Cùng chuỗi, cả hai chiều."
+      },
+      "codeSnippets": [
+        {
+          "fileName": "Cascade delete — the links, in reverse",
+          "code": "fun deletePeriod(periodId: String) {\n    // 3) the homework attached to this period (linked by periodId)\n    val attached = allHomework.filter { it.periodId == periodId }\n\n    // 2) cancel each one's reminder (linked by homework id)\n    attached.forEach { hw ->\n        val intent = Intent(ctx, ReminderReceiver::class.java)\n        val pi = PendingIntent.getBroadcast(ctx, hw.id.hashCode(), intent,\n            PendingIntent.FLAG_IMMUTABLE)\n        (ctx.getSystemService(Context.ALARM_SERVICE) as AlarmManager).cancel(pi)\n    }\n\n    // 1) now remove the data, top of the chain to the bottom\n    storage.saveHomework(allHomework - attached.toSet())\n    storage.savePeriods(allPeriods.filter { it.id != periodId })\n    // period -> homework -> reminders : delete walks the links backwards\n}"
+        }
+      ],
+      "answerChoices": [
+        {
+          "en": "Delete its homework too, and cancel those homeworks' reminders — period → homework → reminder",
+          "vn": "Xóa luôn bài tập của nó, và hủy nhắc nhở của các bài tập đó — tiết → bài tập → nhắc nhở"
+        },
+        {
+          "en": "Just remove the period; the homework and reminders can stay on their own",
+          "vn": "Chỉ xóa tiết; bài tập và nhắc nhở có thể tự ở lại"
+        },
+        {
+          "en": "Delete everything in the whole app to be safe",
+          "vn": "Xóa mọi thứ trong cả app cho chắc"
+        }
+      ],
+      "clawdExplanation": {
+        "en": "This step WAS the comprehension test: deleting a period forced you to name every link — period holds homework (periodId), homework holds its reminder (id). Add walks the chain forwards; delete walks it backwards. If you can explain that cascade out loud, you understand the architecture. One step left: tell the whole story.",
+        "vn": "Bước này CHÍNH LÀ bài kiểm tra hiểu biết: xóa một tiết buộc bạn gọi tên mọi liên kết — tiết giữ bài tập (periodId), bài tập giữ nhắc nhở (id). Thêm đi xuôi chuỗi; xóa đi ngược. Nếu giải thích được dây chuyền đó thành lời, bạn hiểu kiến trúc. Còn một bước: kể toàn bộ câu chuyện."
+      },
+      "vocabTerms": [
+        {
+          "term": "cascade",
+          "color": "#29B6F6",
+          "explanation": {
+            "en": "When one change automatically triggers related changes down the chain — delete a period, its homework and reminders go too.",
+            "vn": "Khi một thay đổi tự động kích hoạt các thay đổi liên quan xuôi chuỗi — xóa một tiết, bài tập và nhắc nhở của nó cũng đi."
+          }
+        },
+        {
+          "term": "data consistency",
+          "color": "#00E676",
+          "explanation": {
+            "en": "Keeping data sensible — no homework pointing to a period that no longer exists, no orphan reminders.",
+            "vn": "Giữ dữ liệu hợp lý — không bài tập trỏ tới tiết không còn tồn tại, không nhắc nhở mồ côi."
+          }
+        },
+        {
+          "term": "orphan",
+          "color": "#FFB300",
+          "explanation": {
+            "en": "Data left pointing at something that's been deleted. Cascades prevent orphans.",
+            "vn": "Dữ liệu còn trỏ tới thứ đã bị xóa. Dây chuyền ngăn dữ liệu mồ côi."
+          }
+        }
+      ],
+      "codeExplainer": {
+        "en": "This deletes a period the right way. It first finds all homework linked to that period by periodId, cancels each homework's reminder using that homework's id, then removes the homework and the period from storage. It walks the same links you built — period to homework to reminder — but in reverse, so no orphan data is left behind.",
+        "vn": "Đoạn này xóa một tiết đúng cách. Trước tiên nó tìm mọi bài tập liên kết với tiết đó qua periodId, hủy nhắc nhở của mỗi bài tập bằng id của bài tập đó, rồi xóa bài tập và tiết khỏi bộ nhớ. Nó đi theo cùng những liên kết bạn đã xây — tiết tới bài tập tới nhắc nhở — nhưng ngược lại, nên không để lại dữ liệu mồ côi."
+      }
+    },
+    {
+      "stepNumber": 16,
+      "type": "final",
+      "title": {
+        "en": "Step 16: You built it — now explain the whole app",
+        "vn": "Bước 16: Bạn đã xây xong — giờ giải thích toàn bộ app"
+      },
+      "instruction": {
+        "en": "You did it. A complete neon timetable app with periods, breakbars, homework, and reminders — designed and built by describing what you wanted to an AI.\n\nThe last skill is the most valuable: telling the story of how it all works, start to finish, in your own words. If you can teach it, you own it. Below is the full journey — read it, then try explaining the app to a friend who's never seen it.",
+        "vn": "Bạn làm được rồi. Một app thời khóa biểu neon hoàn chỉnh với tiết học, thanh giờ nghỉ, bài tập, và nhắc nhở — thiết kế và xây bằng cách mô tả thứ bạn muốn cho một AI.\n\nKỹ năng cuối quý giá nhất: kể câu chuyện mọi thứ hoạt động ra sao, từ đầu đến cuối, bằng lời của bạn. Nếu dạy được, bạn sở hữu nó. Dưới đây là toàn bộ hành trình — đọc nó, rồi thử giải thích app cho một người bạn chưa từng thấy."
+      },
+      "promptText": {
+        "en": "Give me a final summary I can use to explain this whole app to someone else. Walk through every feature in build order and, for each one, say (a) what it does and (b) which other feature it links to. Then give me three good questions a teacher might ask to check I really understand how the timetable, homework, and reminders connect.",
+        "vn": "Cho tôi một bản tóm tắt cuối để tôi giải thích cả app này cho người khác. Đi qua từng tính năng theo thứ tự xây và, với mỗi cái, nói (a) nó làm gì và (b) nó liên kết với tính năng nào khác. Rồi cho tôi ba câu hỏi hay mà một giáo viên có thể hỏi để kiểm tra tôi thật sự hiểu thời khóa biểu, bài tập, và nhắc nhở kết nối ra sao."
+      },
+      "promptRationale": {
+        "en": "Asking for a summary you can TEACH from is the ultimate study technique — explaining forces you to find the gaps in your own understanding. Asking for the teacher's questions turns the AI into a study partner that quizzes you. This is how you turn a finished project into real, lasting skill.",
+        "vn": "Yêu cầu một bản tóm tắt để DẠY lại là kỹ thuật học tối thượng — giải thích buộc bạn tìm ra lỗ hổng trong hiểu biết của chính mình. Yêu cầu câu hỏi của giáo viên biến AI thành bạn học kiểm tra bạn. Đây là cách biến một dự án hoàn thành thành kỹ năng thật, bền vững."
+      },
+      "aiResponse": {
+        "en": "Here's your app, end to end:\n\n• THEME — one colour object; every card and bar reads from it.\n• PERIOD & BREAK — two data types because they behave differently; both carry a startTime and a day.\n• DAY VIEW — merges periods and breaks into one list, sorted by time, drawing a card or a bar for each.\n• ADD PERIOD — a form that builds a Period and hands it back; the day view re-sorts and shows it.\n• STORAGE — saves on every change, loads on startup, so nothing is lost.\n• HOMEWORK — linked to a period by periodId; the card shows a count badge.\n• DUE DATE — picked from the calendar, stored as millis.\n• REMINDER — reads dueDate, sets an alarm 24h before, posts a notification.\n• CASCADE DELETE — removing a period removes its homework and cancels their reminders.\n\nThree questions to test yourself:\n1) Why are Period and Break separate types instead of one?\n2) How does a reminder know which homework — and which period — it belongs to?\n3) If you delete a period, what else must change, and why?\n\nIf you can answer those out loud, you don't just have an app — you have understanding. Well done.",
+        "vn": "Đây là app của bạn, từ đầu đến cuối:\n\n• THEME — một object màu; mọi thẻ và thanh đọc từ nó.\n• PERIOD & BREAK — hai loại dữ liệu vì chúng hành xử khác nhau; cả hai mang startTime và day.\n• DAY VIEW — gộp tiết và giờ nghỉ thành một danh sách, sắp theo giờ, vẽ một thẻ hoặc một thanh cho mỗi cái.\n• ADD PERIOD — biểu mẫu tạo một Period và trao lại; màn hình ngày sắp lại và hiện nó.\n• STORAGE — lưu mỗi thay đổi, đọc khi khởi động, nên không mất gì.\n• HOMEWORK — liên kết với một tiết qua periodId; thẻ hiện huy hiệu đếm.\n• DUE DATE — chọn từ lịch, lưu dạng millis.\n• REMINDER — đọc dueDate, đặt báo thức 24h trước, đăng một thông báo.\n• CASCADE DELETE — xóa một tiết xóa bài tập của nó và hủy nhắc nhở của chúng.\n\nBa câu hỏi để tự kiểm tra:\n1) Vì sao Period và Break là hai loại riêng thay vì một?\n2) Làm sao một nhắc nhở biết nó thuộc bài tập nào — và tiết nào?\n3) Nếu xóa một tiết, còn gì phải đổi, và vì sao?\n\nNếu trả lời được những câu đó thành lời, bạn không chỉ có một app — bạn có sự hiểu biết. Làm tốt lắm."
+      },
+      "codeSnippets": [
+        {
+          "fileName": "The whole app, as links",
+          "code": "// HOW EVERYTHING CONNECTS\n//\n//   Theme ───colours──> PeriodCard & BreakBar\n//\n//   Period ──(in)──> DayView ──(sorted by time)──> screen\n//      ▲                                   │\n//      │ built by                          │ tap a card\n//   AddPeriodDialog                         ▼\n//                                     AddHomeworkSheet\n//                                          │ creates\n//                                          ▼\n//   Homework (periodId ──links to──> Period)\n//      │ has dueDate\n//      ▼\n//   ReminderScheduler ──alarm──> ReminderReceiver ──> Notification\n//\n//   Storage saves: periods, breaks, homework  (load on start)\n//   deletePeriod() walks the links BACKWARDS to clean up.\n//\n// You can now explain every arrow above. That's the whole skill."
+        }
+      ],
+      "answerChoices": [
+        {
+          "en": "Yes — I can explain every feature and how they link",
+          "vn": "Có — tôi giải thích được mọi tính năng và cách chúng liên kết"
+        },
+        {
+          "en": "Let me review the chain once more",
+          "vn": "Để tôi xem lại chuỗi một lần nữa"
+        }
+      ],
+      "clawdExplanation": {
+        "en": "That's the whole journey: an idea in plain words became a designed, working app — and you can now explain every link in the chain. Theme colours the cards, periods hold homework, homework drives reminders, deleting walks it all backwards. You didn't just follow steps; you learned to THINK in workflows. Go build the next one.",
+        "vn": "Đó là toàn bộ hành trình: một ý tưởng bằng lời thường trở thành một app được thiết kế, chạy được — và giờ bạn giải thích được mọi mắt xích. Theme tô màu thẻ, tiết giữ bài tập, bài tập điều khiển nhắc nhở, xóa đi ngược tất cả. Bạn không chỉ làm theo bước; bạn học cách TƯ DUY theo quy trình. Đi xây cái tiếp theo nào."
+      },
+      "vocabTerms": [
+        {
+          "term": "architecture",
+          "color": "#29B6F6",
+          "explanation": {
+            "en": "The big-picture shape of an app — which parts exist and how they connect. You can now draw yours.",
+            "vn": "Hình dạng tổng thể của một app — những phần nào tồn tại và kết nối ra sao. Giờ bạn vẽ được của mình."
+          }
+        },
+        {
+          "term": "teach to learn",
+          "color": "#00E676",
+          "explanation": {
+            "en": "Explaining something out loud reveals exactly what you don't yet understand. The best study trick.",
+            "vn": "Giải thích thành lời phơi bày chính xác thứ bạn chưa hiểu. Mẹo học tốt nhất."
+          }
+        },
+        {
+          "term": "workflow thinking",
+          "color": "#FFB300",
+          "explanation": {
+            "en": "Designing by tracing what the user does step by step, and how each feature feeds the next.",
+            "vn": "Thiết kế bằng cách lần theo những gì người dùng làm từng bước, và cách mỗi tính năng nuôi tính năng kế."
+          }
+        }
+      ],
+      "codeExplainer": {
+        "en": "This diagram is the whole app on one screen. The theme colours the cards and bars; the add dialog builds periods into the day view; tapping a card creates homework linked by periodId; homework's due date drives the reminder scheduler and notification; storage saves it all; and deletePeriod walks every link backwards to clean up. If you can read this map, you understand the app.",
+        "vn": "Sơ đồ này là cả app trên một màn hình. Theme tô màu thẻ và thanh; hộp thoại thêm xây các tiết vào màn hình ngày; chạm một thẻ tạo bài tập liên kết qua periodId; hạn nộp của bài tập điều khiển bộ đặt lịch nhắc nhở và thông báo; bộ nhớ lưu tất cả; và deletePeriod đi ngược mọi liên kết để dọn dẹp. Nếu đọc được bản đồ này, bạn hiểu app."
+      }
+    }
+  ]
+}

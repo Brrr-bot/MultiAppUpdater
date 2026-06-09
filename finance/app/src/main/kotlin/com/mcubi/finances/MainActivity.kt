@@ -1,11 +1,9 @@
 ﻿package com.mcubi.finances
 
-import android.Manifest
 import android.app.DatePickerDialog
 import android.app.PendingIntent
 import android.content.Intent
 import android.content.pm.PackageInstaller
-import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.Typeface
 import android.net.Uri
@@ -123,13 +121,6 @@ class MainActivity : AppCompatActivity() {
     private val pickImageLauncher = registerForActivityResult(
         ActivityResultContracts.GetContent()
     ) { uri: Uri? -> if (uri != null) processReceiptImage(uri) }
-
-    private val permissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { granted ->
-        if (granted) pickImageLauncher.launch("image/*")
-        else flash("Gallery permission denied", "#FF1744")
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -300,14 +291,7 @@ class MainActivity : AppCompatActivity() {
     // ── OCR receipt scanning ──────────────────────────────────────────────────
 
     private fun openImagePicker() {
-        val permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
-            Manifest.permission.READ_MEDIA_IMAGES
-        else
-            Manifest.permission.READ_EXTERNAL_STORAGE
-        if (checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED)
-            pickImageLauncher.launch("image/*")
-        else
-            permissionLauncher.launch(permission)
+        pickImageLauncher.launch("image/*")
     }
 
     private fun processReceiptImage(uri: Uri) {

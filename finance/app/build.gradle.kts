@@ -11,8 +11,8 @@ android {
         applicationId = "com.mcubi.finances"
         minSdk = 26
         targetSdk = 34
-        versionCode = (findProperty("versionCode") as String?)?.toInt() ?: 25
-        versionName = (findProperty("versionName") as String?) ?: "1.0.25"
+        versionCode = (findProperty("versionCode") as String?)?.toInt() ?: 447
+        versionName = (findProperty("versionName") as String?) ?: "1.0.447"
     }
 
     signingConfigs {

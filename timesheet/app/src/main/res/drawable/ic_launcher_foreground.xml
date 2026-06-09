@@ -5,46 +5,57 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
 
-    <!-- Calendar body -->
+    <!-- Left binding ring (sticks above calendar body) -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M80,36H28c-2.2,0-4,1.8-4,4v44c0,2.2,1.8,4,4,4h52c2.2,0,4-1.8,4-4V40c0-2.2-1.8-4-4-4z"/>
-
-    <!-- Header bar (black strip) -->
-    <path
-        android:fillColor="#000000"
-        android:pathData="M24,40c0-2.2,1.8-4,4-4h52c2.2,0,4,1.8,4,4v13H24V40z"/>
-
-    <!-- Left binding ring -->
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M39,25c0-1.7,1.3-3,3-3s3,1.3,3,3v14c0,1.7-1.3,3-3,3s-3-1.3-3-3V25z"/>
+        android:pathData="M36,22 L44,22 C45.1,22,46,22.9,46,24 L46,36 C46,37.1,45.1,38,44,38 L36,38 C34.9,38,34,37.1,34,36 L34,24 C34,22.9,34.9,22,36,22z"/>
 
     <!-- Right binding ring -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M63,25c0-1.7,1.3-3,3-3s3,1.3,3,3v14c0,1.7-1.3,3-3,3s-3-1.3-3-3V25z"/>
+        android:pathData="M64,22 L72,22 C73.1,22,74,22.9,74,24 L74,36 C74,37.1,73.1,38,72,38 L64,38 C62.9,38,62,37.1,62,36 L62,24 C62,22.9,62.9,22,64,22z"/>
 
-    <!-- Day dots — row 1 -->
-    <path android:fillColor="#000000"
-        android:pathData="M36,61m-3,0a3,3,0,1,0,6,0a3,3,0,1,0,-6,0"/>
-    <path android:fillColor="#000000"
-        android:pathData="M54,61m-3,0a3,3,0,1,0,6,0a3,3,0,1,0,-6,0"/>
-    <path android:fillColor="#000000"
-        android:pathData="M72,61m-3,0a3,3,0,1,0,6,0a3,3,0,1,0,-6,0"/>
-
-    <!-- Day dots — row 2 -->
-    <path android:fillColor="#000000"
-        android:pathData="M36,74m-3,0a3,3,0,1,0,6,0a3,3,0,1,0,-6,0"/>
-    <path android:fillColor="#000000"
-        android:pathData="M54,74m-3,0a3,3,0,1,0,6,0a3,3,0,1,0,-6,0"/>
-
-    <!-- Checkmark on last cell (bottom-right) -->
+    <!-- Calendar body -->
     <path
-        android:pathData="M65,70 L69,74 L76,67"
-        android:strokeColor="#000000"
-        android:strokeWidth="3.5"
-        android:strokeLineCap="round"
-        android:strokeLineJoin="round"/>
+        android:fillColor="#FFFFFF"
+        android:pathData="M84,30 L24,30 C21.8,30,20,31.8,20,34 L20,84 C20,86.2,21.8,88,24,88 L84,88 C86.2,88,88,86.2,88,84 L88,34 C88,31.8,86.2,30,84,30z"/>
+
+    <!-- Header bar (black) -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M20,34 C20,31.8,21.8,30,24,30 L84,30 C86.2,30,88,31.8,88,34 L88,48 L20,48z"/>
+
+    <!-- Row 1: checkbox + two bars -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M26,54 L33,54 L33,61 L26,61z"/>
+    <path
+        android:fillColor="#000000"
+        android:pathData="M37,55 L66,55 C67.1,55,68,55.9,68,57 L68,59 C68,60.1,67.1,61,66,61 L37,61 C35.9,61,35,60.1,35,59 L35,57 C35,55.9,35.9,55,37,55z"/>
+    <path
+        android:fillColor="#000000"
+        android:pathData="M71,55 L82,55 C83.1,55,84,55.9,84,57 L84,59 C84,60.1,83.1,61,82,61 L71,61 C69.9,61,69,60.1,69,59 L69,57 C69,55.9,69.9,55,71,55z"/>
+
+    <!-- Row 2: checkbox + two bars -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M26,66 L33,66 L33,73 L26,73z"/>
+    <path
+        android:fillColor="#000000"
+        android:pathData="M37,67 L58,67 C59.1,67,60,67.9,60,69 L60,71 C60,72.1,59.1,73,58,73 L37,73 C35.9,73,35,72.1,35,71 L35,69 C35,67.9,35.9,67,37,67z"/>
+    <path
+        android:fillColor="#000000"
+        android:pathData="M63,67 L82,67 C83.1,67,84,67.9,84,69 L84,71 C84,72.1,83.1,73,82,73 L63,73 C61.9,73,61,72.1,61,71 L61,69 C61,67.9,61.9,67,63,67z"/>
+
+    <!-- Row 3: checkbox + two bars -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M26,78 L33,78 L33,85 L26,85z"/>
+    <path
+        android:fillColor="#000000"
+        android:pathData="M37,79 L72,79 C73.1,79,74,79.9,74,81 L74,83 C74,84.1,73.1,85,72,85 L37,85 C35.9,85,35,84.1,35,83 L35,81 C35,79.9,35.9,79,37,79z"/>
+    <path
+        android:fillColor="#000000"
+        android:pathData="M77,79 L82,79 C83.1,79,84,79.9,84,81 L84,83 C84,84.1,83.1,85,82,85 L77,85 C75.9,85,75,84.1,75,83 L75,81 C75,79.9,75.9,79,77,79z"/>
 
 </vector>

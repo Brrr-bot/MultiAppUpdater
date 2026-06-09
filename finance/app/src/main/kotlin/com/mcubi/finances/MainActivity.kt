@@ -18,7 +18,9 @@ import android.os.Bundle
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
+import android.text.Editable
 import android.text.InputType
+import android.text.TextWatcher
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.ScrollView
@@ -90,6 +92,7 @@ class MainActivity : AppCompatActivity() {
     private var periodStart  = LocalDate.now()
     private var selectedDate = LocalDate.now()
     private var salaryDates  = listOf<LocalDate>()  // sorted ascending, one per salary entry date
+    private var currentHistoryEntries = JSONArray()
 
     companion object {
         private const val UPDATE_CH       = "app_update"
@@ -116,6 +119,12 @@ class MainActivity : AppCompatActivity() {
     private val pickImageLauncher = registerForActivityResult(
         ActivityResultContracts.GetContent()
     ) { uri: Uri? -> if (uri != null) processReceiptImage(uri) }
+
+    private val editEntryLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) {
+        if (it.resultCode == RESULT_OK) refreshCurrentTransactionTab()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -168,6 +177,13 @@ class MainActivity : AppCompatActivity() {
             }
             fetchHistory()
         }
+        b.etHistorySearch.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                renderFilteredHistoryEntries()
+            }
+            override fun afterTextChanged(s: Editable?) = Unit
+        })
 
         // Swipe refresh
         b.swipeRefresh.setColorSchemeColors(
@@ -1062,10 +1078,36 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun renderHistoryEntries(entries: JSONArray) {
+        currentHistoryEntries = entries
+        renderFilteredHistoryEntries()
+    }
+
+    private fun renderFilteredHistoryEntries() {
+        val query = b.etHistorySearch.text.toString().trim().lowercase(Locale.getDefault())
+        val entries = if (query.isEmpty()) currentHistoryEntries else JSONArray().also { filtered ->
+            for (i in 0 until currentHistoryEntries.length()) {
+                val entry = currentHistoryEntries.getJSONObject(i)
+                val haystack = buildString {
+                    append(entry.optString("what"))
+                    append(' ')
+                    append(entry.optString("category"))
+                    append(' ')
+                    append(entry.optDouble("amount"))
+                    append(' ')
+                    append(
+                        java.text.SimpleDateFormat("d MMM yyyy", Locale.ENGLISH)
+                            .format(java.util.Date(entry.optLong("ts")))
+                    )
+                }.lowercase(Locale.getDefault())
+                if (haystack.contains(query)) filtered.put(entry)
+            }
+        }
         if (entries.length() == 0) {
+            b.tvEmpty.text = if (query.isEmpty()) "no entries this month" else "no matching transactions"
             b.tvEmpty.visibility          = View.VISIBLE
             b.historyContainer.visibility = View.GONE
         } else {
+            b.tvEmpty.text = "no entries this month"
             b.tvEmpty.visibility          = View.GONE
             b.historyContainer.visibility = View.VISIBLE
             buildHistoryView(entries)
@@ -1147,7 +1189,6 @@ class MainActivity : AppCompatActivity() {
                 val amount      = e.getDouble("amount")
                 val what        = e.getString("what")
                 val cat         = e.getString("category")
-                val entryId     = e.getInt("id")
                 val ts          = e.getLong("ts")
                 val jDate       = java.util.Date(ts)
                 val dateLine    = java.text.SimpleDateFormat("EEE d MMM yyyy", Locale.ENGLISH).format(jDate)
@@ -1160,7 +1201,7 @@ class MainActivity : AppCompatActivity() {
                     layoutParams = LinearLayout.LayoutParams(MATCH, WRAP).also {
                         it.setMargins(dp(12), dp(2), dp(12), 0)
                     }
-                    setOnLongClickListener { confirmDelete(entryId); true }
+                    setOnLongClickListener { showEntryActions(e); true }
                 }
 
                 // Left accent stripe — explicit height so it renders
@@ -1229,14 +1270,60 @@ class MainActivity : AppCompatActivity() {
         container.requestLayout()
     }
 
-    // ── Delete ────────────────────────────────────────────────────────────────
+    // ── Edit / delete ─────────────────────────────────────────────────────────
+
+    private fun showEntryActions(entry: JSONObject) {
+        val dialog = android.app.AlertDialog.Builder(this, R.style.DatePickerTheme)
+            .setTitle(entry.optString("what", "Transaction"))
+            .setItems(arrayOf("EDIT", "DELETE")) { _, which ->
+                if (which == 0) showEditEntryDialog(entry)
+                else confirmDelete(entry.getInt("id"))
+            }
+            .setNegativeButton("CANCEL", null)
+            .create()
+        dialog.setOnShowListener { styleFinanceDialog(dialog) }
+        dialog.show()
+    }
+
+    private fun showEditEntryDialog(entry: JSONObject) {
+        editEntryLauncher.launch(Intent(this, QuickAddActivity::class.java).apply {
+            putExtra(QuickAddActivity.EXTRA_DIRECTION, entry.getString("direction"))
+            putExtra(QuickAddActivity.EXTRA_ENTRY_ID, entry.getInt("id"))
+            putExtra(QuickAddActivity.EXTRA_ENTRY_TS, entry.getLong("ts"))
+            putExtra(QuickAddActivity.EXTRA_AMOUNT, entry.getDouble("amount"))
+            putExtra(QuickAddActivity.EXTRA_WHAT, entry.getString("what"))
+            putExtra(QuickAddActivity.EXTRA_CATEGORY, entry.getString("category"))
+        })
+    }
+
+    private fun styleFinanceDialog(dialog: android.app.AlertDialog) {
+        dialog.window?.setBackgroundDrawableResource(R.drawable.dialog_bg)
+        dialog.getButton(android.app.AlertDialog.BUTTON_POSITIVE)?.apply {
+            setTextColor(Color.WHITE)
+            typeface = Typeface.create(Typeface.MONOSPACE, Typeface.BOLD)
+        }
+        dialog.getButton(android.app.AlertDialog.BUTTON_NEGATIVE)?.apply {
+            setTextColor(Color.WHITE)
+            typeface = Typeface.MONOSPACE
+        }
+        dialog.getButton(android.app.AlertDialog.BUTTON_NEUTRAL)?.setTextColor(Color.WHITE)
+    }
+
+    private fun refreshCurrentTransactionTab() {
+        if (b.layoutSummary.visibility == View.VISIBLE) buildFinanceSummary()
+        else fetchHistory()
+        fetchBalancePill()
+        fetchSavingsTotal()
+    }
 
     private fun confirmDelete(id: Int) {
-        android.app.AlertDialog.Builder(this)
+        val dialog = android.app.AlertDialog.Builder(this, R.style.DatePickerTheme)
             .setMessage("Delete this entry?")
             .setPositiveButton("DELETE") { _, _ -> deleteEntry(id) }
             .setNegativeButton("CANCEL", null)
-            .show()
+            .create()
+        dialog.setOnShowListener { styleFinanceDialog(dialog) }
+        dialog.show()
     }
 
     private fun deleteEntry(id: Int) {
@@ -1326,6 +1413,21 @@ class MainActivity : AppCompatActivity() {
         }
         nav.addView(prev); nav.addView(lbl); nav.addView(next)
         container.addView(nav)
+        container.addView(TextView(this).apply {
+            text = "SET CATEGORY BUDGETS"
+            textSize = 10f
+            typeface = mono
+            setTypeface(typeface, Typeface.BOLD)
+            setTextColor(Color.parseColor("#29B6F6"))
+            gravity = Gravity.CENTER
+            setBackgroundResource(R.drawable.cat_btn_inactive)
+            isClickable = true
+            isFocusable = true
+            layoutParams = LinearLayout.LayoutParams(MATCH, dp(38)).also {
+                it.setMargins(dp(12), 0, dp(12), dp(6))
+            }
+            setOnClickListener { showBudgetCategoryPicker() }
+        })
 
         CoroutineScope(Dispatchers.IO).launch {
             val from = periodStart
@@ -1333,9 +1435,14 @@ class MainActivity : AppCompatActivity() {
             val arr  = db.getCategoryBreakdown(from, to)
             val (totalIn, totalOut) = db.getSummaryForPeriod(from, to)
             val rows = ArrayList<Triple<String, Double, Int>>()
+            val transactionsByCategory = LinkedHashMap<String, JSONArray>()
+            val budgetsByCategory = LinkedHashMap<String, Double>()
             for (i in 0 until arr.length()) {
                 val o = arr.getJSONObject(i)
-                rows.add(Triple(o.getString("category"), o.getDouble("out"), o.getInt("outCount")))
+                val category = o.getString("category")
+                rows.add(Triple(category, o.getDouble("out"), o.getInt("outCount")))
+                transactionsByCategory[category] = db.getCategoryTransactions(from, to, category)
+                budgetsByCategory[category] = db.getCategoryBudget(category)
             }
             withContext(Dispatchers.Main) {
                 if (rows.isEmpty()) {
@@ -1365,13 +1472,24 @@ class MainActivity : AppCompatActivity() {
                 // Category rows (expenses emphasised; show count + amount, with a bar)
                 val maxOut = rows.maxOf { it.second }.coerceAtLeast(1.0)
                 for ((cat, cOut, count) in rows) {
+                    val budget = budgetsByCategory[cat] ?: 0.0
                     val card = LinearLayout(this@MainActivity).apply {
                         orientation = LinearLayout.VERTICAL
                         setBackgroundColor(cardBg)
                         setPadding(dp(14), dp(10), dp(14), dp(10))
                         layoutParams = LinearLayout.LayoutParams(MATCH, WRAP).also { it.setMargins(dp(12), dp(4), dp(12), 0) }
+                        isLongClickable = true
+                        setOnLongClickListener {
+                            showBudgetDialog(cat)
+                            true
+                        }
                     }
                     val top = LinearLayout(this@MainActivity).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
+                    val arrow = TextView(this@MainActivity).apply {
+                        text = "›"; setTextColor(dim); textSize = 18f; typeface = mono
+                        layoutParams = LinearLayout.LayoutParams(WRAP, WRAP).also { it.marginEnd = dp(8) }
+                    }
+                    top.addView(arrow)
                     top.addView(TextView(this@MainActivity).apply {
                         text = cat; setTextColor(white); textSize = 13f; typeface = mono
                         setTypeface(typeface, android.graphics.Typeface.BOLD)
@@ -1392,19 +1510,138 @@ class MainActivity : AppCompatActivity() {
                         setBackgroundColor(Color.parseColor("#222222"))
                         layoutParams = LinearLayout.LayoutParams(MATCH, dp(3)).also { it.topMargin = dp(6) }
                     }
-                    val fillW = ((cOut / maxOut) * 100).toInt().coerceIn(2, 100)
+                    val fillW = if (budget > 0) {
+                        ((cOut / budget) * 100).toInt().coerceIn(2, 100)
+                    } else {
+                        ((cOut / maxOut) * 100).toInt().coerceIn(2, 100)
+                    }
                     barBg.addView(View(this@MainActivity).apply {
-                        setBackgroundColor(red)
+                        setBackgroundColor(if (budget > 0 && cOut <= budget) green else red)
                         layoutParams = LinearLayout.LayoutParams(0, MATCH, fillW.toFloat())
                     })
                     barBg.addView(View(this@MainActivity).apply {
                         layoutParams = LinearLayout.LayoutParams(0, MATCH, (100 - fillW).toFloat())
                     })
                     card.addView(barBg)
+                    card.addView(TextView(this@MainActivity).apply {
+                        text = when {
+                            budget <= 0 -> "LONG PRESS TO SET BUDGET"
+                            cOut <= budget -> "${fmt(budget - cOut)} REMAINING OF ${fmt(budget)}"
+                            else -> "${fmt(cOut - budget)} OVER ${fmt(budget)} BUDGET"
+                        }
+                        setTextColor(
+                            when {
+                                budget <= 0 -> dim
+                                cOut <= budget -> green
+                                else -> red
+                            }
+                        )
+                        textSize = 9f
+                        typeface = mono
+                        layoutParams = LinearLayout.LayoutParams(MATCH, WRAP).also {
+                            it.topMargin = dp(5)
+                        }
+                    })
+
+                    val details = LinearLayout(this@MainActivity).apply {
+                        orientation = LinearLayout.VERTICAL
+                        visibility = View.GONE
+                        setPadding(0, dp(8), 0, 0)
+                    }
+                    val transactions = transactionsByCategory[cat] ?: JSONArray()
+                    for (i in 0 until transactions.length()) {
+                        val entry = transactions.getJSONObject(i)
+                        val row = LinearLayout(this@MainActivity).apply {
+                            orientation = LinearLayout.HORIZONTAL
+                            gravity = Gravity.CENTER_VERTICAL
+                            isLongClickable = true
+                            setPadding(dp(4), dp(7), dp(4), dp(7))
+                            if (i > 0) setBackgroundColor(Color.parseColor("#111111"))
+                            setOnLongClickListener {
+                                showEntryActions(entry)
+                                true
+                            }
+                        }
+                        val ts = entry.getLong("ts")
+                        val date = java.time.Instant.ofEpochMilli(ts)
+                            .atZone(java.time.ZoneOffset.UTC).toLocalDate()
+                            .format(DateTimeFormatter.ofPattern("d MMM", Locale.ENGLISH))
+                        row.addView(TextView(this@MainActivity).apply {
+                            text = date; setTextColor(dim); textSize = 9f; typeface = mono
+                            layoutParams = LinearLayout.LayoutParams(dp(58), WRAP)
+                        })
+                        row.addView(TextView(this@MainActivity).apply {
+                            text = entry.getString("what"); setTextColor(white); textSize = 11f; typeface = mono
+                            maxLines = 2
+                            layoutParams = LinearLayout.LayoutParams(0, WRAP, 1f).also {
+                                it.marginStart = dp(6); it.marginEnd = dp(8)
+                            }
+                        })
+                        row.addView(TextView(this@MainActivity).apply {
+                            text = fmt(entry.getDouble("amount")); setTextColor(red); textSize = 11f; typeface = mono
+                            setTypeface(typeface, android.graphics.Typeface.BOLD)
+                        })
+                        details.addView(row)
+                    }
+                    card.addView(details)
+                    card.setOnClickListener {
+                        val opening = details.visibility != View.VISIBLE
+                        details.visibility = if (opening) View.VISIBLE else View.GONE
+                        arrow.text = if (opening) "⌄" else "›"
+                    }
                     container.addView(card)
                 }
             }
         }
+    }
+
+    private fun showBudgetCategoryPicker() {
+        val categories = FinanceCategories.expense.toTypedArray()
+        val dialog = android.app.AlertDialog.Builder(this, R.style.DatePickerTheme)
+            .setTitle("CATEGORY BUDGET")
+            .setItems(categories) { _, index -> showBudgetDialog(categories[index]) }
+            .setNegativeButton("CANCEL", null)
+            .create()
+        dialog.setOnShowListener { styleFinanceDialog(dialog) }
+        dialog.show()
+    }
+
+    private fun showBudgetDialog(category: String) {
+        val input = EditText(this).apply {
+            hint = "0 removes budget"
+            inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
+            setTextColor(Color.WHITE)
+            setHintTextColor(Color.parseColor("#646464"))
+            setBackgroundColor(Color.parseColor("#1A1A1A"))
+            setPadding(dp(12), dp(10), dp(12), dp(10))
+            val current = db.getCategoryBudget(category)
+            if (current > 0) setText(current.toString().removeSuffix(".0"))
+            selectAll()
+        }
+        val wrapper = LinearLayout(this).apply {
+            setPadding(dp(20), dp(8), dp(20), 0)
+            addView(input, LinearLayout.LayoutParams(MATCH, WRAP))
+        }
+        val dialog = android.app.AlertDialog.Builder(this, R.style.DatePickerTheme)
+            .setTitle("$category BUDGET")
+            .setView(wrapper)
+            .setPositiveButton("SAVE", null)
+            .setNegativeButton("CANCEL", null)
+            .create()
+        dialog.setOnShowListener {
+            styleFinanceDialog(dialog)
+            dialog.getButton(android.app.AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+                val amount = input.text.toString().trim().toDoubleOrNull()
+                if (amount == null || amount < 0) {
+                    input.error = "Enter 0 or a valid amount"
+                    return@setOnClickListener
+                }
+                db.saveCategoryBudget(category, amount)
+                dialog.dismiss()
+                buildFinanceSummary()
+            }
+        }
+        dialog.show()
     }
 
     // ── Formatting ────────────────────────────────────────────────────────────

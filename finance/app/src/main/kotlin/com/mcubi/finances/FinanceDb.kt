@@ -10,7 +10,7 @@ import java.time.LocalDate
 import java.time.ZoneOffset
 import java.util.Locale
 
-class FinanceDb(context: Context) : SQLiteOpenHelper(context, "finance.db", null, 3) {
+class FinanceDb(context: Context) : SQLiteOpenHelper(context, "finance.db", null, 4) {
 
     override fun onCreate(db: SQLiteDatabase) {
         db.execSQL("""
@@ -30,7 +30,22 @@ class FinanceDb(context: Context) : SQLiteOpenHelper(context, "finance.db", null
                 total REAL    NOT NULL DEFAULT 0
             )
         """)
+        db.execSQL("""
+            CREATE TABLE IF NOT EXISTS merchant_rules (
+                keyword  TEXT PRIMARY KEY COLLATE NOCASE,
+                category TEXT NOT NULL
+            )
+        """)
+        db.execSQL("""
+            CREATE TABLE IF NOT EXISTS category_budgets (
+                category TEXT PRIMARY KEY,
+                amount   REAL NOT NULL
+            )
+        """)
         db.execSQL("INSERT OR IGNORE INTO savings_cache (id, total) VALUES (1, 0)")
+        db.execSQL("INSERT OR IGNORE INTO merchant_rules (keyword, category) VALUES ('grab', 'Grab')")
+        db.execSQL("INSERT OR IGNORE INTO merchant_rules (keyword, category) VALUES ('shopee', 'Shopee')")
+        db.execSQL("INSERT OR IGNORE INTO merchant_rules (keyword, category) VALUES ('shoppee', 'Shopee')")
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
@@ -39,6 +54,23 @@ class FinanceDb(context: Context) : SQLiteOpenHelper(context, "finance.db", null
             try { db.execSQL("ALTER TABLE entries ADD COLUMN synced INTEGER NOT NULL DEFAULT 1") } catch (_: Exception) {}
         }
         if (oldVersion < 3) migrateMerchantCategories(db)
+        if (oldVersion < 4) {
+            db.execSQL("""
+                CREATE TABLE IF NOT EXISTS merchant_rules (
+                    keyword  TEXT PRIMARY KEY COLLATE NOCASE,
+                    category TEXT NOT NULL
+                )
+            """)
+            db.execSQL("""
+                CREATE TABLE IF NOT EXISTS category_budgets (
+                    category TEXT PRIMARY KEY,
+                    amount   REAL NOT NULL
+                )
+            """)
+            db.execSQL("INSERT OR IGNORE INTO merchant_rules (keyword, category) VALUES ('grab', 'Grab')")
+            db.execSQL("INSERT OR IGNORE INTO merchant_rules (keyword, category) VALUES ('shopee', 'Shopee')")
+            db.execSQL("INSERT OR IGNORE INTO merchant_rules (keyword, category) VALUES ('shoppee', 'Shopee')")
+        }
         onCreate(db)
     }
 
@@ -74,7 +106,7 @@ class FinanceDb(context: Context) : SQLiteOpenHelper(context, "finance.db", null
     }
 
     fun insertEntry(id: Int, ts: Long, direction: String, amount: Double, what: String, category: String) {
-        val normalizedCategory = FinanceCategories.normalize(direction, what, category)
+        val normalizedCategory = categoryFor(direction, what, category)
         val cv = ContentValues().apply {
             put("id", id); put("ts", ts); put("direction", direction)
             put("amount", amount); put("what", what); put("category", normalizedCategory); put("synced", 1)
@@ -90,7 +122,7 @@ class FinanceDb(context: Context) : SQLiteOpenHelper(context, "finance.db", null
             if (it.moveToFirst()) it.getInt(0) else 0
         }
         val localId = minOf(minId, 0) - 1
-        val normalizedCategory = FinanceCategories.normalize(direction, what, category)
+        val normalizedCategory = categoryFor(direction, what, category)
         val cv = ContentValues().apply {
             put("id", localId); put("ts", ts); put("direction", direction)
             put("amount", amount); put("what", what); put("category", normalizedCategory); put("synced", 0)
@@ -107,7 +139,7 @@ class FinanceDb(context: Context) : SQLiteOpenHelper(context, "finance.db", null
     /** After a successful push: swap the temporary local row for the server-assigned id. */
     fun markEntrySynced(localId: Int, serverId: Int, serverTs: Long,
                         direction: String, amount: Double, what: String, category: String) {
-        val normalizedCategory = FinanceCategories.normalize(direction, what, category)
+        val normalizedCategory = categoryFor(direction, what, category)
         val db = writableDatabase
         db.beginTransaction()
         try {
@@ -126,6 +158,78 @@ class FinanceDb(context: Context) : SQLiteOpenHelper(context, "finance.db", null
     fun deleteEntry(id: Int) {
         writableDatabase.delete("entries", "id = ?", arrayOf(id.toString()))
     }
+
+    fun updateLocalEntry(
+        id: Int,
+        ts: Long,
+        direction: String,
+        amount: Double,
+        what: String,
+        category: String
+    ) {
+        val cv = ContentValues().apply {
+            put("ts", ts)
+            put("direction", direction)
+            put("amount", amount)
+            put("what", what)
+            put("category", categoryFor(direction, what, category))
+        }
+        writableDatabase.update("entries", cv, "id = ?", arrayOf(id.toString()))
+    }
+
+    fun saveMerchantRule(keyword: String, category: String) {
+        val cleanKeyword = keyword.trim().lowercase(Locale.getDefault())
+        if (cleanKeyword.isEmpty()) return
+        val cv = ContentValues().apply {
+            put("keyword", cleanKeyword)
+            put("category", category)
+        }
+        writableDatabase.insertWithOnConflict(
+            "merchant_rules", null, cv, SQLiteDatabase.CONFLICT_REPLACE
+        )
+        writableDatabase.execSQL(
+            """UPDATE entries
+               SET category = ?
+               WHERE direction = 'out' AND instr(lower(what), ?) > 0""",
+            arrayOf(category, cleanKeyword)
+        )
+    }
+
+    fun deleteMerchantRule(keyword: String) {
+        writableDatabase.delete("merchant_rules", "keyword = ? COLLATE NOCASE", arrayOf(keyword))
+    }
+
+    fun getMerchantRules(): List<Pair<String, String>> {
+        val rules = mutableListOf<Pair<String, String>>()
+        readableDatabase.rawQuery(
+            "SELECT keyword, category FROM merchant_rules ORDER BY keyword COLLATE NOCASE", null
+        ).use {
+            while (it.moveToNext()) rules.add(it.getString(0) to it.getString(1))
+        }
+        return rules
+    }
+
+    fun matchMerchantCategory(description: String): String? =
+        categoryFor("out", description, "").ifEmpty { null }
+
+    fun saveCategoryBudget(category: String, amount: Double) {
+        if (amount <= 0) {
+            writableDatabase.delete("category_budgets", "category = ?", arrayOf(category))
+            return
+        }
+        val cv = ContentValues().apply {
+            put("category", category)
+            put("amount", amount)
+        }
+        writableDatabase.insertWithOnConflict(
+            "category_budgets", null, cv, SQLiteDatabase.CONFLICT_REPLACE
+        )
+    }
+
+    fun getCategoryBudget(category: String): Double =
+        readableDatabase.rawQuery(
+            "SELECT amount FROM category_budgets WHERE category = ?", arrayOf(category)
+        ).use { if (it.moveToFirst()) it.getDouble(0) else 0.0 }
 
     fun saveSavingsTotal(total: Double) {
         val cv = ContentValues().apply { put("id", 1); put("total", total) }
@@ -192,11 +296,12 @@ class FinanceDb(context: Context) : SQLiteOpenHelper(context, "finance.db", null
         val cursor = readableDatabase.rawQuery(
             """SELECT summary_category, SUM(amount) AS total, COUNT(*) AS cnt
                FROM (
-                   SELECT CASE
-                       WHEN LOWER(what) LIKE '%grab%' THEN 'Grab'
-                       WHEN LOWER(what) LIKE '%shopee%' OR LOWER(what) LIKE '%shoppee%' THEN 'Shopee'
-                       ELSE category
-                   END AS summary_category,
+                   SELECT COALESCE(
+                       (SELECT category FROM merchant_rules
+                        WHERE instr(lower(entries.what), lower(keyword)) > 0
+                        ORDER BY length(keyword) DESC LIMIT 1),
+                       category
+                   ) AS summary_category,
                    amount
                    FROM entries
                    WHERE direction = 'out' AND ts >= ? AND ts < ?
@@ -218,12 +323,50 @@ class FinanceDb(context: Context) : SQLiteOpenHelper(context, "finance.db", null
         return out
     }
 
+    /** Transactions included in one Summary category, using the exact same classification
+     *  expression as getCategoryBreakdown(). */
+    fun getCategoryTransactions(from: LocalDate, to: LocalDate, category: String): JSONArray {
+        val start = from.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
+        val end   = to.plusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
+        val cursor = readableDatabase.rawQuery(
+            """SELECT id, ts, direction, amount, what, summary_category AS category
+               FROM (
+                   SELECT id, ts, direction, amount, what,
+                       COALESCE(
+                           (SELECT category FROM merchant_rules
+                            WHERE instr(lower(entries.what), lower(keyword)) > 0
+                            ORDER BY length(keyword) DESC LIMIT 1),
+                           category
+                       ) AS summary_category
+                   FROM entries
+                   WHERE direction = 'out' AND ts >= ? AND ts < ?
+               )
+               WHERE summary_category = ?
+               ORDER BY ts DESC, id DESC""",
+            arrayOf(start.toString(), end.toString(), category)
+        )
+        val out = JSONArray()
+        cursor.use {
+            while (it.moveToNext()) {
+                out.put(JSONObject().apply {
+                    put("id", it.getInt(0))
+                    put("ts", it.getLong(1))
+                    put("direction", it.getString(2))
+                    put("amount", it.getDouble(3))
+                    put("what", it.getString(4))
+                    put("category", it.getString(5))
+                })
+            }
+        }
+        return out
+    }
+
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     private fun entryToValues(e: JSONObject): ContentValues {
         val direction = e.getString("direction")
         val what = e.getString("what")
-        val category = FinanceCategories.normalize(direction, what, e.getString("category"))
+        val category = categoryFor(direction, what, e.getString("category"))
         return ContentValues().apply {
         put("id",        e.getInt("id"))
         put("ts",        e.getLong("ts"))
@@ -233,6 +376,19 @@ class FinanceDb(context: Context) : SQLiteOpenHelper(context, "finance.db", null
         put("category",  category)
         put("synced",    1)   // came from the server
         }
+    }
+
+    private fun categoryFor(direction: String, description: String, fallback: String): String {
+        if (direction != "out") return fallback
+        readableDatabase.rawQuery(
+            """SELECT category FROM merchant_rules
+               WHERE instr(lower(?), lower(keyword)) > 0
+               ORDER BY length(keyword) DESC LIMIT 1""",
+            arrayOf(description)
+        ).use {
+            if (it.moveToFirst()) return it.getString(0)
+        }
+        return FinanceCategories.normalize(direction, description, fallback)
     }
 
     private fun cursorToArray(cursor: android.database.Cursor): JSONArray {

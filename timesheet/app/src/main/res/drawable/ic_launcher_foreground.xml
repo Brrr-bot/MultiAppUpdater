@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Calendar body -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M80,36H28c-2.2,0-4,1.8-4,4v44c0,2.2,1.8,4,4,4h52c2.2,0,4-1.8,4-4V40c0-2.2-1.8-4-4-4z"/>
+
+    <!-- Header bar (black strip) -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M24,40c0-2.2,1.8-4,4-4h52c2.2,0,4,1.8,4,4v13H24V40z"/>
+
+    <!-- Left binding ring -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M39,25c0-1.7,1.3-3,3-3s3,1.3,3,3v14c0,1.7-1.3,3-3,3s-3-1.3-3-3V25z"/>
+
+    <!-- Right binding ring -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M63,25c0-1.7,1.3-3,3-3s3,1.3,3,3v14c0,1.7-1.3,3-3,3s-3-1.3-3-3V25z"/>
+
+    <!-- Day dots — row 1 -->
+    <path android:fillColor="#000000"
+        android:pathData="M36,61m-3,0a3,3,0,1,0,6,0a3,3,0,1,0,-6,0"/>
+    <path android:fillColor="#000000"
+        android:pathData="M54,61m-3,0a3,3,0,1,0,6,0a3,3,0,1,0,-6,0"/>
+    <path android:fillColor="#000000"
+        android:pathData="M72,61m-3,0a3,3,0,1,0,6,0a3,3,0,1,0,-6,0"/>
+
+    <!-- Day dots — row 2 -->
+    <path android:fillColor="#000000"
+        android:pathData="M36,74m-3,0a3,3,0,1,0,6,0a3,3,0,1,0,-6,0"/>
+    <path android:fillColor="#000000"
+        android:pathData="M54,74m-3,0a3,3,0,1,0,6,0a3,3,0,1,0,-6,0"/>
+
+    <!-- Checkmark on last cell (bottom-right) -->
+    <path
+        android:pathData="M65,70 L69,74 L76,67"
+        android:strokeColor="#000000"
+        android:strokeWidth="3.5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"/>
+
+</vector>

@@ -15,7 +15,7 @@
     <color name="text_label">#969696</color>
 
     <!-- Launcher icon -->
-    <color name="ic_launcher_background">#03040A</color>
+    <color name="ic_launcher_background">#000000</color>
 
     <!-- Legacy aliases for Material theme -->
     <color name="forest_green">#29B6F6</color>

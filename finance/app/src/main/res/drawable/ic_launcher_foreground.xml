@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Speed/motion lines (left side) -->
+    <path
+        android:pathData="M19,46 L33,46"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="4.5"
+        android:strokeLineCap="round"/>
+    <path
+        android:pathData="M17,55 L33,55"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="4.5"
+        android:strokeLineCap="round"/>
+    <path
+        android:pathData="M19,64 L33,64"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="4.5"
+        android:strokeLineCap="round"/>
+
+    <!-- Card sticking out from upper-left of wallet (drawn behind wallet body) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M38,32 L57,32 C58.7,32,60,33.3,60,35 L60,57 L36,57 L36,35 C36,33.3,37.3,32,38,32z"/>
+
+    <!-- Wallet body (drawn over card) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M85,47 L42,47 C39.8,47,38,48.8,38,51 L38,77 C38,79.2,39.8,81,42,81 L85,81 C87.2,81,89,79.2,89,77 L89,51 C89,48.8,87.2,47,85,47z"/>
+
+    <!-- Card pocket (black) on right of wallet -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M73,53 L83,53 C84.1,53,85,53.9,85,55 L85,65 C85,66.1,84.1,67,83,67 L73,67 C71.9,67,71,66.1,71,65 L71,55 C71,53.9,71.9,53,73,53z"/>
+
+    <!-- Coin in pocket -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M78,60m-3.5,0a3.5,3.5,0,1,0,7,0a3.5,3.5,0,1,0,-7,0"/>
+
+</vector>

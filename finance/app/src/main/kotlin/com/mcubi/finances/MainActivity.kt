@@ -52,13 +52,8 @@ private const val BASE_URL = "https://finances.mcubittbuilders.workers.dev"
 
 // ─── Categories ───────────────────────────────────────────────────────────────
 
-private val CATEGORIES_OUT = listOf(
-    "Food & Drink", "Groceries", "Transport", "Bills", "Shopping",
-    "Health", "Entertainment", "Rent", "Other"
-)
-private val CATEGORIES_IN = listOf(
-    "Salary", "Freelance", "Gift", "Other Income"
-)
+private val CATEGORIES_OUT = FinanceCategories.expense
+private val CATEGORIES_IN = FinanceCategories.income
 
 // ─── OCR result ───────────────────────────────────────────────────────────────
 
@@ -1280,9 +1275,7 @@ class MainActivity : AppCompatActivity() {
         if (tab == 2) buildFinanceSummary()
     }
 
-    // ── Summary tab: previous-month spending by category ────────────────────────
-
-    private var summaryMonth: java.time.YearMonth = java.time.YearMonth.now().minusMonths(1)
+    // ── Summary tab: salary-period spending by category ─────────────────────────
 
     private fun buildFinanceSummary() {
         val container = b.summaryContainer
@@ -1305,10 +1298,15 @@ class MainActivity : AppCompatActivity() {
         val prev = TextView(this).apply {
             text = "‹"; textSize = 24f; typeface = mono; setTextColor(Color.parseColor("#29B6F6"))
             setPadding(dp(22), dp(4), dp(22), dp(4)); isClickable = true
-            setOnClickListener { summaryMonth = summaryMonth.minusMonths(1); buildFinanceSummary() }
+            setOnClickListener {
+                val idx = salaryDates.indexOf(periodStart)
+                periodStart = if (idx > 0) salaryDates[idx - 1] else periodStart.minusMonths(1)
+                buildFinanceSummary()
+            }
         }
         val lbl = TextView(this).apply {
-            text = summaryMonth.format(java.time.format.DateTimeFormatter.ofPattern("MMMM yyyy", Locale.ENGLISH))
+            text = "${periodStart.format(DateTimeFormatter.ofPattern("d MMM", Locale.ENGLISH))} – " +
+                periodEnd.format(DateTimeFormatter.ofPattern("d MMM yyyy", Locale.ENGLISH))
             textSize = 14f; typeface = mono; setTextColor(white); setTypeface(typeface, android.graphics.Typeface.BOLD)
             gravity = Gravity.CENTER; layoutParams = LinearLayout.LayoutParams(0, WRAP, 1f)
         }
@@ -1316,24 +1314,28 @@ class MainActivity : AppCompatActivity() {
             text = "›"; textSize = 24f; typeface = mono; setTextColor(Color.parseColor("#29B6F6"))
             setPadding(dp(22), dp(4), dp(22), dp(4)); isClickable = true
             setOnClickListener {
-                if (summaryMonth.isBefore(java.time.YearMonth.now())) { summaryMonth = summaryMonth.plusMonths(1); buildFinanceSummary() }
+                val idx = salaryDates.indexOf(periodStart)
+                periodStart = when {
+                    idx >= 0 && idx < salaryDates.size - 1 -> salaryDates[idx + 1]
+                    idx == -1 -> salaryDates.firstOrNull { it >= periodStart.plusMonths(1) }
+                        ?: periodStart.plusMonths(1)
+                    else -> periodStart
+                }
+                buildFinanceSummary()
             }
         }
         nav.addView(prev); nav.addView(lbl); nav.addView(next)
         container.addView(nav)
 
         CoroutineScope(Dispatchers.IO).launch {
-            val from = summaryMonth.atDay(1)
-            val to   = summaryMonth.atEndOfMonth()
+            val from = periodStart
+            val to   = periodEnd
             val arr  = db.getCategoryBreakdown(from, to)
-            var totalIn = 0.0; var totalOut = 0.0
-            val rows = ArrayList<Triple<String, DoubleArray, IntArray>>()
+            val (totalIn, totalOut) = db.getSummaryForPeriod(from, to)
+            val rows = ArrayList<Triple<String, Double, Int>>()
             for (i in 0 until arr.length()) {
                 val o = arr.getJSONObject(i)
-                val cIn = o.getDouble("in"); val cOut = o.getDouble("out")
-                totalIn += cIn; totalOut += cOut
-                rows.add(Triple(o.getString("category"),
-                    doubleArrayOf(cIn, cOut), intArrayOf(o.getInt("inCount"), o.getInt("outCount"))))
+                rows.add(Triple(o.getString("category"), o.getDouble("out"), o.getInt("outCount")))
             }
             withContext(Dispatchers.Main) {
                 if (rows.isEmpty()) {
@@ -1361,9 +1363,8 @@ class MainActivity : AppCompatActivity() {
                 container.addView(totalsCard)
 
                 // Category rows (expenses emphasised; show count + amount, with a bar)
-                val maxOut = rows.maxOf { it.second[1] }.coerceAtLeast(1.0)
-                for ((cat, amounts, counts) in rows) {
-                    val cIn = amounts[0]; val cOut = amounts[1]
+                val maxOut = rows.maxOf { it.second }.coerceAtLeast(1.0)
+                for ((cat, cOut, count) in rows) {
                     val card = LinearLayout(this@MainActivity).apply {
                         orientation = LinearLayout.VERTICAL
                         setBackgroundColor(cardBg)
@@ -1377,32 +1378,29 @@ class MainActivity : AppCompatActivity() {
                         layoutParams = LinearLayout.LayoutParams(0, WRAP, 1f)
                     })
                     top.addView(TextView(this@MainActivity).apply {
-                        val n = counts[1] + counts[0]
-                        text = "$n ×"; setTextColor(dim); textSize = 10f; typeface = mono
+                        text = "$count ×"; setTextColor(dim); textSize = 10f; typeface = mono
                         layoutParams = LinearLayout.LayoutParams(WRAP, WRAP).also { it.marginEnd = dp(10) }
                     })
                     top.addView(TextView(this@MainActivity).apply {
-                        text = if (cOut > 0) fmt(cOut) else "+${fmt(cIn)}"
-                        setTextColor(if (cOut > 0) red else green); textSize = 13f; typeface = mono
+                        text = fmt(cOut)
+                        setTextColor(red); textSize = 13f; typeface = mono
                         setTypeface(typeface, android.graphics.Typeface.BOLD)
                     })
                     card.addView(top)
                     // proportion bar (expense share)
-                    if (cOut > 0) {
-                        val barBg = LinearLayout(this@MainActivity).apply {
-                            setBackgroundColor(Color.parseColor("#222222"))
-                            layoutParams = LinearLayout.LayoutParams(MATCH, dp(3)).also { it.topMargin = dp(6) }
-                        }
-                        val fillW = ((cOut / maxOut) * 100).toInt().coerceIn(2, 100)
-                        barBg.addView(View(this@MainActivity).apply {
-                            setBackgroundColor(red)
-                            layoutParams = LinearLayout.LayoutParams(0, MATCH, fillW.toFloat())
-                        })
-                        barBg.addView(View(this@MainActivity).apply {
-                            layoutParams = LinearLayout.LayoutParams(0, MATCH, (100 - fillW).toFloat())
-                        })
-                        card.addView(barBg)
+                    val barBg = LinearLayout(this@MainActivity).apply {
+                        setBackgroundColor(Color.parseColor("#222222"))
+                        layoutParams = LinearLayout.LayoutParams(MATCH, dp(3)).also { it.topMargin = dp(6) }
                     }
+                    val fillW = ((cOut / maxOut) * 100).toInt().coerceIn(2, 100)
+                    barBg.addView(View(this@MainActivity).apply {
+                        setBackgroundColor(red)
+                        layoutParams = LinearLayout.LayoutParams(0, MATCH, fillW.toFloat())
+                    })
+                    barBg.addView(View(this@MainActivity).apply {
+                        layoutParams = LinearLayout.LayoutParams(0, MATCH, (100 - fillW).toFloat())
+                    })
+                    card.addView(barBg)
                     container.addView(card)
                 }
             }

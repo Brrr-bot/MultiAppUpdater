@@ -100,9 +100,7 @@ class QuickAddActivity : AppCompatActivity() {
             isHorizontalScrollBarEnabled = false
         }
         val catRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
-        val cats = if (isIn) listOf("Salary", "Freelance", "Gift", "Other Income")
-                   else listOf("Food & Drink", "Groceries", "Transport", "Bills",
-                               "Shopping", "Health", "Entertainment", "Rent", "Other")
+        val cats = if (isIn) FinanceCategories.income else FinanceCategories.expense
         for (cat in cats) {
             val btn = TextView(this).apply {
                 text = cat; textSize = 10f; typeface = Typeface.MONOSPACE
@@ -146,7 +144,7 @@ class QuickAddActivity : AppCompatActivity() {
         root.addView(TextView(this).apply {
             text = "SAVE"; textSize = 13f; typeface = Typeface.MONOSPACE
             setTypeface(typeface, Typeface.BOLD)
-            setTextColor(Color.parseColor("#060a12")); gravity = Gravity.CENTER
+            setTextColor(Color.WHITE); gravity = Gravity.CENTER
             setBackgroundResource(R.drawable.btn_save)
             isClickable = true; isFocusable = true
             layoutParams = LinearLayout.LayoutParams(MATCH, dp(48))

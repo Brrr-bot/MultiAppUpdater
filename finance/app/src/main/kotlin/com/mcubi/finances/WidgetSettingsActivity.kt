@@ -105,7 +105,7 @@ class WidgetSettingsActivity : AppCompatActivity() {
         root.addView(TextView(this).apply {
             text = "APPLY"; textSize = 12f; typeface = Typeface.MONOSPACE
             setTypeface(typeface, Typeface.BOLD)
-            setTextColor(Color.parseColor("#060a12")); gravity = Gravity.CENTER
+            setTextColor(Color.WHITE); gravity = Gravity.CENTER
             setBackgroundResource(R.drawable.btn_save)
             isClickable = true; isFocusable = true
             layoutParams = LinearLayout.LayoutParams(MATCH, dp(48))

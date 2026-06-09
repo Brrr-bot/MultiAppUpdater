@@ -10,7 +10,7 @@ import java.time.LocalDate
 import java.time.ZoneOffset
 import java.util.Locale
 
-class FinanceDb(context: Context) : SQLiteOpenHelper(context, "finance.db", null, 2) {
+class FinanceDb(context: Context) : SQLiteOpenHelper(context, "finance.db", null, 3) {
 
     override fun onCreate(db: SQLiteDatabase) {
         db.execSQL("""
@@ -38,7 +38,20 @@ class FinanceDb(context: Context) : SQLiteOpenHelper(context, "finance.db", null
         if (oldVersion < 2) {
             try { db.execSQL("ALTER TABLE entries ADD COLUMN synced INTEGER NOT NULL DEFAULT 1") } catch (_: Exception) {}
         }
+        if (oldVersion < 3) migrateMerchantCategories(db)
         onCreate(db)
+    }
+
+    private fun migrateMerchantCategories(db: SQLiteDatabase) {
+        db.execSQL(
+            "UPDATE entries SET category = 'Grab' " +
+                "WHERE direction = 'out' AND LOWER(what) LIKE '%grab%'"
+        )
+        db.execSQL(
+            "UPDATE entries SET category = 'Shopee' " +
+                "WHERE direction = 'out' AND " +
+                "(LOWER(what) LIKE '%shopee%' OR LOWER(what) LIKE '%shoppee%')"
+        )
     }
 
     // ── Write ─────────────────────────────────────────────────────────────────
@@ -61,9 +74,10 @@ class FinanceDb(context: Context) : SQLiteOpenHelper(context, "finance.db", null
     }
 
     fun insertEntry(id: Int, ts: Long, direction: String, amount: Double, what: String, category: String) {
+        val normalizedCategory = FinanceCategories.normalize(direction, what, category)
         val cv = ContentValues().apply {
             put("id", id); put("ts", ts); put("direction", direction)
-            put("amount", amount); put("what", what); put("category", category); put("synced", 1)
+            put("amount", amount); put("what", what); put("category", normalizedCategory); put("synced", 1)
         }
         writableDatabase.insertWithOnConflict("entries", null, cv, SQLiteDatabase.CONFLICT_REPLACE)
     }
@@ -76,9 +90,10 @@ class FinanceDb(context: Context) : SQLiteOpenHelper(context, "finance.db", null
             if (it.moveToFirst()) it.getInt(0) else 0
         }
         val localId = minOf(minId, 0) - 1
+        val normalizedCategory = FinanceCategories.normalize(direction, what, category)
         val cv = ContentValues().apply {
             put("id", localId); put("ts", ts); put("direction", direction)
-            put("amount", amount); put("what", what); put("category", category); put("synced", 0)
+            put("amount", amount); put("what", what); put("category", normalizedCategory); put("synced", 0)
         }
         db.insertWithOnConflict("entries", null, cv, SQLiteDatabase.CONFLICT_REPLACE)
         return localId
@@ -92,13 +107,14 @@ class FinanceDb(context: Context) : SQLiteOpenHelper(context, "finance.db", null
     /** After a successful push: swap the temporary local row for the server-assigned id. */
     fun markEntrySynced(localId: Int, serverId: Int, serverTs: Long,
                         direction: String, amount: Double, what: String, category: String) {
+        val normalizedCategory = FinanceCategories.normalize(direction, what, category)
         val db = writableDatabase
         db.beginTransaction()
         try {
             db.delete("entries", "id = ?", arrayOf(localId.toString()))
             val cv = ContentValues().apply {
                 put("id", serverId); put("ts", serverTs); put("direction", direction)
-                put("amount", amount); put("what", what); put("category", category); put("synced", 1)
+                put("amount", amount); put("what", what); put("category", normalizedCategory); put("synced", 1)
             }
             db.insertWithOnConflict("entries", null, cv, SQLiteDatabase.CONFLICT_REPLACE)
             db.setTransactionSuccessful()
@@ -169,48 +185,54 @@ class FinanceDb(context: Context) : SQLiteOpenHelper(context, "finance.db", null
         return cursor.use { if (it.moveToFirst()) it.getDouble(0) else 0.0 }
     }
 
-    /** Per-category totals for a date range, split into income (in) and expense (out).
-     *  Returns an array of {category, in, out} objects, sorted by out desc. */
+    /** Expense totals for a date range, grouped by category and sorted by spend descending. */
     fun getCategoryBreakdown(from: LocalDate, to: LocalDate): JSONArray {
         val start = from.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
         val end   = to.plusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
         val cursor = readableDatabase.rawQuery(
-            """SELECT category, direction, SUM(amount) AS total, COUNT(*) AS cnt
-               FROM entries WHERE ts >= ? AND ts < ?
-               GROUP BY category, direction""",
+            """SELECT summary_category, SUM(amount) AS total, COUNT(*) AS cnt
+               FROM (
+                   SELECT CASE
+                       WHEN LOWER(what) LIKE '%grab%' THEN 'Grab'
+                       WHEN LOWER(what) LIKE '%shopee%' OR LOWER(what) LIKE '%shoppee%' THEN 'Shopee'
+                       ELSE category
+                   END AS summary_category,
+                   amount
+                   FROM entries
+                   WHERE direction = 'out' AND ts >= ? AND ts < ?
+               )
+               GROUP BY summary_category
+               ORDER BY total DESC""",
             arrayOf(start.toString(), end.toString())
         )
-        // category -> [in, out, inCount, outCount]
-        val map = LinkedHashMap<String, DoubleArray>()
+        val out = JSONArray()
         cursor.use {
             while (it.moveToNext()) {
-                val cat = it.getString(0); val dir = it.getString(1)
-                val total = it.getDouble(2); val cnt = it.getDouble(3)
-                val row = map.getOrPut(cat) { DoubleArray(4) }
-                if (dir == "in") { row[0] = total; row[2] = cnt } else { row[1] = total; row[3] = cnt }
+                out.put(JSONObject().apply {
+                    put("category", it.getString(0))
+                    put("out", it.getDouble(1))
+                    put("outCount", it.getInt(2))
+                })
             }
-        }
-        val list = map.entries.sortedByDescending { it.value[1] }   // by expense desc
-        val out = JSONArray()
-        for ((cat, v) in list) {
-            out.put(JSONObject().apply {
-                put("category", cat); put("in", v[0]); put("out", v[1])
-                put("inCount", v[2].toInt()); put("outCount", v[3].toInt())
-            })
         }
         return out
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
 
-    private fun entryToValues(e: JSONObject) = ContentValues().apply {
+    private fun entryToValues(e: JSONObject): ContentValues {
+        val direction = e.getString("direction")
+        val what = e.getString("what")
+        val category = FinanceCategories.normalize(direction, what, e.getString("category"))
+        return ContentValues().apply {
         put("id",        e.getInt("id"))
         put("ts",        e.getLong("ts"))
-        put("direction", e.getString("direction"))
+        put("direction", direction)
         put("amount",    e.getDouble("amount"))
-        put("what",      e.getString("what"))
-        put("category",  e.getString("category"))
+        put("what",      what)
+        put("category",  category)
         put("synced",    1)   // came from the server
+        }
     }
 
     private fun cursorToArray(cursor: android.database.Cursor): JSONArray {

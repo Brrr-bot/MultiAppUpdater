@@ -51,6 +51,9 @@ import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 private const val BASE_URL = "https://finances.mcubittbuilders.workers.dev"
+// Home-hub sidecar (same local/Tailscale channel the PhotoSync client uses). The dashboard reads
+// the finance card from the hub, so it stays live with no cloud dependency.
+private const val HUB_SIDECAR_FINANCE = "http://100.126.58.18:8767/sidecar/finance"
 
 // ─── Categories ───────────────────────────────────────────────────────────────
 
@@ -912,6 +915,32 @@ class MainActivity : AppCompatActivity() {
                     if (bal >= 0) Color.parseColor("#FFB300") else Color.parseColor("#FF1744")
                 )
             }
+            pushFinanceToHub()
+        }
+    }
+
+    // Mirror the CURRENT salary-period snapshot to the home hub so the dashboard's finance card
+    // shows live data over the local network (and the last value when the phone is offline).
+    private fun pushFinanceToHub() {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val curStart = db.getSalaryDates().lastOrNull()
+                val (income, expense) = db.getSummaryForPeriod(curStart, LocalDate.now())
+                val savings = db.getSavingsTotal()
+                val label = if (curStart != null)
+                    curStart.format(DateTimeFormatter.ofPattern("d MMM", Locale.ENGLISH)).uppercase() + " TO NOW"
+                else "ALL TIME"
+                val json = JSONObject().apply {
+                    put("periodLabel", label)
+                    put("income", income)
+                    put("expense", expense)
+                    put("balance", income - expense)
+                    put("savings", savings)
+                    put("updatedAt", System.currentTimeMillis())
+                }.toString().toRequestBody("application/json".toMediaType())
+                client.newCall(Request.Builder().url(HUB_SIDECAR_FINANCE).post(json).build())
+                    .execute().close()
+            } catch (_: Exception) {}
         }
     }
 

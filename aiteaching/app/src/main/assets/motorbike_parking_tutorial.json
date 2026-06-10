@@ -4,6 +4,7 @@
     "en": "Motorbike Parking Finder",
     "vn": "Tìm Chỗ Đậu Xe Máy"
   },
+  "order": 1,
   "steps": [
     {
       "stepNumber": 1,
@@ -18,8 +19,8 @@
         "vn": "Bãi xe ở trường Việt Nam nổi tiếng hỗn loạn — hàng trăm Honda Wave và Vision giống hệt xếp thành hàng. Bạn đậu xe, học 4 tiếng, ra về... Hàng C hay D? Bên trái hay phải?\n\nChúng ta xây app giải quyết điều này. Nó chụp ảnh chỗ đậu và đánh dấu GPS, để tìm xe chỉ cần một chạm.\n\nĐầu tiên: màn hình chính. Hai nút lớn — `Đậu Xe` và `Tìm Xe`."
       },
       "promptText": {
-        "en": "I'm building an Android app called 'Find My Xe' — a motorbike parking finder for students. Write MainActivity.kt using Jetpack Compose:\n- Dark background (#0F172A)\n- Title 'Find My Xe', subtitle 'Never lose your bike again'\n- Two full-width buttons: 'Park Here' (blue #3B82F6) and 'Find My Bike' (green #10B981)\n- Buttons don't do anything yet — pass onClick as lambda parameters",
-        "vn": "Tôi đang xây app Android tên 'Find My Xe' — ứng dụng tìm chỗ đậu xe cho sinh viên. Viết MainActivity.kt dùng Jetpack Compose:\n- Nền tối (#0F172A)\n- Tiêu đề 'Find My Xe', phụ đề 'Never lose your bike again'\n- Hai nút chiều ngang: 'Đậu Xe' (xanh #3B82F6) và 'Tìm Xe' (xanh lá #10B981)\n- Các nút chưa làm gì — truyền onClick làm tham số lambda"
+        "en": "I'm making an app called 'Find My Xe' that helps students remember where they parked their motorbike. Can you build me the home screen? I'd like a dark background, the app's name 'Find My Xe' at the top with a small line under it saying 'Never lose your bike again', and two big buttons that fill the width — a blue one called 'Park Here' and a green one called 'Find My Bike'. The buttons don't need to do anything yet — we'll add that later.",
+        "vn": "Tôi đang làm một app tên 'Find My Xe' giúp học sinh nhớ chỗ đậu xe máy. Bạn xây màn hình chính giúp tôi nhé? Tôi muốn nền tối, tên app 'Find My Xe' ở trên cùng với một dòng nhỏ bên dưới ghi 'Never lose your bike again', và hai nút lớn chiếm hết bề ngang — một nút xanh dương tên 'Park Here' và một nút xanh lá tên 'Find My Bike'. Các nút chưa cần làm gì cả — ta sẽ thêm sau."
       },
       "promptRationale": {
         "en": "Give the AI the hex colors and layout intent upfront. 'Don't do anything yet' stops it over-engineering step 1 with camera code you haven't written.",
@@ -106,8 +107,8 @@
         "vn": "Trước khi dùng camera hay GPS, ta cần quyết định: một chỗ đậu xe chứa thông tin gì?\n\nTrong lập trình, bạn mô hình hóa vật thật thành dữ liệu. Một chỗ đậu xe có:\n- Ảnh (đường dẫn đến file ảnh trên điện thoại)\n- Tọa độ GPS (vĩ độ và kinh độ)\n- Timestamp (lúc đậu)\n- Ghi chú tùy chọn\n\n`data class` trong Kotlin là công cụ hoàn hảo — lớp có nhiệm vụ duy nhất là chứa dữ liệu."
       },
       "promptText": {
-        "en": "Create a Kotlin data class called ParkingSpot that holds: photoPath (String, nullable — the user might not take a photo), latitude and longitude (Double), timestamp (Long — milliseconds since epoch), and an optional note (String, default empty string).",
-        "vn": "Tạo data class Kotlin tên ParkingSpot chứa: photoPath (String, nullable — người dùng có thể không chụp), latitude và longitude (Double), timestamp (Long — milliseconds từ epoch), và ghi chú tùy chọn (String, mặc định rỗng)."
+        "en": "Now let's set up the information the app needs to remember about a parking spot. It should remember the photo the student takes of the spot (they might skip the photo, so that part is optional), where the bike is (the GPS position), the exact time they parked, and an optional little note. Can you set that up for me?",
+        "vn": "Giờ hãy thiết lập thông tin app cần nhớ về một chỗ đậu xe. Nó nên nhớ tấm ảnh học sinh chụp chỗ đậu (họ có thể bỏ qua ảnh, nên phần đó là tùy chọn), vị trí xe (tọa độ GPS), giờ chính xác lúc đậu, và một ghi chú nhỏ tùy chọn. Bạn thiết lập giúp tôi nhé?"
       },
       "promptRationale": {
         "en": "List each field with its type and whether it's nullable. The AI follows this spec precisely — vague prompts get vague data models.",
@@ -194,8 +195,8 @@
         "vn": "Bộ nhớ điện thoại bị xóa mỗi lần app đóng. Để nhớ chỗ đậu xe giữa các phiên, ta cần ghi dữ liệu vào bộ nhớ vĩnh viễn.\n\n`SharedPreferences` là kho key-value tích hợp Android — hoàn hảo để lưu một chỗ đậu xe hiện tại. Ta chuyển `ParkingSpot` thành JSON (định dạng văn bản), lưu thành chuỗi, và đọc lại khi app mở.\n\nĐây gọi là **serialization** — biến đối tượng thành định dạng có thể lưu hoặc gửi."
       },
       "promptText": {
-        "en": "Write a ParkingStorage class for Android that:\n- Takes a Context in the constructor\n- Uses SharedPreferences with the name 'parking_prefs'\n- Has a save(spot: ParkingSpot) function that converts it to JSON and stores it under key 'current_spot'\n- Has a load(): ParkingSpot? function that reads the JSON back and returns null if nothing saved\n- Has a clear() function to erase the saved spot\nUse Gson for JSON conversion.",
-        "vn": "Viết lớp ParkingStorage cho Android:\n- Nhận Context trong constructor\n- Dùng SharedPreferences tên 'parking_prefs'\n- Có hàm save(spot: ParkingSpot) chuyển sang JSON và lưu với key 'current_spot'\n- Có hàm load(): ParkingSpot? đọc JSON lại và trả về null nếu chưa lưu gì\n- Có hàm clear() để xóa chỗ đã lưu\nDùng Gson để chuyển đổi JSON."
+        "en": "I want the app to actually remember the parking spot even after it's closed, so a student can come back hours later and still find their bike. Please make it save the current spot, load it back when they reopen the app, and be able to clear it when they park somewhere new.",
+        "vn": "Tôi muốn app thật sự nhớ chỗ đậu xe kể cả sau khi đóng, để học sinh quay lại sau vài giờ vẫn tìm được xe. Hãy làm nó lưu chỗ đậu hiện tại, đọc lại khi mở app, và có thể xóa khi họ đậu ở chỗ mới."
       },
       "promptRationale": {
         "en": "Name the SharedPreferences file and the key explicitly — the AI needs these details to write production-quality code, not just a sketch.",
@@ -286,8 +287,8 @@
         "vn": "Android có hệ thống quyền hai lớp:\n1. Khai báo quyền app *có thể* cần trong `AndroidManifest.xml`\n2. Hỏi người dùng lúc chạy — họ có thể đồng ý hoặc từ chối\n\nTừ Android 6.0 (2015), quyền nguy hiểm như CAMERA và LOCATION phải xin lúc chạy. Người dùng thấy popup. Nếu họ từ chối, app phải xử lý nhẹ nhàng — không crash.\n\nTa dùng `ActivityResultLauncher` — cách hiện đại, an toàn để xin quyền."
       },
       "promptText": {
-        "en": "Add camera permission handling to MainActivity. I need:\n- A registerForActivityResult launcher using RequestPermission contract for CAMERA\n- If granted: call openCamera() (we'll write that next step)\n- If denied: show a Toast 'Camera permission needed to photo your spot'\n- A checkAndOpenCamera() function that first checks if permission is already granted, and either opens camera directly or launches the permission request",
-        "vn": "Thêm xử lý quyền camera vào MainActivity. Tôi cần:\n- Launcher registerForActivityResult dùng contract RequestPermission cho CAMERA\n- Nếu được cấp: gọi openCamera() (sẽ viết bước sau)\n- Nếu từ chối: hiện Toast 'Cần quyền camera để chụp chỗ đậu'\n- Hàm checkAndOpenCamera() kiểm tra xem quyền đã được cấp chưa, rồi mở camera trực tiếp hoặc khởi chạy yêu cầu quyền"
+        "en": "When the student taps 'Park Here', I want the app to open the camera so they can snap a photo of where they left their bike. Phones ask permission before an app can use the camera, so please ask for that the first time. If they say no, show a small message explaining the camera is needed to photo their spot.",
+        "vn": "Khi học sinh chạm 'Park Here', tôi muốn app mở camera để họ chụp ảnh chỗ để xe. Điện thoại hỏi quyền trước khi app dùng camera, nên hãy xin quyền đó lần đầu. Nếu họ từ chối, hiện một lời nhắn nhỏ giải thích cần camera để chụp chỗ đậu."
       },
       "promptRationale": {
         "en": "Describe both the granted AND denied cases explicitly. Apps that only handle the happy path crash for real users who tap 'Deny'.",
@@ -374,8 +375,8 @@
         "vn": "Chụp ảnh trong Android khá phức tạp — không phải vì camera, mà vì **bảo mật file**.\n\nKhi app của bạn bảo app camera 'lưu ảnh ở đây', bạn không thể chỉ truyền đường dẫn file. Từ Android 7.0, app được sandbox: app camera không thể trực tiếp truy cập file riêng của app bạn. Bạn cần `FileProvider` — thành phần đặc biệt bọc đường dẫn file thành URI bảo mật mà camera có thể ghi.\n\nHãy nghĩ như bàn giao có bảo mật: FileProvider tạo giấy phép tạm thời, có thể thu hồi."
       },
       "promptText": {
-        "en": "Fill in the openCamera() function in MainActivity. It should:\n1. Create a File in getExternalFilesDir(DIRECTORY_PICTURES) with name 'parking_TIMESTAMP.jpg'\n2. Convert it to a URI using FileProvider.getUriForFile() with authority '${packageName}.fileprovider'\n3. Store the URI in a private var photoUri\n4. Launch the TakePicture ActivityResult launcher\nAlso add the TakePicture launcher — on success, call saveCurrentSpot() (placeholder). On failure, show a Toast.",
-        "vn": "Điền hàm openCamera() trong MainActivity. Nó cần:\n1. Tạo File trong getExternalFilesDir(DIRECTORY_PICTURES) tên 'parking_TIMESTAMP.jpg'\n2. Chuyển thành URI dùng FileProvider.getUriForFile() với authority '${packageName}.fileprovider'\n3. Lưu URI vào var photoUri riêng\n4. Khởi chạy launcher ActivityResult TakePicture\nThêm launcher TakePicture — khi thành công gọi saveCurrentSpot() (placeholder). Thất bại hiện Toast."
+        "en": "Now make the camera actually open and take the photo when they tap Park Here, and keep that photo so we can show it to them later when they're looking for their bike. If taking the photo fails for some reason, show a small message instead of letting the app crash.",
+        "vn": "Giờ làm camera thật sự mở và chụp ảnh khi họ chạm Park Here, và giữ tấm ảnh đó để sau này cho họ xem khi đi tìm xe. Nếu chụp ảnh thất bại vì lý do nào đó, hiện một lời nhắn nhỏ thay vì để app sập."
       },
       "promptRationale": {
         "en": "Give the exact authority string — '${packageName}.fileprovider' is a convention, not magic. The AI needs this to write the correct FileProvider call.",
@@ -467,8 +468,8 @@
         "vn": "Sau khi chụp ảnh, ta cần ghim tọa độ GPS — để app biết chính xác đâu cần đưa sinh viên khi họ nhấn 'Tìm Xe'.\n\n`FusedLocationProviderClient` của Android là API vị trí hiện đại. Nó kết hợp vệ tinh GPS, định vị WiFi và tam giác cell tower để lấy vị trí tốt nhất nhanh nhất có thể.\n\nTa cũng cần quyền vị trí — giống camera, phải xin lúc chạy."
       },
       "promptText": {
-        "en": "Write a LocationHelper class for Android that:\n- Takes a Context in the constructor\n- Uses FusedLocationProviderClient\n- Has a getCurrentLocation(onResult: (Double, Double) -> Unit) function\n- Checks ACCESS_FINE_LOCATION permission before calling getLastLocation()\n- Calls onResult(latitude, longitude) on success\n- Falls back to (0.0, 0.0) if location is null (no cached fix yet)",
-        "vn": "Viết lớp LocationHelper cho Android:\n- Nhận Context trong constructor\n- Dùng FusedLocationProviderClient\n- Có hàm getCurrentLocation(onResult: (Double, Double) -> Unit)\n- Kiểm tra quyền ACCESS_FINE_LOCATION trước khi gọi getLastLocation()\n- Gọi onResult(latitude, longitude) khi thành công\n- Dùng (0.0, 0.0) nếu location null (chưa có fix GPS cache)"
+        "en": "I also want the app to record exactly where the bike is using the phone's GPS. Can you add something that finds the student's current location — basically a point on the map — so we can save it with the parking spot? If it can't get a location yet, it should handle that gracefully instead of breaking.",
+        "vn": "Tôi cũng muốn app ghi lại chính xác vị trí xe bằng GPS của điện thoại. Bạn thêm thứ gì đó tìm vị trí hiện tại của học sinh — đại khái một điểm trên bản đồ — để lưu cùng chỗ đậu xe nhé? Nếu chưa lấy được vị trí, nó nên xử lý nhẹ nhàng thay vì hỏng."
       },
       "promptRationale": {
         "en": "The callback signature (Double, Double) -> Unit is explicit — vague prompts like 'get location' produce interfaces you have to rewrite. Specify exactly how you want the result delivered.",
@@ -559,8 +560,8 @@
         "vn": "Đến lúc kết nối các mảnh. Khi sinh viên nhấn 'Đậu Xe':\n1. Camera mở → sinh viên chụp chỗ đậu\n2. Ảnh lưu → `saveCurrentSpot()` được gọi\n3. GPS lấy → tất cả dữ liệu ghép thành `ParkingSpot`\n4. `ParkingStorage.save()` ghi vào SharedPreferences\n\nTa cũng cần xin quyền vị trí nếu chưa được cấp — cùng mẫu với quyền camera."
       },
       "promptText": {
-        "en": "Add to MainActivity:\n1. A requestLocationPermission ActivityResultLauncher (same pattern as camera permission)\n2. A saveCurrentSpot() function that: gets current location using LocationHelper, creates a ParkingSpot with photoUri?.toString(), the coordinates, and System.currentTimeMillis(), saves it using ParkingStorage, and shows a Toast 'Spot saved!'\n3. Update onParkHere lambda to call checkAndOpenCamera()\n4. Add a checkLocationPermission() helper similar to checkAndOpenCamera()",
-        "vn": "Thêm vào MainActivity:\n1. ActivityResultLauncher requestLocationPermission (cùng mẫu quyền camera)\n2. Hàm saveCurrentSpot() lấy vị trí dùng LocationHelper, tạo ParkingSpot với photoUri?.toString(), tọa độ, và System.currentTimeMillis(), lưu bằng ParkingStorage, hiện Toast 'Đã lưu chỗ đậu!'\n3. Cập nhật lambda onParkHere để gọi checkAndOpenCamera()\n4. Thêm checkLocationPermission() tương tự checkAndOpenCamera()"
+        "en": "Let's connect everything to the 'Park Here' button. When the student taps it, the app should take the photo, get their current GPS location, save the spot (photo, location, and the time right now) so it's remembered, and show a little 'Spot saved!' message. Please ask for location permission the first time, the same friendly way we did for the camera.",
+        "vn": "Hãy kết nối mọi thứ vào nút 'Park Here'. Khi học sinh chạm nó, app nên chụp ảnh, lấy vị trí GPS hiện tại, lưu chỗ đậu (ảnh, vị trí, và giờ ngay lúc đó) để được ghi nhớ, và hiện một lời nhắn nhỏ 'Spot saved!'. Hãy xin quyền vị trí lần đầu, theo cách thân thiện như đã làm với camera."
       },
       "promptRationale": {
         "en": "Breaking the prompt into numbered steps forces the AI to address each requirement — a single vague sentence would miss the permission check or the Toast.",
@@ -647,8 +648,8 @@
         "vn": "Sinh viên đã đậu xe, dữ liệu đã lưu. Giờ họ cần TÌM xe.\n\nMàn hình Tìm Xe tải `ParkingSpot` đã lưu từ SharedPreferences, hiển thị khi họ đậu, và tọa độ GPS. Ở bước sau ta thêm ảnh và tính khoảng cách.\n\nMàn hình này cần kiểm tra lại chỗ đã lưu mỗi khi mở — sinh viên có thể đã đậu lại từ lần trước."
       },
       "promptText": {
-        "en": "Write a FindBikeScreen composable function in FindBikeScreen.kt. It should:\n- Take a ParkingStorage parameter and an onBack lambda\n- Load the saved ParkingSpot using remember { storage.load() }\n- Show 'No spot saved yet — tap Park Here first!' if nothing saved\n- If a spot exists: show 'You parked here' header, the timestamp formatted as a readable date/time using SimpleDateFormat('dd MMM HH:mm'), latitude and longitude, a Back button\n- Dark background matching the home screen (#0F172A)",
-        "vn": "Viết composable FindBikeScreen trong FindBikeScreen.kt. Nó cần:\n- Nhận ParkingStorage và lambda onBack\n- Tải ParkingSpot đã lưu dùng remember { storage.load() }\n- Hiện 'Chưa lưu chỗ — nhấn Đậu Xe trước!' nếu chưa có gì\n- Nếu có chỗ: hiện header 'Xe bạn đậu ở đây', timestamp định dạng dd MMM HH:mm, vĩ độ và kinh độ, nút Quay lại\n- Nền tối giống màn hình chính (#0F172A)"
+        "en": "Now build the 'Find My Bike' screen — the one they see when they're trying to find their bike. If they haven't parked yet, show a friendly message like 'No spot saved yet — tap Park Here first!'. If they have parked, show a 'You parked here' heading, the date and time they parked written in an easy-to-read way, where the bike is, and a Back button. Use the same dark look as the home screen.",
+        "vn": "Giờ xây màn hình 'Find My Bike' — màn hình họ thấy khi đi tìm xe. Nếu họ chưa đậu, hiện một lời nhắn thân thiện như 'No spot saved yet — tap Park Here first!'. Nếu đã đậu, hiện tiêu đề 'You parked here', ngày giờ đậu viết dễ đọc, vị trí xe, và một nút Back. Dùng vẻ tối giống màn hình chính."
       },
       "promptRationale": {
         "en": "Specifying the empty-state message and the date format string saves a revision cycle — the AI produces exactly what you need the first time.",
@@ -735,8 +736,8 @@
         "vn": "Hai tính năng làm app thực sự hữu ích:\n\n1. **Ảnh** — thấy hình ảnh thực chỗ đậu ngay lập tức gợi nhớ. Coil là thư viện tải ảnh tốt nhất Android: xử lý tải URI, cache và trạng thái lỗi trong một dòng.\n\n2. **Khoảng cách** — 'Xe bạn cách 47 mét' hữu ích hơn nhiều so với tọa độ GPS thô. `Location.distanceBetween()` tích hợp Android tính khoảng cách đường thẳng giữa hai điểm GPS."
       },
       "promptText": {
-        "en": "Add to FindBikeScreen.kt inside the 'else' block (spot exists):\n1. If spot.photoPath is not null: show an AsyncImage (Coil) loading from Uri.parse(spot.photoPath), ContentScale.Crop, 200dp height, rounded corners 12dp\n2. Below the coordinates: show distance in metres using Location.distanceBetween() between a 'currentLat/Lng' state and spot.latitude/longitude. For now, hardcode currentLat = 10.7769, currentLng = 106.7009 (HCMC center) — we'll make it live in a later step\n3. Format distance as '%.0f m away'.format(distance) if under 1000m, or '%.1f km away'.format(distance/1000) if over",
-        "vn": "Thêm vào FindBikeScreen.kt trong khối 'else' (chỗ tồn tại):\n1. Nếu spot.photoPath không null: hiện AsyncImage (Coil) tải từ Uri.parse(spot.photoPath), ContentScale.Crop, cao 200dp, góc bo 12dp\n2. Dưới tọa độ: hiện khoảng cách bằng mét dùng Location.distanceBetween() giữa 'currentLat/Lng' state và spot.latitude/longitude. Tạm thời hardcode currentLat = 10.7769, currentLng = 106.7009 (trung tâm HCMC)\n3. Định dạng khoảng cách '%.0f m away'.format(distance) nếu dưới 1000m, hoặc '%.1f km'.format(distance/1000) nếu trên"
+        "en": "On the Find My Bike screen, please also show the photo they took of the spot, and tell them how far away their bike is — in metres if it's close, or kilometres if it's far. For now you can just pretend they're standing in the middle of the city; we'll use their real position in a later step.",
+        "vn": "Trên màn hình Find My Bike, hãy cũng hiện tấm ảnh họ đã chụp chỗ đậu, và cho họ biết xe cách bao xa — tính bằng mét nếu gần, hoặc ki-lô-mét nếu xa. Tạm thời cứ giả vờ họ đang đứng giữa thành phố; ta sẽ dùng vị trí thật ở bước sau."
       },
       "promptRationale": {
         "en": "Hardcoding HCMC coordinates is the right call for now — we'll add live location in a later step. Tell the AI this explicitly so it doesn't over-engineer a live GPS update flow you don't need yet.",
@@ -827,8 +828,8 @@
         "vn": "Sinh viên đã đậu xe, ảnh và GPS đã lưu. Nhưng nếu họ quên mở app? Một thông báo xuất hiện trên màn hình khóa: 'Đậu lúc 14:32 — nhấn để tìm xe'.\n\nThông báo trong Android cần:\n1. **Notification channel** (từ Android 8.0 / API 26) — danh mục người dùng có thể tắt tiếng\n2. **PendingIntent** — hành động chạy khi người dùng nhấn thông báo\n3. Quyền **POST_NOTIFICATIONS** trên Android 13+"
       },
       "promptText": {
-        "en": "Write a NotificationHelper class that:\n- Creates a notification channel 'parking_channel' with name 'Parking Reminders' in the constructor\n- Has a showParkingNotification(timeParked: String) function\n- The notification: small icon android.R.drawable.ic_dialog_map, title 'Bike parked!', text 'You parked at [timeParked] — tap to find it'\n- Tapping opens MainActivity (use PendingIntent.getActivity with FLAG_IMMUTABLE)\n- Checks POST_NOTIFICATIONS permission on Android 13+ before showing",
-        "vn": "Viết lớp NotificationHelper:\n- Tạo notification channel 'parking_channel' tên 'Parking Reminders' trong constructor\n- Có hàm showParkingNotification(timeParked: String)\n- Thông báo: icon android.R.drawable.ic_dialog_map, tiêu đề 'Xe đã đậu!', nội dung 'Bạn đậu lúc [timeParked] — nhấn để tìm'\n- Nhấn mở MainActivity (dùng PendingIntent.getActivity với FLAG_IMMUTABLE)\n- Kiểm tra quyền POST_NOTIFICATIONS trên Android 13+ trước khi hiện"
+        "en": "I'd like the app to show a notification right after they park, so they get a little reminder they can tap later to find their bike. It should say something like 'Bike parked!' along with the time, and tapping it should open the app. On newer phones that ask permission before sending notifications, please make sure we handle that.",
+        "vn": "Tôi muốn app hiện một thông báo ngay sau khi họ đậu, để họ có một lời nhắc nhỏ có thể chạm sau để tìm xe. Nó nên ghi đại loại 'Bike parked!' kèm giờ, và chạm vào sẽ mở app. Với điện thoại đời mới hỏi quyền trước khi gửi thông báo, hãy chắc ta xử lý điều đó."
       },
       "promptRationale": {
         "en": "Name the channel ID and specify FLAG_IMMUTABLE explicitly — forgetting FLAG_IMMUTABLE is one of the most common notification crashes on Android 12+.",
@@ -919,8 +920,8 @@
         "vn": "Notification helper đã có nhưng chưa gì gọi nó. Đến lúc gắn vào `saveCurrentSpot()` — thời điểm lưu chỗ đậu xe chính là lúc người dùng muốn nhắc nhở.\n\nTrên Android 13+, ta cũng cần xin quyền `POST_NOTIFICATIONS`. Không có nó, thông báo lặng lẽ thất bại — không lỗi, chỉ không hiện.\n\nĐây là một trong những thay đổi Android bị bỏ qua nhiều nhất vài năm gần đây."
       },
       "promptText": {
-        "en": "Update MainActivity:\n1. Add a notificationHelper lazy property: `private val notificationHelper by lazy { NotificationHelper(this) }`\n2. Add a requestNotificationPermission ActivityResultLauncher (RequestPermission contract for POST_NOTIFICATIONS)\n3. In onCreate, if Build.VERSION.SDK_INT >= 33 and POST_NOTIFICATIONS isn't granted, launch the request\n4. Inside saveCurrentSpot(), after storage.save(spot), format the timestamp with SimpleDateFormat('HH:mm') and call notificationHelper.showParkingNotification(timeStr)",
-        "vn": "Cập nhật MainActivity:\n1. Thêm thuộc tính lazy notificationHelper: `private val notificationHelper by lazy { NotificationHelper(this) }`\n2. Thêm ActivityResultLauncher requestNotificationPermission (contract RequestPermission cho POST_NOTIFICATIONS)\n3. Trong onCreate, nếu Build.VERSION.SDK_INT >= 33 và POST_NOTIFICATIONS chưa được cấp, khởi chạy yêu cầu\n4. Bên trong saveCurrentSpot(), sau storage.save(spot), định dạng timestamp với SimpleDateFormat('HH:mm') và gọi notificationHelper.showParkingNotification(timeStr)"
+        "en": "Now connect that notification to the parking action: right after the spot is saved, show the 'Bike parked!' notification with the time they parked. And when the app opens, if it's one of those newer phones that needs permission to send notifications, please ask for it.",
+        "vn": "Giờ kết nối thông báo đó với hành động đậu xe: ngay sau khi chỗ đậu được lưu, hiện thông báo 'Bike parked!' kèm giờ họ đậu. Và khi app mở, nếu là loại điện thoại đời mới cần quyền gửi thông báo, hãy xin quyền đó."
       },
       "promptRationale": {
         "en": "Specify the Android version check (SDK_INT >= 33) explicitly. The AI sometimes forgets that POST_NOTIFICATIONS is only a runtime permission on Android 13+ — on older versions, you must NOT request it.",
@@ -1011,8 +1012,8 @@
         "vn": "Trước khi xử lý bug thực, kiểm tra hiểu biết nhanh về tính năng quan trọng nhất của Kotlin: **null safety**.\n\nTrong `FindBikeScreen`, ta dùng `storage.load()` trả về `ParkingSpot?` (nullable). Sau đó viết `if (spot == null) { ... } else { ... }`.\n\nNhưng nếu người mới viết `spot.latitude` trực tiếp không kiểm tra null? Chọn đáp án đúng dưới đây."
       },
       "promptText": {
-        "en": "If savedSpot is declared as 'val savedSpot: ParkingSpot? = storage.load()' and we try to access 'savedSpot.latitude' directly without a null check, what does Kotlin do? Why is the right approach to use 'savedSpot?.latitude' (safe call) or to null-check first?",
-        "vn": "Nếu savedSpot khai báo 'val savedSpot: ParkingSpot? = storage.load()' và ta truy cập 'savedSpot.latitude' trực tiếp không kiểm tra null, Kotlin làm gì? Vì sao cách đúng là dùng 'savedSpot?.latitude' (safe call) hoặc kiểm tra null trước?"
+        "en": "I have a question. The saved parking spot might be empty if the student hasn't parked yet. What happens if my app tries to read the bike's location when there's actually no spot saved at all? Could that crash the app — and what's the safe way to handle 'there might be nothing here' so it never crashes?",
+        "vn": "Tôi có một câu hỏi. Chỗ đậu xe đã lưu có thể trống nếu học sinh chưa đậu. Điều gì xảy ra nếu app cố đọc vị trí xe trong khi thật ra chưa lưu chỗ đậu nào? Điều đó có làm app sập không — và cách an toàn để xử lý 'có thể không có gì ở đây' để nó không bao giờ sập là gì?"
       },
       "promptRationale": {
         "en": "Asking 'what does the compiler do' makes the AI explain Kotlin's type system clearly — better than just 'how do I avoid the bug', which gets a workaround instead of the principle.",
@@ -1104,8 +1105,8 @@
         "vn": "Bạn nhấn **Đậu Xe**. App crash ngay lập tức. Lỗi Logcat:\n\n```\njava.lang.IllegalArgumentException: Failed to find configured root\nthat contains /storage/emulated/0/Android/data/com.example.findmyxe/files/Pictures/parking_1706789123.jpg\n```\n\nCrash xảy ra trong `FileProvider.getUriForFile()`. Lỗi rõ: FileProvider không tìm thấy root cấu hình cho đường dẫn đó.\n\nHai file liên quan:\n- `AndroidManifest.xml` — phải khai báo phần tử `<provider>`\n- `res/xml/file_paths.xml` — phải liệt kê thư mục FileProvider được phép chia sẻ\n\nVới bug này, một trong hai bị thiếu hoặc sai."
       },
       "promptText": {
-        "en": "I'm getting this crash when tapping Park Here in my Android app:\n\njava.lang.IllegalArgumentException: Failed to find configured root that contains /storage/emulated/0/Android/data/com.example.findmyxe/files/Pictures/parking_1706789123.jpg\n\nIt happens inside FileProvider.getUriForFile() with authority '${packageName}.fileprovider'. I have a <provider> declaration in AndroidManifest.xml but the crash still happens. What's wrong with my file_paths.xml and how do I fix it?",
-        "vn": "Tôi bị crash khi nhấn Đậu Xe trong app Android:\n\njava.lang.IllegalArgumentException: Failed to find configured root that contains /storage/emulated/0/Android/data/com.example.findmyxe/files/Pictures/parking_1706789123.jpg\n\nXảy ra trong FileProvider.getUriForFile() với authority '${packageName}.fileprovider'. Tôi có khai báo <provider> trong AndroidManifest.xml nhưng crash vẫn xảy ra. file_paths.xml của tôi sai gì và sửa thế nào?"
+        "en": "I'm getting a crash when I tap 'Park Here'. Here's exactly what it says:\n\njava.lang.IllegalArgumentException: Failed to find configured root that contains /storage/emulated/0/Android/data/com.example.findmyxe/files/Pictures/parking_1706789123.jpg\n\nIt seems to happen the moment the app tries to use the photo file. I followed a guide and added some setup for sharing the photo file, but it still crashes. Can you work out what's wrong and fix it for me?",
+        "vn": "Tôi bị sập khi chạm 'Park Here'. Đây là nội dung chính xác nó báo:\n\njava.lang.IllegalArgumentException: Failed to find configured root that contains /storage/emulated/0/Android/data/com.example.findmyxe/files/Pictures/parking_1706789123.jpg\n\nNó dường như xảy ra ngay khi app cố dùng file ảnh. Tôi đã làm theo một hướng dẫn và thêm vài thiết lập để chia sẻ file ảnh, nhưng vẫn sập. Bạn tìm ra cái gì sai và sửa giúp tôi nhé?"
       },
       "promptRationale": {
         "en": "Paste the full stack trace and mention the manifest declaration already exists. The AI immediately knows to look at file_paths.xml — without this context, it might rewrite the manifest unnecessarily.",
@@ -1196,8 +1197,8 @@
         "vn": "Sửa bug FileProvider. Bạn nhấn Đậu Xe lại. Camera mở, bạn chụp ảnh, app crash:\n\n```\njava.lang.SecurityException: \"gps\" location provider requires\nACCESS_FINE_LOCATION permission.\n```\n\nQuyền ĐÃ khai báo trong `AndroidManifest.xml` — bạn thấy nó. Launcher quyền runtime tồn tại. Nhưng `LocationHelper.getCurrentLocation()` vẫn crash.\n\nNhìn kỹ chuỗi gọi. Khoảng trống ở đâu?"
       },
       "promptText": {
-        "en": "I'm getting java.lang.SecurityException: 'gps' location provider requires ACCESS_FINE_LOCATION permission when calling LocationHelper.getCurrentLocation(). I've declared the permission in AndroidManifest.xml, and I have a requestLocationPermission ActivityResultLauncher in MainActivity. But the location call still crashes. Here's the relevant code:\n\nonParkHere = { checkAndOpenCamera() }\n\nAnd saveCurrentSpot() calls locationHelper.getCurrentLocation { lat, lng -> ... }.\n\nWhat am I missing in the flow?",
-        "vn": "Tôi bị java.lang.SecurityException: 'gps' location provider requires ACCESS_FINE_LOCATION permission khi gọi LocationHelper.getCurrentLocation(). Đã khai báo quyền trong AndroidManifest.xml, có ActivityResultLauncher requestLocationPermission trong MainActivity. Nhưng gọi vị trí vẫn crash. Code liên quan:\n\nonParkHere = { checkAndOpenCamera() }\n\nVà saveCurrentSpot() gọi locationHelper.getCurrentLocation { lat, lng -> ... }.\n\nTôi thiếu gì trong flow?"
+        "en": "Now I'm getting a different crash when the app tries to find my location. Here's what it says:\n\njava.lang.SecurityException: 'gps' location provider requires ACCESS_FINE_LOCATION permission\n\nThe strange thing is I'm sure I already asked for location permission and set it up in the right place. But it still crashes when I tap Park Here. Here's roughly the order of what happens: tapping Park Here opens the camera, and after the photo it tries to get my location. Can you figure out what I'm missing?",
+        "vn": "Giờ tôi bị một lỗi sập khác khi app cố tìm vị trí. Đây là nội dung:\n\njava.lang.SecurityException: 'gps' location provider requires ACCESS_FINE_LOCATION permission\n\nĐiều lạ là tôi chắc đã xin quyền vị trí và thiết lập đúng chỗ rồi. Nhưng nó vẫn sập khi tôi chạm Park Here. Đại khái trình tự xảy ra: chạm Park Here mở camera, và sau khi chụp ảnh nó cố lấy vị trí. Bạn tìm ra tôi đang thiếu gì nhé?"
       },
       "promptRationale": {
         "en": "Show the call chain in the prompt — onParkHere → checkAndOpenCamera → saveCurrentSpot. The AI sees the chain and immediately spots that nothing requests location permission anywhere in the flow. Without the chain, it might guess at the wrong layer.",
@@ -1280,8 +1281,8 @@
         "vn": "Hai bug đã sửa. App chạy. Xem bạn thực sự đã xây gì.\n\n**Find My Xe** — app Android hoàn chỉnh:\n- Chụp camera với FileProvider (cách đúng)\n- Vị trí GPS với FusedLocationProviderClient\n- Lưu trữ vĩnh viễn với SharedPreferences + Gson\n- Thông báo màn hình khóa với channel và PendingIntent\n- UI Compose với quản lý state đúng\n- Flow quyền runtime cho ba tài nguyên nhạy cảm\n\nSinh viên ở HCMC có thể cài và không bao giờ mất xe ở trường nữa. Đó là sản phẩm thực."
       },
       "promptText": {
-        "en": "Looking at the complete Find My Xe app — MainActivity wiring photo capture, GPS, storage, notifications, and three permission flows; the FindBikeScreen with photo + timestamp + distance; the helper classes (LocationHelper, ParkingStorage, NotificationHelper) — what would I add to take this from a class project to something I could publish on the Play Store? Give me five concrete next features ranked by user value.",
-        "vn": "Nhìn app Find My Xe hoàn chỉnh — MainActivity kết nối chụp ảnh, GPS, lưu trữ, thông báo, và ba flow quyền; FindBikeScreen với ảnh + timestamp + khoảng cách; các lớp helper (LocationHelper, ParkingStorage, NotificationHelper) — tôi sẽ thêm gì để chuyển từ project học đến cái có thể đăng Play Store? Cho tôi năm tính năng cụ thể tiếp theo xếp theo giá trị người dùng."
+        "en": "My Find My Xe app is working — it takes a photo, saves where I parked with the time, shows me the photo and how far away my bike is, and sends a reminder notification. If I wanted to turn this from a class project into something real that other students could download from the Play Store, what five things should I add next? Please rank them by how much they'd help the people using it.",
+        "vn": "App Find My Xe của tôi chạy rồi — nó chụp ảnh, lưu chỗ tôi đậu kèm giờ, cho tôi xem ảnh và xe cách bao xa, và gửi một thông báo nhắc. Nếu tôi muốn biến nó từ một bài tập trên lớp thành một thứ thật mà học sinh khác tải được từ Play Store, tôi nên thêm năm thứ gì tiếp theo? Hãy xếp hạng theo mức độ giúp ích cho người dùng."
       },
       "promptRationale": {
         "en": "Asking for a ranked list forces concrete suggestions. 'How do I improve this?' gets fluff. 'Five features ranked by user value' gets a roadmap.",

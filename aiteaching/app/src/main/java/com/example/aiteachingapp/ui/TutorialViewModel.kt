@@ -24,6 +24,7 @@ class TutorialViewModel(
 
     private val repository = TutorialRepository(application)
     private val progressRepository = com.example.aiteachingapp.data.ProgressRepository(application)
+    private val userInputRepository = com.example.aiteachingapp.data.UserInputRepository(application)
     private val tutorialData = if (tutorialId.isBlank()) repository.loadTutorial()
                                else repository.loadByTutorialId(tutorialId)
     private val steps: List<TutorialStep> = tutorialData.steps
@@ -61,6 +62,21 @@ class TutorialViewModel(
 
     private val _showInterstitial = MutableStateFlow(false)
     val showInterstitial = _showInterstitial.asStateFlow()
+
+    /** Student-entered values (e.g. their Firebase URL), key -> value. Persisted. */
+    private val _userInputs = MutableStateFlow(
+        userInputRepository.getAll(tutorialData.tutorialId)
+    )
+    val userInputs = _userInputs.asStateFlow()
+
+    /** Save what the student typed into an editable field. Persists immediately,
+     *  so it's already saved by the time they move to the next step. */
+    fun setUserInput(key: String, value: String) {
+        userInputRepository.set(tutorialData.tutorialId, key, value)
+        _userInputs.value = _userInputs.value.toMutableMap().apply {
+            put(key, value.replace("\n", "").replace("\r", "").trim())
+        }
+    }
 
     private val _awaitingChoice = MutableStateFlow(false)
     val awaitingChoice = _awaitingChoice.asStateFlow()

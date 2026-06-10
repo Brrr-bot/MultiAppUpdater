@@ -4,6 +4,7 @@
     "en": "Build Rain Alert with AI",
     "vn": "Xây dựng Rain Alert với AI"
   },
+  "order": 3,
   "steps": [
     {
       "stepNumber": 1,
@@ -129,7 +130,7 @@
         "vn": "Đừng bao giờ giả vờ biết. Nhờ AI đề xuất VÀ giải thích VÌ SAO. Phần 'vì sao' là phần dạy bạn."
       },
       "aiResponse": {
-        "en": "Good question. For Android, there are two main languages:\n\n• **Java** — older, used in lots of legacy apps, more wordy.\n• **Kotlin** — modern (2011), what Google officially recommends since 2019.\n\nFor a first app I strongly suggest **Kotlin** because:\n(1) Needs about 40% less code than Java to do the same job — less typing, less reading.\n(2) Catches a whole class of crashes (called 'null pointer exceptions') before you even run the app.\n(3) Most new Android apps use it: Pinterest, Trello, Square, Duolingo.\n\nWant me to set up a Kotlin project?",
+        "en": "Good question. For Android, there are two main languages:\n\n• **Java** — older, used in lots of legacy apps, more wordy.\n• **Kotlin** — modern (2011), what Google officially recommends since 2019.\n\nFor a complete beginner I strongly suggest **Kotlin** because:\n(1) Needs about 40% less code than Java to do the same job — less typing, less reading.\n(2) Catches a whole class of crashes (called 'null pointer exceptions') before you even run the app.\n(3) Most new Android apps use it: Pinterest, Trello, Square, Duolingo.\n\nWant me to set up a Kotlin project?",
         "vn": "Câu hỏi tốt. Cho Android có hai ngôn ngữ chính:\n\n• **Java** — cũ hơn, dùng trong nhiều app cũ, dài dòng hơn.\n• **Kotlin** — hiện đại (2011), được Google khuyến nghị chính thức từ 2019.\n\nCho app đầu tay tôi đề xuất **Kotlin** vì:\n(1) Cần ít hơn ~40% code so với Java — gõ ít, đọc ít.\n(2) Bắt được cả lớp crash (gọi là 'null pointer exception') trước khi chạy.\n(3) Hầu hết app Android mới đều dùng: Pinterest, Trello, Square, Duolingo.\n\nBạn muốn tôi tạo project Kotlin chứ?"
       },
       "codeSnippets": [
@@ -902,108 +903,89 @@
       "stepNumber": 9,
       "type": "lesson",
       "title": {
-        "en": "Sharing data in the cloud — Firebase",
-        "vn": "Chia sẻ data trên mây — Firebase"
+        "en": "Set up your free cloud database (no card needed)",
+        "vn": "Tạo cơ sở dữ liệu đám mây miễn phí (không cần thẻ)"
       },
       "instruction": {
-        "en": "When one user reports rain, ALL users need to see it. The data can't live on just one phone — it has to live somewhere everyone can read.\n\nThat place is called a CLOUD DATABASE. We'll use Firebase, Google's free one. Think of it as a shared notebook on the internet — every phone writes to and reads from the same notebook.",
-        "vn": "Khi một user báo mưa, TẤT CẢ user cần thấy. Data không thể chỉ sống trên một điện thoại — phải ở nơi mọi người đọc được.\n\nNơi đó gọi là CLOUD DATABASE. Ta dùng Firebase — của Google, miễn phí. Nghĩ như cuốn sổ tay chung trên internet — mọi điện thoại viết và đọc cùng một cuốn sổ."
+        "en": "For other phones to see your rain reports, the reports can't live on just one phone — they need to live in the cloud, somewhere every phone can reach. We'll use Firebase. It's made by Google, it's free, and it does NOT ask for a credit card.\n\nSet it up now — it takes about 5 minutes. Do this on a computer:\n\n1. Go to console.firebase.google.com and sign in with any Google account.\n2. Click 'Create a project'. Name it something like 'rain-alert'. On the next screen turn OFF Google Analytics (you don't need it), then click Create project.\n3. When it's ready, click 'Build' in the left menu, then 'Realtime Database', then the 'Create Database' button.\n4. Pick any location. Then choose 'Start in test mode' — this lets your app read and write while you're learning. Click Enable.\n5. At the top of the Realtime Database page you'll see a web address ending in '.firebaseio.com'. That's your database. Copy it.\n6. Paste it into the orange box below. The app saves it and drops it straight into your code — you only paste it once.\n\nTest mode is perfect for a class project. Later you can make it private by asking the AI: 'how do I add security rules to my Firebase Realtime Database?'",
+        "vn": "Để các điện thoại khác thấy báo cáo mưa của bạn, báo cáo không thể chỉ nằm trên một điện thoại — chúng cần ở trên đám mây, nơi mọi điện thoại đều truy cập được. Ta sẽ dùng Firebase. Nó của Google, miễn phí, và KHÔNG đòi thẻ tín dụng.\n\nHãy thiết lập ngay — mất khoảng 5 phút. Làm trên máy tính:\n\n1. Vào console.firebase.google.com và đăng nhập bằng tài khoản Google bất kỳ.\n2. Bấm 'Create a project'. Đặt tên như 'rain-alert'. Ở màn hình kế, TẮT Google Analytics (không cần), rồi bấm Create project.\n3. Khi xong, bấm 'Build' ở menu bên trái, rồi 'Realtime Database', rồi nút 'Create Database'.\n4. Chọn vị trí bất kỳ. Rồi chọn 'Start in test mode' — cho phép app đọc và ghi khi bạn đang học. Bấm Enable.\n5. Ở đầu trang Realtime Database bạn sẽ thấy một địa chỉ web kết thúc bằng '.firebaseio.com'. Đó là cơ sở dữ liệu của bạn. Sao chép nó.\n6. Dán vào ô màu cam bên dưới. App sẽ lưu lại và đưa thẳng vào code của bạn — bạn chỉ dán một lần.\n\nChế độ test rất hợp cho bài tập trên lớp. Sau này bạn có thể khóa lại bằng cách hỏi AI: 'làm sao thêm quy tắc bảo mật cho Firebase Realtime Database?'"
       },
       "promptText": {
-        "en": "Set up Firebase Realtime Database for this app. When a user taps the rain button, send their location and the timestamp to Firebase. Walk me through the full setup, including the website steps and the Kotlin code. Explain what Firebase is in simple terms.",
-        "vn": "Cài đặt Firebase Realtime Database cho app này. Khi người dùng nhấn nút báo mưa, gửi vị trí và thời gian của họ lên Firebase. Hướng dẫn tôi toàn bộ quá trình, bao gồm cả các bước trên website và code Kotlin. Giải thích Firebase là gì bằng lời đơn giản."
+        "en": "I've created a free Firebase Realtime Database and my database web address is {{FIREBASE_URL}}. I don't want to install any complicated libraries. Can you write me a simple helper that does two things: when someone taps the rain button, it sends their report (their location and the current time) to my database over the internet; and it can also download all the recent reports so I can show them on screen. Please keep it beginner-friendly and explain what each part does.",
+        "vn": "Tôi đã tạo một Firebase Realtime Database miễn phí và địa chỉ web cơ sở dữ liệu của tôi là {{FIREBASE_URL}}. Tôi không muốn cài thư viện phức tạp nào. Bạn viết giúp tôi một helper đơn giản làm hai việc: khi ai đó chạm nút mưa, nó gửi báo cáo của họ (vị trí và giờ hiện tại) lên cơ sở dữ liệu của tôi qua internet; và nó cũng tải về tất cả báo cáo gần đây để tôi hiện lên màn hình. Hãy giữ dễ hiểu cho người mới và giải thích từng phần làm gì."
       },
       "promptRationale": {
-        "en": "Firebase has setup steps OUTSIDE the code (creating a project on the Firebase website, downloading a config file). Asking the AI for the FULL walkthrough including the website steps prevents the \"I did the code but it doesn't work\" trap.",
-        "vn": "Firebase có bước setup NGOÀI code (tạo project trên web Firebase, tải file cấu hình). Nhờ AI hướng dẫn TOÀN BỘ kể cả bước trên web giúp tránh bẫy \"code xong mà không chạy.\""
+        "en": "Notice your database address was filled in for you — you pasted it once into the box above and it's now inside this prompt AND your code, everywhere it's needed. Asking for a 'simple helper' with 'no complicated libraries' steers the AI to use plain internet requests, which are far easier for a beginner than the full Firebase toolkit.",
+        "vn": "Để ý địa chỉ cơ sở dữ liệu của bạn được điền sẵn — bạn dán một lần vào ô phía trên và giờ nó nằm trong prompt NÀY VÀ trong code, ở mọi nơi cần. Yêu cầu một 'helper đơn giản' 'không thư viện phức tạp' hướng AI dùng các yêu cầu internet thường, dễ hơn nhiều cho người mới so với bộ công cụ Firebase đầy đủ."
       },
       "aiResponse": {
-        "en": "Firebase = a free database hosted by Google. Picture a shared Google Doc that any app can read/write to in real time. Setup:\n\n(1) Go to console.firebase.google.com → create a new project.\n(2) Add an Android app to the project → enter your app's package name → download the `google-services.json` file → drop it in your `app/` folder.\n(3) Add Firebase lines to your `build.gradle` files (the AI will give you these).\n(4) In your Kotlin code, call `FirebaseDatabase.getInstance().getReference(\"reports\").push().setValue(yourReport)`. Done — that one line sends data to the cloud.\n\nReads work the same: `.addValueEventListener { … }` and Firebase calls you back whenever new data arrives.",
-        "vn": "Firebase = database miễn phí của Google. Hãy hình dung Google Doc chung mà bất kỳ app nào cũng đọc/ghi real-time. Setup:\n\n(1) Vào console.firebase.google.com → tạo project mới.\n(2) Thêm app Android → nhập package name → tải file `google-services.json` → đặt vào thư mục `app/`.\n(3) Thêm dòng Firebase vào file `build.gradle` (AI sẽ đưa).\n(4) Trong code Kotlin: `FirebaseDatabase.getInstance().getReference(\"reports\").push().setValue(yourReport)`. Xong — một dòng gửi data lên mây.\n\nĐọc tương tự: `.addValueEventListener { … }`, Firebase gọi lại bạn mỗi khi có data mới."
+        "en": "Perfect — and here's the nice surprise: because Firebase gives every database its own web address, we can talk to it with plain internet requests, no big libraries needed. To SAVE a report we send it to your address with '/reports.json' on the end; to READ them we ask that same address for the whole list. I've put your real address right into the code for you.\n\nEach report is tiny — just a location and the time it was sent. Tap the button, and seconds later that report is in the cloud where every other phone running your app can read it.",
+        "vn": "Tuyệt — và đây là điều bất ngờ thú vị: vì Firebase cho mỗi cơ sở dữ liệu một địa chỉ web riêng, ta có thể nói chuyện với nó bằng các yêu cầu internet thường, không cần thư viện lớn. Để LƯU một báo cáo, ta gửi tới địa chỉ của bạn kèm '/reports.json' ở cuối; để ĐỌC, ta hỏi chính địa chỉ đó lấy cả danh sách. Tôi đã đưa địa chỉ thật của bạn vào code rồi.\n\nMỗi báo cáo rất nhỏ — chỉ là vị trí và giờ gửi. Chạm nút, vài giây sau báo cáo đó đã ở trên đám mây nơi mọi điện thoại khác chạy app của bạn đều đọc được."
       },
       "codeSnippets": [
         {
-          "fileName": "RainNotificationService.kt",
-          "code": "class RainNotificationService : FirebaseMessagingService() {\n\n    override fun onMessageReceived(message: RemoteMessage) {\n        val district = message.data[\"district\"] ?: return\n        val intensity = message.data[\"intensity\"] ?: \"Mưa vừa\"\n        val timeAgo = message.data[\"time\"] ?: \"Vừa xong\"\n        showRainNotification(district, intensity, timeAgo)\n    }\n\n    private fun showRainNotification(\n        district: String, intensity: String, time: String\n    ) {\n        createNotificationChannel()\n\n        val tapIntent = Intent(this, MainActivity::class.java).apply {\n            flags = Intent.FLAG_ACTIVITY_NEW_TASK or\n                    Intent.FLAG_ACTIVITY_CLEAR_TASK\n            putExtra(\"district\", district)\n        }\n        val pendingIntent = PendingIntent.getActivity(\n            this, 0, tapIntent,\n            PendingIntent.FLAG_UPDATE_CURRENT or\n            PendingIntent.FLAG_IMMUTABLE\n        )\n\n        val notification = NotificationCompat.Builder(this, CHANNEL_ID)\n            .setSmallIcon(R.drawable.ic_rain)\n            .setContentTitle(\"Cảnh báo mưa tại $district!\")\n            .setContentText(\"$intensity • $time\")\n            .setPriority(NotificationCompat.PRIORITY_HIGH)\n            .setContentIntent(pendingIntent)\n            .setAutoCancel(true)\n            .build()\n\n        NotificationManagerCompat.from(this)\n            .notify(district.hashCode(), notification)\n    }\n\n    private fun createNotificationChannel() {\n        val channel = NotificationChannel(\n            CHANNEL_ID, \"Cảnh báo mưa\",\n            NotificationManager.IMPORTANCE_HIGH\n        )\n        getSystemService(NotificationManager::class.java)\n            .createNotificationChannel(channel)\n    }\n\n    companion object { const val CHANNEL_ID = \"rain_alerts\" }\n}",
-          "lineExplanations": {
-            "1": {
-              "en": "FirebaseMessagingService: Android service that FCM calls when a message arrives — runs even when the app is closed",
-              "vn": "FirebaseMessagingService: dịch vụ Android mà FCM gọi khi nhận tin nhắn — chạy ngay cả khi app đã đóng"
-            },
-            "4": {
-              "en": "message.data[\"district\"]: FCM data payload (not notification payload) — arrives even if app is in foreground",
-              "vn": "message.data[\"district\"]: payload data FCM (không phải notification payload) — đến ngay cả khi app đang ở foreground"
-            },
-            "15": {
-              "en": "FLAG_ACTIVITY_CLEAR_TASK: clears the back stack — tapping notification shows Rain Alert fresh, not buried in history",
-              "vn": "FLAG_ACTIVITY_CLEAR_TASK: xóa back stack — nhấn thông báo hiển thị Rain Alert mới, không bị chôn vùi trong lịch sử"
-            },
-            "18": {
-              "en": "putExtra(\"district\"): passes the district name to MainActivity so it can highlight the right area on the map",
-              "vn": "putExtra(\"district\"): truyền tên quận đến MainActivity để nó có thể làm nổi bật khu vực đúng trên bản đồ"
-            },
-            "23": {
-              "en": "FLAG_IMMUTABLE: required on Android 12+ — makes the PendingIntent unmodifiable for security (prevents intent hijacking)",
-              "vn": "FLAG_IMMUTABLE: bắt buộc trên Android 12+ — làm PendingIntent không thể sửa đổi vì bảo mật (ngăn chặn chiếm đoạt intent)"
-            },
-            "30": {
-              "en": "PRIORITY_HIGH: shows as a heads-up notification (banner at top) — user sees it without unlocking the phone",
-              "vn": "PRIORITY_HIGH: hiển thị dưới dạng thông báo heads-up (banner ở trên) — người dùng thấy mà không cần mở khóa điện thoại"
-            },
-            "32": {
-              "en": "setAutoCancel(true): notification disappears from the shade when the user taps it — good UX practice",
-              "vn": "setAutoCancel(true): thông báo biến mất khỏi ngăn kéo khi người dùng nhấn vào — thực hành UX tốt"
-            },
-            "35": {
-              "en": "district.hashCode(): uses the district string as notification ID — updating same district replaces the old notification",
-              "vn": "district.hashCode(): dùng chuỗi quận làm ID thông báo — cập nhật cùng quận thay thế thông báo cũ"
-            }
-          }
+          "fileName": "RainCloud.kt",
+          "code": "// Talks to YOUR Firebase database over plain HTTPS — no Firebase library needed.\nobject RainCloud {\n    private val client = OkHttpClient()\n\n    // 👇 Your database address — pasted once, dropped in here for you\n    private const val DB = \"{{FIREBASE_URL}}\"\n\n    // Save one rain report (call this when the user taps the button)\n    fun sendReport(lat: Double, lng: Double) {\n        val json = \"\"\"{\"lat\":$lat,\"lng\":$lng,\"time\":${System.currentTimeMillis()}}\"\"\"\n        val body = json.toRequestBody(\"application/json\".toMediaType())\n        val request = Request.Builder().url(\"$DB/reports.json\").post(body).build()\n        client.newCall(request).enqueue(object : Callback {\n            override fun onFailure(call: Call, e: IOException) { /* offline — try later */ }\n            override fun onResponse(call: Call, response: Response) { response.close() }\n        })\n    }\n\n    // Download all recent reports (as text) so we can show them\n    fun loadReports(onResult: (String) -> Unit) {\n        val request = Request.Builder().url(\"$DB/reports.json\").get().build()\n        client.newCall(request).enqueue(object : Callback {\n            override fun onFailure(call: Call, e: IOException) { onResult(\"{}\") }\n            override fun onResponse(call: Call, response: Response) {\n                onResult(response.body?.string() ?: \"{}\"); response.close()\n            }\n        })\n    }\n}",
+          "lineExplanations": {}
         }
       ],
       "clawdExplanation": {
-        "en": "Firebase = shared notebook in the cloud. Every user reads from and writes to the same notebook. This is how every app you use works: `WhatsApp` messages, `Instagram` photos, `Spotify` playlists — all in similar cloud databases, not on your phone. Next: how the app handles MANY rain reports at once — lists.",
-        "vn": "Firebase = sổ tay chung trên mây. Mỗi user đọc và viết cùng sổ. Mọi app bạn dùng đều thế: tin nhắn `WhatsApp`, ảnh `Instagram`, playlist `Spotify` — đều ở cloud database tương tự, không nằm trên điện thoại bạn. Tiếp: app xử lý NHIỀU báo cáo mưa cùng lúc — lists."
+        "en": "Huge milestone — your app now talks to the internet, and it's YOUR own database doing the work. The trick to remember: a Firebase database is just a web address, so saving a report is like posting a tiny letter to that address, and reading them is asking for the whole pile back. You pasted your address once and it flowed into the code by itself. Next: turning that pile of reports into a list on the screen.",
+        "vn": "Cột mốc lớn — app của bạn giờ nói chuyện với internet, và chính cơ sở dữ liệu CỦA BẠN làm việc đó. Mẹo cần nhớ: một cơ sở dữ liệu Firebase chỉ là một địa chỉ web, nên lưu một báo cáo giống như gửi một lá thư nhỏ tới địa chỉ đó, và đọc chúng là xin lại cả chồng thư. Bạn dán địa chỉ một lần và nó tự chảy vào code. Tiếp theo: biến chồng báo cáo đó thành một danh sách trên màn hình."
       },
       "answerChoices": [],
       "vocabTerms": [
         {
-          "term": "FusedLocationProvider",
-          "color": "#10B981",
-          "explanation": {
-            "en": "Google's smart location API — picks the best signal (GPS, WiFi, cell) while saving battery",
-            "vn": "API vị trí thông minh của Google — chọn tín hiệu tốt nhất (GPS, WiFi, tháp) trong khi tiết kiệm pin"
-          }
-        },
-        {
-          "term": "Geocoder",
-          "color": "#60A5FA",
-          "explanation": {
-            "en": "Converts GPS coordinates (lat/lng) into a human-readable address like a district name",
-            "vn": "Chuyển đổi tọa độ GPS (lat/lng) thành địa chỉ dễ đọc như tên quận"
-          }
-        },
-        {
-          "term": "callback",
-          "color": "#A78BFA",
-          "explanation": {
-            "en": "A function you give to another function to call when it's done — the result arrives later, not immediately",
-            "vn": "Hàm bạn truyền cho hàm khác để gọi khi hoàn thành — kết quả đến sau, không phải ngay lập tức"
-          }
-        },
-        {
-          "term": "permission",
+          "term": "Firebase",
           "color": "#FBBF24",
           "explanation": {
-            "en": "A runtime dialog asking the user to allow GPS access — must be granted before location calls work",
-            "vn": "Hộp thoại yêu cầu người dùng cho phép truy cập GPS — phải được cấp trước khi gọi vị trí"
+            "en": "Google's free cloud service. We use its Realtime Database to store rain reports online — no credit card.",
+            "vn": "Dịch vụ đám mây miễn phí của Google. Ta dùng Realtime Database của nó để lưu báo cáo mưa trực tuyến — không cần thẻ."
+          }
+        },
+        {
+          "term": "database URL",
+          "color": "#29B6F6",
+          "explanation": {
+            "en": "Your database's web address (ends in .firebaseio.com). Sending data there saves it; asking it returns the data.",
+            "vn": "Địa chỉ web của cơ sở dữ liệu (kết thúc bằng .firebaseio.com). Gửi dữ liệu tới đó là lưu; hỏi nó là lấy lại dữ liệu."
+          }
+        },
+        {
+          "term": "HTTPS request",
+          "color": "#00E676",
+          "explanation": {
+            "en": "A message your app sends over the internet — 'post this' to save, 'get this' to read.",
+            "vn": "Một tin nhắn app gửi qua internet — 'post' để lưu, 'get' để đọc."
+          }
+        },
+        {
+          "term": "JSON",
+          "color": "#A78BFA",
+          "explanation": {
+            "en": "The simple text format the reports are stored in, like {\"lat\":10.7,\"lng\":106.7}.",
+            "vn": "Định dạng văn bản đơn giản mà báo cáo được lưu, như {\"lat\":10.7,\"lng\":106.7}."
           }
         }
       ],
       "codeExplainer": {
-        "en": "GPS is now wired up. The FusedLocationProvider is Google's smart system that picks the best signal available (GPS satellite, nearby WiFi, or phone towers) to find the user's location while using as little battery as possible. Once it gets coordinates (two numbers: latitude and longitude), the Geocoder converts them into a readable district name. The app then asks the user's permission before any of this runs.",
-        "vn": "GPS giờ đã được kết nối. FusedLocationProvider là hệ thống thông minh của Google chọn tín hiệu tốt nhất (vệ tinh GPS, WiFi gần đó hoặc tháp điện thoại) để tìm vị trí người dùng trong khi tiêu thụ ít pin nhất có thể. Khi có tọa độ (hai số: vĩ độ và kinh độ), Geocoder chuyển chúng thành tên quận đọc được. App xin phép người dùng trước khi bất kỳ thứ gì này chạy."
-      }
+        "en": "This is the whole 'cloud' part of your app, and it's tiny. sendReport packs the location and time into a small message and posts it to your database's web address with '/reports.json' on the end. loadReports asks that same address for everything saved so far. Look at line 6 — your real database address is already sitting in the code, because you pasted it above.",
+        "vn": "Đây là toàn bộ phần 'đám mây' của app, và nó rất nhỏ. sendReport gói vị trí và giờ vào một tin nhắn nhỏ và gửi tới địa chỉ web cơ sở dữ liệu của bạn kèm '/reports.json' ở cuối. loadReports hỏi chính địa chỉ đó lấy mọi thứ đã lưu. Nhìn dòng 6 — địa chỉ cơ sở dữ liệu thật của bạn đã nằm trong code, vì bạn đã dán nó ở trên."
+      },
+      "userInputs": [
+        {
+          "key": "FIREBASE_URL",
+          "label": {
+            "en": "Your Firebase database web address",
+            "vn": "Địa chỉ web cơ sở dữ liệu Firebase của bạn"
+          },
+          "example": "https://rain-alert-1234-default-rtdb.firebaseio.com",
+          "help": {
+            "en": "It ends with .firebaseio.com — copy it from the top of your Realtime Database page. No '/' on the end.",
+            "vn": "Nó kết thúc bằng .firebaseio.com — sao chép từ đầu trang Realtime Database. Không có '/' ở cuối."
+          }
+        }
+      ]
     },
     {
       "stepNumber": 10,
@@ -1211,95 +1193,66 @@
       "stepNumber": 12,
       "type": "lesson",
       "title": {
-        "en": "Alerting nearby users — push notifications",
-        "vn": "Cảnh báo user gần đó — push notifications"
+        "en": "Tell users about nearby rain (for free)",
+        "vn": "Báo cho người dùng về mưa gần đó (miễn phí)"
       },
       "instruction": {
-        "en": "When one user reports rain, we want OTHER phones nearby to buzz with an alert — even if their app is closed. This is a PUSH NOTIFICATION. We'll use Firebase Cloud Messaging (FCM) — Google's free notification postman service.",
-        "vn": "Khi một user báo mưa, ta muốn điện thoại NGƯỜI KHÁC gần đó kêu cảnh báo — dù app đóng. Đó là PUSH NOTIFICATION. Ta dùng Firebase Cloud Messaging (FCM) — dịch vụ đưa thư thông báo miễn phí của Google."
+        "en": "We'd love other phones to buzz when someone nearby reports rain. The 'big company' way is push notifications through a paid server — but that needs a credit card, and we don't need it.\n\nThe free way is just as good for a community app: every few minutes, the app quietly downloads the recent reports from your database (using the helper you already built), checks if any are close to you AND newer than the last one you saw, and if so, shows a notification on your phone. No server, no card — your app does the checking itself.",
+        "vn": "Ta rất muốn các điện thoại khác rung lên khi ai đó gần đây báo mưa. Cách của 'công ty lớn' là thông báo đẩy qua một máy chủ trả phí — nhưng cái đó cần thẻ tín dụng, và ta không cần.\n\nCách miễn phí cũng tốt ngang cho một app cộng đồng: cứ vài phút, app lặng lẽ tải về các báo cáo gần đây từ cơ sở dữ liệu của bạn (dùng helper bạn đã xây), kiểm tra có cái nào gần bạn VÀ mới hơn cái cuối bạn đã thấy không, nếu có thì hiện một thông báo trên điện thoại. Không máy chủ, không thẻ — app tự kiểm tra."
       },
       "promptText": {
-        "en": "When a user taps the rain button, send a push notification using Firebase Cloud Messaging to all users within 5km of that location. The notification title should be \"Rain reported nearby ☔\" and the body should say something like \"Someone reported rain 2km away\". Tapping the notification should open the map view. Walk me through the setup.",
-        "vn": "Khi người dùng nhấn nút báo mưa, gửi thông báo đẩy dùng Firebase Cloud Messaging đến tất cả người dùng trong vòng 5km. Tiêu đề thông báo là \"Có mưa gần đây ☂️\" và nội dung là \"Ai đó vừa báo mưa cách 2km\". Nhấn vào thông báo sẽ mở chế độ xem bản đồ. Hướng dẫn tôi cách thiết lập."
+        "en": "Now I want people to get a heads-up when someone nearby reports rain, but I don't want to pay for anything or run a server. Can you make the app check my database every few minutes, and if there's a fresh report within about 5km of me that I haven't already been told about, show me a notification saying rain was reported nearby? Please explain how it avoids showing me the same report twice.",
+        "vn": "Giờ tôi muốn mọi người được báo khi ai đó gần đây báo mưa, nhưng tôi không muốn trả tiền hay chạy máy chủ. Bạn làm app kiểm tra cơ sở dữ liệu của tôi vài phút một lần, và nếu có một báo cáo mới trong khoảng 5km quanh tôi mà tôi chưa được báo, hiện một thông báo nói có mưa gần đó nhé? Hãy giải thích nó tránh hiện cùng một báo cáo hai lần ra sao."
       },
       "promptRationale": {
-        "en": "Specify the trigger (rain button tap), the audience (within 5km), the exact title and body text, and the tap behaviour. The clearer you are, the less the AI has to guess.",
-        "vn": "Chỉ định kích hoạt (nhấn nút mưa), đối tượng (trong 5km), chính xác tiêu đề và nội dung, hành vi khi chạm. Rõ ràng hơn → AI ít đoán hơn."
+        "en": "You set two clear rules in plain words: 'within about 5km' and 'that I haven't already been told about'. Those are real product decisions. Saying you don't want a server tells the AI to use the free polling approach (the app checks for itself) instead of paid push notifications.",
+        "vn": "Bạn đặt hai quy tắc rõ ràng bằng lời thường: 'trong khoảng 5km' và 'mà tôi chưa được báo'. Đó là những quyết định sản phẩm thật. Nói bạn không muốn máy chủ bảo AI dùng cách kiểm tra định kỳ miễn phí (app tự kiểm tra) thay vì thông báo đẩy trả phí."
       },
       "aiResponse": {
-        "en": "FCM = Google's free postman. It can deliver tiny messages to phones even when your app is closed. Pipeline:\n\n(1) When a new rain report is written to Firebase, a tiny server called a \"Cloud Function\" wakes up.\n(2) It looks at all users (also stored in Firebase) and finds the ones within 5km of the new report.\n(3) It sends each of them an FCM message.\n(4) The phones receive it, show the notification, and on tap open the map screen.\n\nYou'll write the Cloud Function in JavaScript (Firebase makes you), but it's only ~15 lines. The AI will write it.",
-        "vn": "FCM = bưu tá miễn phí của Google. Gửi tin nhỏ tới điện thoại kể cả khi app đóng. Pipeline:\n\n(1) Khi báo cáo mưa mới ghi vào Firebase, một server nhỏ tên \"Cloud Function\" thức dậy.\n(2) Nó xem tất cả user (cũng lưu trong Firebase) và tìm những người trong 5km quanh báo cáo mới.\n(3) Gửi mỗi người một tin FCM.\n(4) Điện thoại nhận, hiện thông báo, chạm vào mở màn hình bản đồ.\n\nBạn sẽ viết Cloud Function bằng JavaScript (Firebase bắt thế), nhưng chỉ ~15 dòng. AI sẽ viết."
+        "en": "Smart choice — for a community app, checking every few minutes is plenty, and it costs nothing. Here's how it works: a background check downloads the recent reports, measures how far each one is from you, and keeps only the close, fresh ones. To avoid nagging you with the same report twice, it remembers the time of the newest report it has already shown, and ignores anything older. If something new and nearby turns up, it posts a notification.\n\nThat's the last big piece — your app can now send, receive, AND alert, all on the free plan.",
+        "vn": "Lựa chọn thông minh — với một app cộng đồng, kiểm tra vài phút một lần là quá đủ, và không tốn gì. Cách hoạt động: một lần kiểm tra nền tải về các báo cáo gần đây, đo mỗi cái cách bạn bao xa, và chỉ giữ những cái gần và mới. Để khỏi làm phiền bạn cùng một báo cáo hai lần, nó nhớ giờ của báo cáo mới nhất đã hiện, và bỏ qua mọi thứ cũ hơn. Nếu có cái gì mới và gần xuất hiện, nó đăng một thông báo.\n\nĐó là mảnh lớn cuối — app của bạn giờ có thể gửi, nhận, VÀ báo, tất cả trên gói miễn phí."
       },
       "codeSnippets": [
         {
-          "fileName": "Architecture Summary",
-          "code": "// MVVM Architecture — Rain Alert Vietnam\n//\n// VIEW (Compose UI)\n//   MainScreen.kt\n//     ↕ observes StateFlow\n// VIEWMODEL\n//   MainViewModel.kt\n//     ↕ calls                ↕ calls\n// MODEL                  SERVICES\n//   RainReport.kt          LocationManager.kt\n//   ReportManager.kt       RainNotificationService.kt\n//     ↕ Firebase SDK\n// CLOUD\n//   Firebase Realtime DB   (stores reports)\n//   Firebase Cloud Msg     (pushes notifications)\n//   Google Maps SDK        (displays markers)\n//\n// USER ACTION FLOW:\n// 1. App opens → init{} → LocationManager.getCurrentDistrict()\n// 2. Location found → subscribeToDistrict() → live data begins\n// 3. User sees rain → taps FAB → submitRainReport(HEAVY)\n// 4. Firebase write → Cloud Function → FCM to topic\n// 5. Neighbor's phone → onMessageReceived → notification shown\n// 6. Neighbor taps → app opens → MapManager shows marker\n//\n// WHY EACH TECH:\n// Kotlin:    safe (no NPE), concise (-40% code vs Java)\n// Compose:   reactive UI, no manual view updates\n// Firebase:  real-time sync + offline support built-in\n// FCM:       battery-efficient push (one connection for all apps)\n// FusedLoc:  intelligent GPS/WiFi/cell fusion, battery-safe",
-          "lineExplanations": {
-            "3": {
-              "en": "VIEW layer: only displays data, never fetches it. If you can't see it on screen, it doesn't belong in Compose",
-              "vn": "Lớp VIEW: chỉ hiển thị dữ liệu, không bao giờ lấy dữ liệu. Nếu không thấy trên màn hình, không nên ở trong Compose"
-            },
-            "6": {
-              "en": "VIEWMODEL: the mediator — survives rotation, holds state, contains all business logic. No Android imports in Model!",
-              "vn": "VIEWMODEL: người trung gian — tồn tại sau xoay, giữ state, chứa tất cả logic nghiệp vụ. Không import Android trong Model!"
-            },
-            "9": {
-              "en": "MODEL: pure Kotlin data classes — no Android dependencies. This makes them easy to unit test",
-              "vn": "MODEL: data class Kotlin thuần — không phụ thuộc Android. Điều này làm chúng dễ unit test"
-            },
-            "25": {
-              "en": "Kotlin null safety eliminated the #1 Android crash type — NullPointerException — which Java couldn't prevent",
-              "vn": "Null safety Kotlin loại bỏ loại crash Android #1 — NullPointerException — mà Java không thể ngăn chặn"
-            },
-            "27": {
-              "en": "FCM uses a single persistent connection per device for ALL apps — far more battery-efficient than each app polling separately",
-              "vn": "FCM dùng một kết nối liên tục duy nhất mỗi thiết bị cho TẤT CẢ app — tiết kiệm pin hơn nhiều so với mỗi app tự polling"
-            }
-          }
+          "fileName": "NearbyRainChecker.kt",
+          "code": "// Free 'nearby alert' — the app checks for itself, no paid push server.\nobject NearbyRainChecker {\n    private var lastSeenTime = 0L   // newest report we've already shown\n\n    fun check(myLat: Double, myLng: Double, context: Context) {\n        RainCloud.loadReports { jsonText ->\n            val reports = JSONObject(jsonText)\n            for (key in reports.keys()) {\n                val r = reports.getJSONObject(key)\n                val time = r.getLong(\"time\")\n                if (time <= lastSeenTime) continue          // already told about it\n\n                val result = FloatArray(1)\n                Location.distanceBetween(myLat, myLng, r.getDouble(\"lat\"), r.getDouble(\"lng\"), result)\n                if (result[0] <= 5000) {                     // within 5 km\n                    showNotification(context, \"Rain reported nearby ☔\",\n                                     \"Someone close to you just reported rain.\")\n                    lastSeenTime = time                      // don't repeat it\n                }\n            }\n        }\n    }\n}",
+          "lineExplanations": {}
         }
       ],
       "clawdExplanation": {
-        "en": "Push notifications = the postman. Even with your app shut, `FCM` delivers. This is what makes `WhatsApp` and `Messenger` feel alive. Notice you didn't write one line of networking code — Firebase handles all the plumbing. Real devs don't reinvent wheels; they ASK for the right tools. Next: your first bug. Don't panic.",
-        "vn": "Push notification = bưu tá. Dù app đóng, `FCM` vẫn giao. Đó là thứ làm `WhatsApp` và `Messenger` cảm thấy sống động. Chú ý: bạn không viết một dòng code mạng nào — Firebase lo hết phần ống nước. Dev thật không phát minh lại bánh xe; họ HỎI công cụ đúng. Tiếp: bug đầu tiên. Đừng hoảng."
+        "en": "You just dodged the one thing that usually costs money — push servers — with a clever free trick: let the app check for itself every few minutes. The 'remember the newest one I've shown' idea is how almost every notifications feature avoids spamming you. Your app is now complete: it sends rain, receives rain, and warns about nearby rain, all for free.",
+        "vn": "Bạn vừa né được thứ thường tốn tiền — máy chủ đẩy — bằng một mẹo miễn phí khéo léo: để app tự kiểm tra vài phút một lần. Ý 'nhớ cái mới nhất đã hiện' là cách hầu hết mọi tính năng thông báo tránh làm phiền bạn. App của bạn giờ đã hoàn chỉnh: nó gửi mưa, nhận mưa, và cảnh báo mưa gần đó, tất cả miễn phí."
       },
       "answerChoices": [],
       "vocabTerms": [
         {
-          "term": "FCM",
-          "color": "#A78BFA",
+          "term": "polling",
+          "color": "#29B6F6",
           "explanation": {
-            "en": "Firebase Cloud Messaging — Google's free service for sending push notifications to Android and iOS",
-            "vn": "Firebase Cloud Messaging — dịch vụ miễn phí của Google để gửi thông báo đẩy đến Android và iOS"
+            "en": "Checking for new data every so often, instead of waiting to be pushed it. Simple and free.",
+            "vn": "Kiểm tra dữ liệu mới đều đặn, thay vì chờ được đẩy. Đơn giản và miễn phí."
           }
         },
         {
-          "term": "token",
-          "color": "#60A5FA",
+          "term": "distanceBetween",
+          "color": "#00E676",
           "explanation": {
-            "en": "A unique ID for each device — Firebase uses it to know exactly which phone to deliver the notification to",
-            "vn": "ID duy nhất cho mỗi thiết bị — Firebase dùng nó để biết chính xác điện thoại nào cần giao thông báo"
+            "en": "A built-in tool that measures the metres between two map points — used to find 'nearby' reports.",
+            "vn": "Công cụ có sẵn đo số mét giữa hai điểm bản đồ — dùng để tìm báo cáo 'gần đó'."
           }
         },
         {
-          "term": "Service",
-          "color": "#FBBF24",
+          "term": "de-duplicate",
+          "color": "#FFB300",
           "explanation": {
-            "en": "An Android component that runs in the background with no UI — used to receive and display notifications",
-            "vn": "Thành phần Android chạy ở nền không có UI — dùng để nhận và hiển thị thông báo"
-          }
-        },
-        {
-          "term": "NotificationChannel",
-          "color": "#10B981",
-          "explanation": {
-            "en": "Required on Android 8+ — groups notifications by category so users can silence one type without blocking all",
-            "vn": "Bắt buộc trên Android 8+ — nhóm thông báo theo danh mục để người dùng tắt một loại mà không chặn tất cả"
+            "en": "Making sure you're not shown the same report twice, by remembering the newest one already seen.",
+            "vn": "Đảm bảo bạn không bị hiện cùng báo cáo hai lần, bằng cách nhớ cái mới nhất đã thấy."
           }
         }
       ],
       "codeExplainer": {
-        "en": "Push notifications are now set up using Firebase Cloud Messaging (FCM). Each phone gets a unique token — like a postal address — when the app starts. When rain is reported in a district, the app sends that token plus a message to Firebase, which delivers the notification to the right phones even when the app is closed. The NotificationChannel groups your alerts so users can control them in phone settings.",
-        "vn": "Thông báo đẩy giờ được thiết lập bằng Firebase Cloud Messaging (FCM). Mỗi điện thoại nhận token duy nhất — như địa chỉ bưu điện — khi app khởi động. Khi có mưa ở một quận, app gửi token đó cùng tin nhắn đến Firebase, Firebase giao thông báo đến đúng điện thoại dù app đang đóng. NotificationChannel nhóm cảnh báo để người dùng kiểm soát trong cài đặt điện thoại."
+        "en": "This checks for nearby rain without any paid server. It downloads the reports with the same RainCloud helper from before, then for each one: it skips anything it has already shown (older than lastSeenTime), measures the distance to you, and if it's within 5km it pops a notification and remembers that report's time so you're never told twice.",
+        "vn": "Đoạn này kiểm tra mưa gần đó mà không cần máy chủ trả phí. Nó tải báo cáo bằng chính helper RainCloud trước đó, rồi với mỗi cái: bỏ qua thứ đã hiện (cũ hơn lastSeenTime), đo khoảng cách tới bạn, và nếu trong 5km thì bật một thông báo và nhớ giờ báo cáo đó để bạn không bị báo hai lần."
       }
     },
     {
@@ -1570,7 +1523,7 @@
         "vn": "🎉 Bạn đã ra mắt app thật!"
       },
       "instruction": {
-        "en": "That's it. You built a working community rain-alert app:\n\n✓ A screen with a button\n✓ Location permission and GPS\n✓ A cloud database (Firebase)\n✓ A live map of reports\n✓ Push notifications to nearby users\n✓ Three real bugs identified and fixed\n\nYou did this WITHOUT learning Kotlin syntax by heart. You learned to:\n• Describe what you want clearly\n• Ask the AI for options + reasons\n• Read error messages and paste them back\n• Trust the AI for the typing, focus on the thinking\n\nNext project: a multiplayer game / a Tinder-style match app / a personal finance tracker — each one will be bigger and introduce new ideas. See you in the next lesson.",
+        "en": "That's it. You built a working community rain-alert app:\n\n✓ A screen with a button\n✓ Location permission and GPS\n✓ Your own free Firebase cloud database\n✓ A live map of reports\n✓ Free nearby-rain alerts (no paid server)ers\n✓ Three real bugs identified and fixed\n\nYou did this WITHOUT learning Kotlin syntax by heart. You learned to:\n• Describe what you want clearly\n• Ask the AI for options + reasons\n• Read error messages and paste them back\n• Trust the AI for the typing, focus on the thinking\n\nNext project: a multiplayer game / a Tinder-style match app / a personal finance tracker — each one will be bigger and introduce new ideas. See you in the next lesson.",
         "vn": "Vậy là xong. Bạn vừa xây app cảnh báo mưa cộng đồng:\n\n✓ Màn hình có nút\n✓ Quyền vị trí và GPS\n✓ Database trên mây (Firebase)\n✓ Bản đồ trực tiếp các báo cáo\n✓ Push notification đến user gần đó\n✓ Ba bug thật được tìm và sửa\n\nBạn làm hết mà KHÔNG cần thuộc cú pháp Kotlin. Bạn học được:\n• Mô tả thứ mình muốn rõ ràng\n• Hỏi AI tùy chọn + lý do\n• Đọc thông báo lỗi và dán lại\n• Tin AI gõ code, bạn lo phần suy nghĩ\n\nDự án tiếp theo: game nhiều người / app hẹn hò kiểu Tinder / app quản lý tài chính cá nhân — mỗi cái sẽ lớn hơn, dạy thêm ý mới. Hẹn gặp ở bài sau."
       },
       "promptText": {

@@ -397,6 +397,9 @@ private val DATE_FMT  = DateTimeFormatter.ofPattern("EEE d MMM",  Locale.ENGLISH
 
 // Cloud session backup endpoint (mirror of the local log on the update portal)
 private const val TS_BACKUP_URL = "https://app-updates.mcubittbuilders.workers.dev/api/timesheet/backup"
+// Home-hub sidecar — same local/Tailscale channel the PhotoSync client uses. The dashboard reads
+// the timesheet card from the hub, so it stays live with no cloud/laptop dependency.
+private const val HUB_SIDECAR_TIMESHEET = "http://100.126.58.18:8767/sidecar/timesheet"
 
 // (Session list built programmatically in buildHistoryView — no adapter needed)
 
@@ -1089,7 +1092,22 @@ class MainActivity : AppCompatActivity() {
 
     /** Overwrite the cloud mirror with this device's current sessions (propagates edits/deletes).
      *  Never runs until we've confirmed the cloud state, so an empty fresh install can't wipe it. */
+    /** Mirror sessions to the home hub (local network) for the dashboard's timesheet card. */
+    private fun pushSessionsToHub() {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val body = org.json.JSONObject().apply {
+                    put("sessions", org.json.JSONArray(sessionLinesFromLog()))
+                    put("updatedAt", System.currentTimeMillis())
+                }.toString().toRequestBody("application/json".toMediaType())
+                client.newCall(Request.Builder().url(HUB_SIDECAR_TIMESHEET).post(body).build())
+                    .execute().close()
+            } catch (_: Exception) {}
+        }
+    }
+
     private fun pushBackup() {
+        pushSessionsToHub()   // local hub mirror — independent of the cloud backup
         if (!cloudBackupReady) return
         CoroutineScope(Dispatchers.IO).launch {
             try {

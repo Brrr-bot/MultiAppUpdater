@@ -5,7 +5,21 @@ data class BilingualText(val en: String = "", val vn: String = "")
 data class TutorialData(
     val tutorialId: String = "",
     val title: BilingualText = BilingualText(),
+    /** Menu sort order (lower = earlier). Same order falls back to title. */
+    val order: Int = 100,
     val steps: List<TutorialStep> = emptyList()
+)
+
+/**
+ * A spot where the student types their OWN value (e.g. a Firebase database URL).
+ * Any `{{key}}` token inside this step's promptText or code snippets is replaced
+ * with what they type, and the value is saved so later steps reuse it automatically.
+ */
+data class UserInputField(
+    val key: String = "",                       // e.g. "FIREBASE_URL" -> token {{FIREBASE_URL}}
+    val label: BilingualText = BilingualText(), // shown above the input box
+    val example: String = "",                   // greyed-out placeholder example
+    val help: BilingualText = BilingualText()   // optional one-line hint under the box
 )
 
 /** A colour-coded vocabulary term shown on the between-step interstitial. */
@@ -35,7 +49,9 @@ data class TutorialStep(
     // Key terms from this step's code, colour-coded by category.
     val vocabTerms: List<VocabTerm> = emptyList(),
     // Plain-English explanation of exactly what the code in this step does.
-    val codeExplainer: BilingualText = BilingualText()
+    val codeExplainer: BilingualText = BilingualText(),
+    // Editable fields where the student pastes their own values (e.g. server URL).
+    val userInputs: List<UserInputField> = emptyList()
 )
 
 data class CodeSnippet(

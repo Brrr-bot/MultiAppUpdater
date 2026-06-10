@@ -48,13 +48,16 @@ class HubRepository(
         } else {
             "Idle"
         }
+        val logs = response.recentLogs
+            .map(String::trim)
+            .filter(String::isNotEmpty)
         return HubUiState(
             connected = true,
             statusLine = "Phone connected",
             lastUpdated = formatAge(response.updatedAt),
             transferLine = progress,
             compressionLine = compression,
-            logs = response.recentLogs.ifEmpty { listOf(response.lastSyncSummary.ifBlank { "No recent activity" }) }
+            logs = logs.ifEmpty { listOf(response.lastSyncSummary.ifBlank { "No recent activity" }) }
         )
     }
 

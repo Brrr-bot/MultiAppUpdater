@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -13,37 +14,35 @@
         android:orientation="vertical"
         android:padding="10dp">
 
-        <!-- Banner: compact, clock dominant, settings icon right -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="50dp"
+            android:background="@color/banner_bg"
             android:gravity="center_vertical"
             android:orientation="horizontal"
             android:paddingStart="16dp"
-            android:paddingEnd="4dp"
-            android:background="@color/banner_bg">
+            android:paddingEnd="4dp">
 
             <TextView
                 android:id="@+id/tv_clock"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:fontFamily="monospace"
                 android:textColor="@color/neon_cyan"
                 android:textSize="26sp"
-                android:fontFamily="monospace"
                 android:textStyle="bold" />
 
             <ImageButton
                 android:id="@+id/btn_settings"
                 android:layout_width="44dp"
                 android:layout_height="44dp"
-                android:src="@drawable/ic_more_vert"
-                android:tint="@color/neon_cyan"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="@string/settings" />
+                android:contentDescription="@string/settings"
+                android:src="@drawable/ic_more_vert"
+                android:tint="@color/neon_cyan" />
         </LinearLayout>
 
-        <!-- Weather card — weight 1.3 -->
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -64,24 +63,24 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_alignParentStart="true"
+                        android:layout_centerVertical="true"
+                        android:fontFamily="monospace"
+                        android:letterSpacing="0.2"
                         android:text="7 DAY WEATHER"
                         android:textColor="@color/neon_cyan"
                         android:textSize="11sp"
-                        android:fontFamily="monospace"
-                        android:textStyle="bold"
-                        android:letterSpacing="0.2"
-                        android:layout_alignParentStart="true"
-                        android:layout_centerVertical="true" />
+                        android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/tv_weather_location"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="11sp"
-                        android:fontFamily="monospace"
                         android:layout_alignParentEnd="true"
-                        android:layout_centerVertical="true" />
+                        android:layout_centerVertical="true"
+                        android:fontFamily="monospace"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="11sp" />
                 </RelativeLayout>
 
                 <LinearLayout
@@ -95,22 +94,21 @@
             </LinearLayout>
         </FrameLayout>
 
-        <!-- Middle row: Hub (50%) | Finance (25%) | Timesheet (25%) — weight 1.2 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1.2"
             android:layout_marginTop="8dp"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:weightSum="4">
 
-            <!-- Hub card — half width (weight 2) -->
             <FrameLayout
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="2"
+                android:layout_weight="1.3"
                 android:layout_marginEnd="4dp"
                 android:background="@drawable/neon_card_purple"
-                android:padding="10dp">
+                android:padding="8dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -120,12 +118,12 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:fontFamily="monospace"
+                        android:letterSpacing="0.2"
                         android:text="LIVE HUB"
                         android:textColor="@color/neon_purple"
                         android:textSize="11sp"
-                        android:fontFamily="monospace"
-                        android:textStyle="bold"
-                        android:letterSpacing="0.2" />
+                        android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/tv_hub_status"
@@ -133,16 +131,16 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="3dp"
                         android:textColor="@color/text_primary"
-                        android:textSize="13sp" />
+                        android:textSize="12sp" />
 
                     <TextView
                         android:id="@+id/tv_hub_last_updated"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="2dp"
+                        android:fontFamily="monospace"
                         android:textColor="@color/text_secondary"
-                        android:textSize="12sp"
-                        android:fontFamily="monospace" />
+                        android:textSize="10sp" />
 
                     <TextView
                         android:id="@+id/tv_hub_transfer"
@@ -150,7 +148,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="3dp"
                         android:textColor="@color/text_primary"
-                        android:textSize="13sp" />
+                        android:textSize="11sp" />
 
                     <ScrollView
                         android:id="@+id/scroll_hub_logs"
@@ -164,179 +162,248 @@
                             android:id="@+id/tv_hub_logs"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/text_secondary"
-                            android:textSize="12sp"
                             android:fontFamily="monospace"
-                            android:lineSpacingExtra="0dp" />
+                            android:lineSpacingExtra="0dp"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="10sp" />
                     </ScrollView>
                 </LinearLayout>
             </FrameLayout>
 
-            <!-- Finance card — quarter width (weight 1) -->
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="1"
+                android:layout_weight="0.9"
                 android:layout_marginEnd="4dp"
                 android:background="@drawable/neon_card_cyan"
                 android:orientation="vertical"
-                android:padding="10dp">
+                android:padding="8dp">
 
-                <!-- Header row: label + period date -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
+                    android:layout_marginTop="0dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
 
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
+                        android:fontFamily="monospace"
+                        android:letterSpacing="0.2"
                         android:text="FINANCE"
                         android:textColor="@color/neon_cyan"
                         android:textSize="11sp"
-                        android:fontFamily="monospace"
-                        android:textStyle="bold"
-                        android:letterSpacing="0.2" />
+                        android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/tv_finance_period"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="10sp"
                         android:fontFamily="monospace"
-                        android:text="—" />
+                        android:text="OFFLINE"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="8sp" />
                 </LinearLayout>
 
-                <View android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
 
-                <!-- IN row -->
-                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
-                    <TextView android:layout_width="30dp" android:layout_height="wrap_content"
-                        android:text="IN" android:textColor="#FF00E676" android:textSize="11sp"
-                        android:fontFamily="monospace" android:textStyle="bold" />
-                    <TextView android:id="@+id/tv_finance_income" android:layout_width="0dp"
-                        android:layout_height="wrap_content" android:layout_weight="1"
-                        android:textColor="#FF00E676" android:textSize="11sp"
-                        android:fontFamily="monospace" android:textStyle="bold" android:text="—" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="monospace"
+                        android:text="INCOME"
+                        android:textColor="#FF00E676"
+                        android:textSize="9sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv_finance_income"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:fontFamily="monospace"
+                        android:gravity="end"
+                        android:text="--"
+                        android:textAlignment="viewEnd"
+                        android:textColor="#FF00E676"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
                 </LinearLayout>
 
-                <View android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
 
-                <!-- OUT row -->
-                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
-                    <TextView android:layout_width="30dp" android:layout_height="wrap_content"
-                        android:text="OUT" android:textColor="#FFFF5252" android:textSize="11sp"
-                        android:fontFamily="monospace" android:textStyle="bold" />
-                    <TextView android:id="@+id/tv_finance_expense" android:layout_width="0dp"
-                        android:layout_height="wrap_content" android:layout_weight="1"
-                        android:textColor="#FFFF5252" android:textSize="11sp"
-                        android:fontFamily="monospace" android:textStyle="bold" android:text="—" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="monospace"
+                        android:text="EXPENSE"
+                        android:textColor="#FFFF5252"
+                        android:textSize="9sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv_finance_expense"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:fontFamily="monospace"
+                        android:gravity="end"
+                        android:text="--"
+                        android:textAlignment="viewEnd"
+                        android:textColor="#FFFF5252"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
                 </LinearLayout>
 
-                <View android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
 
-                <!-- BAL row -->
-                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
-                    <TextView android:layout_width="30dp" android:layout_height="wrap_content"
-                        android:text="BAL" android:textColor="#FFFFB300" android:textSize="11sp"
-                        android:fontFamily="monospace" android:textStyle="bold" />
-                    <TextView android:id="@+id/tv_finance_bal" android:layout_width="0dp"
-                        android:layout_height="wrap_content" android:layout_weight="1"
-                        android:textColor="#FFFFB300" android:textSize="11sp"
-                        android:fontFamily="monospace" android:textStyle="bold" android:text="—" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="monospace"
+                        android:text="BALANCE"
+                        android:textColor="#FFFFB300"
+                        android:textSize="9sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv_finance_bal"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:fontFamily="monospace"
+                        android:gravity="end"
+                        android:text="--"
+                        android:textAlignment="viewEnd"
+                        android:textColor="#FFFFB300"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
                 </LinearLayout>
 
-                <!-- Divider -->
-                <View android:layout_width="match_parent" android:layout_height="1dp"
-                    android:layout_marginTop="4dp" android:layout_marginBottom="4dp"
-                    android:background="#33FFFFFF" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
 
-                <!-- SAV row -->
-                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
-                    <TextView android:layout_width="30dp" android:layout_height="wrap_content"
-                        android:text="SAV" android:textColor="@color/neon_cyan" android:textSize="11sp"
-                        android:fontFamily="monospace" android:textStyle="bold" />
-                    <TextView android:id="@+id/tv_finance_savings" android:layout_width="0dp"
-                        android:layout_height="wrap_content" android:layout_weight="1"
-                        android:textColor="@color/neon_cyan" android:textSize="11sp"
-                        android:fontFamily="monospace" android:textStyle="bold" android:text="—" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="monospace"
+                        android:text="SAVINGS"
+                        android:textColor="@color/neon_cyan"
+                        android:textSize="9sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv_finance_savings"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:fontFamily="monospace"
+                        android:gravity="end"
+                        android:text="--"
+                        android:textAlignment="viewEnd"
+                        android:textColor="@color/neon_cyan"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
                 </LinearLayout>
-
-                <View android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" />
-
             </LinearLayout>
 
-            <!-- Timesheet card — quarter width (weight 1) -->
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="1"
+                android:layout_weight="0.9"
+                android:layout_marginEnd="4dp"
                 android:background="@drawable/neon_card_green"
                 android:orientation="vertical"
                 android:padding="8dp">
 
-                <!-- Header row: label + earned -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
+                    android:layout_marginTop="0dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
 
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
+                        android:fontFamily="monospace"
+                        android:letterSpacing="0.2"
                         android:text="TIMESHEET"
                         android:textColor="@color/neon_green"
                         android:textSize="11sp"
-                        android:fontFamily="monospace"
-                        android:textStyle="bold"
-                        android:letterSpacing="0.2" />
+                        android:textStyle="bold" />
 
                     <TextView
-                        android:id="@+id/tv_timesheet_earned"
+                        android:id="@+id/tv_timesheet_status"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textColor="#FFFFB300"
-                        android:textSize="11sp"
                         android:fontFamily="monospace"
-                        android:textStyle="bold"
-                        android:text="—" />
+                        android:text="OFFLINE"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="8sp"
+                        android:textStyle="bold" />
                 </LinearLayout>
 
-                <!-- Hours / sessions sub-label -->
+                <TextView
+                    android:id="@+id/tv_timesheet_earned"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="monospace"
+                    android:gravity="end"
+                    android:text="--"
+                    android:textColor="#FFFFB300"
+                    android:textSize="9sp"
+                    android:textStyle="bold" />
+
                 <TextView
                     android:id="@+id/tv_timesheet_hours"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="10sp"
                     android:fontFamily="monospace"
-                    android:text="" />
+                    android:text=""
+                    android:textColor="@color/text_secondary"
+                    android:textSize="8sp" />
 
-                <!-- Today label -->
                 <TextView
                     android:id="@+id/tv_timesheet_today_label"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="1dp"
-                    android:textColor="@color/neon_green"
-                    android:textSize="10sp"
                     android:fontFamily="monospace"
-                    android:textStyle="bold"
                     android:letterSpacing="0.1"
-                    android:text="" />
+                    android:text=""
+                    android:textColor="@color/neon_green"
+                    android:textSize="8sp"
+                    android:textStyle="bold" />
 
-                <!-- Two-column schedule grid (AM left, PM right) -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:layout_weight="1"
-                    android:orientation="horizontal"
-                    android:layout_marginTop="1dp">
+                    android:layout_marginTop="1dp"
+                    android:orientation="horizontal">
 
                     <LinearLayout
                         android:id="@+id/ll_timesheet_am"
@@ -352,12 +419,91 @@
                         android:layout_weight="1"
                         android:orientation="vertical" />
                 </LinearLayout>
-
             </LinearLayout>
 
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.9"
+                android:background="@drawable/neon_card_purple"
+                android:orientation="vertical"
+                android:padding="8dp">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentStart="true"
+                        android:fontFamily="monospace"
+                        android:letterSpacing="0.2"
+                        android:text="CAMERA"
+                        android:textColor="@color/neon_purple"
+                        android:textSize="11sp"
+                        android:textStyle="bold" />
+
+                    <ImageButton
+                        android:id="@+id/btn_camera_mute"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentTop="true"
+                        android:background="@android:color/transparent"
+                        android:contentDescription="Mute camera"
+                        android:padding="2dp"
+                        android:src="@drawable/ic_volume_off"
+                        android:tint="@color/neon_purple" />
+                </RelativeLayout>
+
+                <TextView
+                    android:id="@+id/tv_camera_status"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="-3dp"
+                    android:fontFamily="monospace"
+                    android:text="live view"
+                    android:textAlignment="viewStart"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="8sp" />
+
+                <FrameLayout
+                    android:id="@+id/camera_preview_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:layout_marginTop="2dp"
+                    android:layout_marginBottom="8dp"
+                    android:background="#14000000"
+                    android:foregroundGravity="center"
+                    android:paddingStart="2dp"
+                    android:paddingEnd="2dp">
+
+                    <androidx.media3.ui.PlayerView
+                        android:id="@+id/player_camera"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:keepScreenOn="false"
+                        app:resize_mode="zoom"
+                        app:surface_type="texture_view" />
+
+                    <TextView
+                        android:id="@+id/tv_camera_overlay"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:fontFamily="monospace"
+                        android:text="[ camera ]"
+                        android:textColor="@color/neon_purple"
+                        android:textSize="10sp"
+                        android:textStyle="bold" />
+                </FrameLayout>
+            </LinearLayout>
         </LinearLayout>
 
-        <!-- Alarms card — teal, weight 1.3 -->
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -374,12 +520,12 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:fontFamily="monospace"
+                    android:letterSpacing="0.2"
                     android:text="WEEKLY ALARMS"
                     android:textColor="@color/neon_green"
                     android:textSize="11sp"
-                    android:fontFamily="monospace"
-                    android:textStyle="bold"
-                    android:letterSpacing="0.2" />
+                    android:textStyle="bold" />
 
                 <LinearLayout
                     android:id="@+id/day_card_container"
@@ -392,13 +538,12 @@
         </FrameLayout>
     </LinearLayout>
 
-    <!-- Dim overlay — animates alpha to darken UI without touching system brightness -->
     <View
         android:id="@+id/dim_overlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#000000"
         android:alpha="0"
+        android:background="#000000"
         android:clickable="false"
         android:focusable="false" />
 

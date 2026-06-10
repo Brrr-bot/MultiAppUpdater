@@ -21,8 +21,14 @@ import android.view.WindowInsetsController
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.view.isVisible
+import androidx.core.net.toUri
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import androidx.media3.common.MediaItem
+import androidx.media3.common.PlaybackException
+import androidx.media3.common.Player
+import androidx.media3.exoplayer.ExoPlayer
 import com.google.android.material.snackbar.Snackbar
 import com.homehub.dashboard.BuildConfig
 import com.homehub.dashboard.HomeHubApp
@@ -51,8 +57,17 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import java.util.concurrent.TimeUnit
+import kotlin.math.abs
 
 private val Int.dp get() = (this * android.content.res.Resources.getSystem().displayMetrics.density).toInt()
+
+private data class FinanceSnapshot(
+    val periodLabel: String,
+    val income: Double,
+    val expense: Double,
+    val balance: Double,
+    val savings: Double
+)
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -63,7 +78,12 @@ class MainActivity : AppCompatActivity() {
     private var financeJob: Job? = null
     private var timesheetJob: Job? = null
     private var clockRunnable: Runnable? = null
+    private var cameraPlayer: ExoPlayer? = null
+    private var activeCameraStreamPath: String? = null
+    private val attemptedCameraStreamPaths = linkedSetOf<String>()
+    private var isCameraMuted = true
     private var updateInProgress = false
+    private val financePrefs by lazy { getSharedPreferences("finance_card_cache", MODE_PRIVATE) }
     private val client = OkHttpClient.Builder()
         .connectTimeout(15, TimeUnit.SECONDS)
         .readTimeout(60, TimeUnit.SECONDS)
@@ -81,7 +101,12 @@ class MainActivity : AppCompatActivity() {
         startForegroundService(Intent(this, KeepAliveService::class.java))
 
         binding.btnSettings.setOnClickListener { startActivity(Intent(this, SettingsActivity::class.java)) }
-
+        binding.btnCameraMute.setOnClickListener { toggleCameraMute() }
+        binding.cameraPreviewContainer.setOnClickListener { openCameraFullscreen() }
+        binding.playerCamera.setOnClickListener { openCameraFullscreen() }
+        binding.tvCameraOverlay.setOnClickListener { openCameraFullscreen() }
+        updateCameraMuteIcon()
+        loadFinanceSnapshot()?.let(::renderFinanceSnapshot)
 
         bindAlarms()
         startClock()
@@ -100,6 +125,7 @@ class MainActivity : AppCompatActivity() {
         startFinancePolling()
         startTimesheetPolling()
         renderTodaySchedule()
+        startCameraFeed()
     }
 
     override fun onStop() {
@@ -107,6 +133,7 @@ class MainActivity : AppCompatActivity() {
         hubJob?.cancel()
         financeJob?.cancel()
         timesheetJob?.cancel()
+        stopCameraFeed()
         brightnessController.stop()
     }
 
@@ -120,7 +147,7 @@ class MainActivity : AppCompatActivity() {
         brightnessController.onUserInteraction()
     }
 
-    // ── Immersive fullscreen ───────────────────────────────────────────────────
+    // Immersive fullscreen
 
     private fun hideSystemUI() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -192,7 +219,7 @@ class MainActivity : AppCompatActivity() {
 
             when (sorted.size) {
                 0 -> {
-                    tvAlarm1.text = "—"
+                    tvAlarm1.text = "--"
                     tvAlarm1.isClickable = false
                     tvAlarm2.text = ""
                     tvCount.text  = ""
@@ -364,21 +391,20 @@ class MainActivity : AppCompatActivity() {
     private fun fetchFinance() {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                // Fetch all entries + savings in parallel-ish (sequential is fine on IO thread)
-                val entriesBody = client.newCall(
-                    Request.Builder().url("https://finances.mcubittbuilders.workers.dev/api/entries").build()
-                ).execute().body?.string() ?: return@launch
-                val savingsBody = client.newCall(
-                    Request.Builder().url("https://finances.mcubittbuilders.workers.dev/api/savings").build()
-                ).execute().body?.string() ?: return@launch
+                val entriesBody = fetchRequiredBody(
+                    "https://finances.mcubittbuilders.workers.dev/api/entries",
+                    "entries"
+                )
+                val savingsBody = fetchRequiredBody(
+                    "https://finances.mcubittbuilders.workers.dev/api/savings",
+                    "savings"
+                )
 
-                val entries  = org.json.JSONArray(entriesBody)
-                val savings  = org.json.JSONObject(savingsBody).optLong("total", 0)
-
-                // Find most recent salary date (same logic as Finance app's rebuildSalaryDates)
+                val entries = org.json.JSONArray(entriesBody)
+                val savings = org.json.JSONObject(savingsBody).optDouble("total", 0.0)
                 val salaryDates = mutableSetOf<String>()
                 val dateFmt = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd")
-                val zone    = java.time.ZoneId.systemDefault()
+                val zone = java.time.ZoneId.systemDefault()
                 for (i in 0 until entries.length()) {
                     val e = entries.getJSONObject(i)
                     if (e.optString("direction") == "in" && e.optString("category") == "Salary") {
@@ -387,46 +413,108 @@ class MainActivity : AppCompatActivity() {
                         salaryDates.add(date)
                     }
                 }
-                val periodStart = salaryDates.maxOrNull()  // most recent salary date
-                val periodStartMs = if (periodStart != null)
+                val periodStart = salaryDates.maxOrNull()
+                val periodStartMs = if (periodStart != null) {
                     java.time.LocalDate.parse(periodStart).atStartOfDay(zone).toInstant().toEpochMilli()
-                else 0L
+                } else {
+                    0L
+                }
 
-                // Sum income/expense for the current period
-                var income  = 0L
-                var expense = 0L
+                var income = 0.0
+                var expense = 0.0
                 for (i in 0 until entries.length()) {
-                    val e  = entries.getJSONObject(i)
+                    val e = entries.getJSONObject(i)
                     val ts = e.optLong("ts", 0)
                     if (ts < periodStartMs) continue
-                    val amt = e.optLong("amount", 0)
+                    val amt = e.optDouble("amount", 0.0)
                     when (e.optString("direction")) {
-                        "in"  -> income  += amt
+                        "in" -> income += amt
                         "out" -> expense += amt
                     }
                 }
                 val balance = income - expense
-
                 val periodLabel = if (periodStart != null) {
                     val d = java.time.LocalDate.parse(periodStart)
-                    "${d.format(java.time.format.DateTimeFormatter.ofPattern("d MMM", Locale.ENGLISH)).uppercase()} → NOW"
-                } else "ALL TIME"
+                    "${d.format(java.time.format.DateTimeFormatter.ofPattern("d MMM", Locale.ENGLISH)).uppercase()} TO NOW"
+                } else {
+                    "ALL TIME"
+                }
+
+                val snapshot = FinanceSnapshot(
+                    periodLabel = periodLabel,
+                    income = income,
+                    expense = expense,
+                    balance = balance,
+                    savings = savings
+                )
+                saveFinanceSnapshot(snapshot)
 
                 withContext(Dispatchers.Main) {
-                    binding.tvFinancePeriod.text  = periodLabel
-                    binding.tvFinanceIncome.text  = formatVnd(income)
-                    binding.tvFinanceExpense.text = formatVnd(expense)
-                    binding.tvFinanceBal.text     = formatVnd(balance)
-                    binding.tvFinanceBal.setTextColor(
-                        if (balance >= 0) 0xFF00E676.toInt() else 0xFFFF5252.toInt())
-                    binding.tvFinanceSavings.text = formatVnd(savings)
+                    renderFinanceSnapshot(snapshot)
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    binding.tvFinancePeriod.text = "offline"
+                    val cached = loadFinanceSnapshot()
+                    if (cached != null) {
+                        renderFinanceSnapshot(cached)
+                        binding.tvFinancePeriod.text = "CACHED"
+                    } else {
+                        binding.tvFinancePeriod.text = "OFFLINE"
+                        binding.tvFinanceIncome.text = "--"
+                        binding.tvFinanceExpense.text = "--"
+                        binding.tvFinanceBal.text = "--"
+                        binding.tvFinanceSavings.text = "--"
+                    }
                 }
+                RemoteLogger.e("finance card fetch failed: ${e.message.orEmpty()}")
             }
         }
+    }
+
+    private fun fetchRequiredBody(url: String, label: String): String {
+        client.newCall(Request.Builder().url(url).build()).execute().use { response ->
+            val body = response.body?.string().orEmpty()
+            if (!response.isSuccessful) {
+                val detail = body.take(120).replace('\n', ' ').trim()
+                throw IllegalStateException(
+                    if (detail.isEmpty()) "$label ${response.code}"
+                    else "$label ${response.code}: $detail"
+                )
+            }
+            if (body.isBlank()) throw IllegalStateException("$label body empty")
+            return body
+        }
+    }
+    private fun renderFinanceSnapshot(snapshot: FinanceSnapshot) {
+        binding.tvFinancePeriod.text = snapshot.periodLabel
+        binding.tvFinanceIncome.text = formatVnd(snapshot.income)
+        binding.tvFinanceExpense.text = formatVnd(snapshot.expense)
+        binding.tvFinanceBal.text = formatVnd(snapshot.balance)
+        binding.tvFinanceBal.setTextColor(
+            if (snapshot.balance >= 0) 0xFF00E676.toInt() else 0xFFFF5252.toInt()
+        )
+        binding.tvFinanceSavings.text = formatVnd(snapshot.savings)
+    }
+
+    private fun saveFinanceSnapshot(snapshot: FinanceSnapshot) {
+        financePrefs.edit()
+            .putString("periodLabel", snapshot.periodLabel)
+            .putFloat("income", snapshot.income.toFloat())
+            .putFloat("expense", snapshot.expense.toFloat())
+            .putFloat("balance", snapshot.balance.toFloat())
+            .putFloat("savings", snapshot.savings.toFloat())
+            .apply()
+    }
+
+    private fun loadFinanceSnapshot(): FinanceSnapshot? {
+        val periodLabel = financePrefs.getString("periodLabel", null) ?: return null
+        return FinanceSnapshot(
+            periodLabel = periodLabel,
+            income = financePrefs.getFloat("income", 0f).toDouble(),
+            expense = financePrefs.getFloat("expense", 0f).toDouble(),
+            balance = financePrefs.getFloat("balance", 0f).toDouble(),
+            savings = financePrefs.getFloat("savings", 0f).toDouble()
+        )
     }
 
     private fun startTimesheetPolling() {
@@ -460,13 +548,15 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
                 withContext(Dispatchers.Main) {
+                    binding.tvTimesheetStatus.text = "ONLINE"
                     binding.tvTimesheetEarned.text = formatVnd(earned)
                     binding.tvTimesheetHours.text  =
                         "${String.format("%.1f", totalHours)}h  ·  $sessionCount session${if (sessionCount != 1) "s" else ""}"
                 }
             } catch (_: Exception) {
                 withContext(Dispatchers.Main) {
-                    binding.tvTimesheetEarned.text = "—"
+                    binding.tvTimesheetEarned.text = "--"
+                    binding.tvTimesheetStatus.text = "OFFLINE"
                     binding.tvTimesheetHours.text  = ""
                 }
             }
@@ -488,7 +578,7 @@ class MainActivity : AppCompatActivity() {
             container.removeAllViews()
             if (slotList.isEmpty()) {
                 container.addView(TextView(this).apply {
-                    text = "—"
+                    text = "--"
                     setTextColor(0xFF646464.toInt())
                     textSize = 9f
                     typeface = android.graphics.Typeface.MONOSPACE
@@ -513,6 +603,103 @@ class MainActivity : AppCompatActivity() {
         fillColumn(binding.llTimesheetPm, pmSlots)
     }
 
+    private fun startCameraFeed() {
+        val host = BuildConfig.CAMERA_HOST.trim()
+        val user = BuildConfig.CAMERA_USER.trim()
+        val password = BuildConfig.CAMERA_PASSWORD.trim()
+        if (host.isEmpty() || user.isEmpty() || password.isEmpty()) {
+            binding.tvCameraStatus.text = "camera not configured"
+            binding.tvCameraOverlay.visibility = View.VISIBLE
+            return
+        }
+        if (cameraPlayer != null) return
+
+        binding.tvCameraStatus.text = "connecting to $host"
+        binding.tvCameraOverlay.visibility = View.VISIBLE
+        binding.playerCamera.useController = false
+        attemptedCameraStreamPaths.clear()
+
+        val player = ExoPlayer.Builder(this).build().also { exo ->
+            exo.playWhenReady = true
+            exo.volume = if (isCameraMuted) 0f else 1f
+            exo.addListener(object : Player.Listener {
+                override fun onPlaybackStateChanged(playbackState: Int) {
+                    when (playbackState) {
+                        Player.STATE_BUFFERING -> {
+                            binding.tvCameraStatus.text = "live view"
+                            binding.tvCameraOverlay.visibility = View.VISIBLE
+                        }
+                        Player.STATE_READY -> {
+                            binding.tvCameraStatus.text = "live view"
+                            binding.tvCameraOverlay.visibility = View.GONE
+                        }
+                        Player.STATE_ENDED -> {
+                            binding.tvCameraStatus.text = "stream ended"
+                            binding.tvCameraOverlay.visibility = View.VISIBLE
+                        }
+                    }
+                }
+
+                override fun onPlayerError(error: PlaybackException) {
+                    val failedPath = activeCameraStreamPath
+                    val retryPath = CameraStreamConfig.streamPaths.firstOrNull { it !in attemptedCameraStreamPaths }
+                    if (retryPath != null && failedPath != null) {
+                        binding.tvCameraStatus.text = "live view"
+                        binding.tvCameraOverlay.visibility = View.VISIBLE
+                        RemoteLogger.e("camera rtsp error on $failedPath: ${error.errorCodeName} ${error.message.orEmpty()}")
+                        playCameraStream(exo, retryPath)
+                        return
+                    }
+                    binding.tvCameraStatus.text = "camera error: ${error.errorCodeName.lowercase(Locale.US)}"
+                    binding.tvCameraOverlay.visibility = View.VISIBLE
+                    RemoteLogger.e("camera rtsp error: ${error.errorCodeName} ${error.message.orEmpty()}")
+                }
+            })
+            playCameraStream(exo, CameraStreamConfig.streamPaths.first())
+        }
+        cameraPlayer = player
+        binding.playerCamera.player = player
+    }
+
+    private fun stopCameraFeed() {
+        binding.playerCamera.player = null
+        cameraPlayer?.release()
+        cameraPlayer = null
+        activeCameraStreamPath = null
+        attemptedCameraStreamPaths.clear()
+    }
+
+    private fun playCameraStream(player: ExoPlayer, streamPath: String) {
+        activeCameraStreamPath = streamPath
+        attemptedCameraStreamPaths += streamPath
+        binding.tvCameraStatus.text = "live view"
+        player.setMediaItem(MediaItem.fromUri(CameraStreamConfig.buildUri(streamPath)))
+        player.prepare()
+        RemoteLogger.i("camera rtsp start -> ${BuildConfig.CAMERA_HOST.trim()}/$streamPath")
+    }
+
+    private fun toggleCameraMute() {
+        isCameraMuted = !isCameraMuted
+        cameraPlayer?.volume = if (isCameraMuted) 0f else 1f
+        updateCameraMuteIcon()
+    }
+
+    private fun updateCameraMuteIcon() {
+        binding.btnCameraMute.setImageResource(
+            if (isCameraMuted) R.drawable.ic_volume_off else R.drawable.ic_volume_on
+        )
+        binding.btnCameraMute.contentDescription =
+            if (isCameraMuted) "Unmute camera" else "Mute camera"
+    }
+
+    private fun openCameraFullscreen() {
+        if (!CameraStreamConfig.isConfigured()) return
+        startActivity(
+            Intent(this, FullscreenCameraActivity::class.java)
+                .putExtra(FullscreenCameraActivity.EXTRA_START_MUTED, isCameraMuted)
+        )
+    }
+
     private fun tsSchoolRate(name: String): Long {
         val l = name.lowercase()
         return when {
@@ -525,7 +712,13 @@ class MainActivity : AppCompatActivity() {
     private fun formatVnd(amount: Long): String {
         val nf = java.text.NumberFormat.getNumberInstance(Locale.US).apply { maximumFractionDigits = 0 }
         val prefix = if (amount < 0) "-" else ""
-        return "${prefix}${nf.format(Math.abs(amount))}₫"
+        return "${prefix}${nf.format(Math.abs(amount))}\u20AB"
+    }
+
+    private fun formatVnd(amount: Double): String {
+        val nf = java.text.NumberFormat.getNumberInstance(Locale.US).apply { maximumFractionDigits = 0 }
+        val prefix = if (amount < 0) "-" else ""
+        return "${prefix}${nf.format(abs(amount))}\u20AB"
     }
 
     companion object {
@@ -647,7 +840,7 @@ class MainActivity : AppCompatActivity() {
                     updateInProgress = true
                     downloadAndNotify(serverCode, apkUrl)
                 } else {
-                    // Already up to date — clear any stale "update ready" notification.
+                    // Already up to date; clear any stale "update ready" notification.
                     NotificationManagerCompat.from(this@MainActivity).cancel(UPDATE_NOTIF_ID)
                 }
             } catch (_: Exception) { }
@@ -681,7 +874,7 @@ class MainActivity : AppCompatActivity() {
                     NotificationCompat.Builder(this@MainActivity, UPDATE_CH)
                         .setSmallIcon(android.R.drawable.stat_sys_download_done)
                         .setContentTitle("Dashboard update ready")
-                        .setContentText("Build $buildNum downloaded — tap to install")
+                        .setContentText("Build $buildNum downloaded - tap to install")
                         .setPriority(NotificationCompat.PRIORITY_HIGH)
                         .setContentIntent(pending)
                         .setAutoCancel(true)
@@ -708,3 +901,4 @@ class MainActivity : AppCompatActivity() {
         return String.format(Locale.getDefault(), "%02d:%02d", alarm.hour, alarm.minute)
     }
 }
+

@@ -1,18 +1,18 @@
 package com.homehub.dashboard.hub
 
 data class HubDashboardResponse(
-    val hubReady: Boolean,
-    val batteryOptimizedIgnored: Boolean,
-    val accessibilityEnabled: Boolean,
-    val currentMode: String,
-    val progressCurrent: Int,
-    val progressTotal: Int,
-    val currentFile: String,
-    val compressionCurrent: Int,
-    val compressionTotal: Int,
-    val recentLogs: List<String>,
-    val lastSyncSummary: String,
-    val updatedAt: Long
+    val hubReady: Boolean = false,
+    val batteryOptimizedIgnored: Boolean = false,
+    val accessibilityEnabled: Boolean = false,
+    val currentMode: String = "",
+    val progressCurrent: Int = 0,
+    val progressTotal: Int = 0,
+    val currentFile: String = "",
+    val compressionCurrent: Int = 0,
+    val compressionTotal: Int = 0,
+    val recentLogs: List<String> = emptyList(),
+    val lastSyncSummary: String = "",
+    val updatedAt: Long = 0L
 )
 
 data class HubUiState(

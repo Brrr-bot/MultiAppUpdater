@@ -107,6 +107,11 @@ class MainActivity : AppCompatActivity() {
         binding.tvCameraOverlay.setOnClickListener { openCameraFullscreen() }
         updateCameraMuteIcon()
         loadFinanceSnapshot()?.let(::renderFinanceSnapshot)
+        loadTimesheetSnapshot()?.let { (earned, hoursLabel) ->
+            binding.tvTimesheetStatus.text = "CACHED"
+            binding.tvTimesheetEarned.text = formatVnd(earned)
+            binding.tvTimesheetHours.text = hoursLabel
+        }
 
         bindAlarms()
         startClock()
@@ -219,7 +224,8 @@ class MainActivity : AppCompatActivity() {
 
             when (sorted.size) {
                 0 -> {
-                    tvAlarm1.text = "--"
+                    tvAlarm1.text = "☾"          // dim crescent moon = no alarm set
+                    tvAlarm1.setTextColor(0xFF3A4A5A.toInt())
                     tvAlarm1.isClickable = false
                     tvAlarm2.text = ""
                     tvCount.text  = ""
@@ -389,102 +395,39 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun fetchFinance() {
-        CoroutineScope(Dispatchers.IO).launch {
+        lifecycleScope.launch {
             try {
-                val entriesBody = fetchRequiredBody(
-                    "https://finances.mcubittbuilders.workers.dev/api/entries",
-                    "entries"
-                )
-                val savingsBody = fetchRequiredBody(
-                    "https://finances.mcubittbuilders.workers.dev/api/savings",
-                    "savings"
-                )
-
-                val entries = org.json.JSONArray(entriesBody)
-                val savings = org.json.JSONObject(savingsBody).optDouble("total", 0.0)
-                val salaryDates = mutableSetOf<String>()
-                val dateFmt = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd")
-                val zone = java.time.ZoneId.systemDefault()
-                for (i in 0 until entries.length()) {
-                    val e = entries.getJSONObject(i)
-                    if (e.optString("direction") == "in" && e.optString("category") == "Salary") {
-                        val date = java.time.Instant.ofEpochMilli(e.optLong("ts", 0))
-                            .atZone(zone).toLocalDate().format(dateFmt)
-                        salaryDates.add(date)
-                    }
-                }
-                val periodStart = salaryDates.maxOrNull()
-                val periodStartMs = if (periodStart != null) {
-                    java.time.LocalDate.parse(periodStart).atStartOfDay(zone).toInstant().toEpochMilli()
-                } else {
-                    0L
-                }
-
-                var income = 0.0
-                var expense = 0.0
-                for (i in 0 until entries.length()) {
-                    val e = entries.getJSONObject(i)
-                    val ts = e.optLong("ts", 0)
-                    if (ts < periodStartMs) continue
-                    val amt = e.optDouble("amount", 0.0)
-                    when (e.optString("direction")) {
-                        "in" -> income += amt
-                        "out" -> expense += amt
-                    }
-                }
-                val balance = income - expense
-                val periodLabel = if (periodStart != null) {
-                    val d = java.time.LocalDate.parse(periodStart)
-                    "${d.format(java.time.format.DateTimeFormatter.ofPattern("d MMM", Locale.ENGLISH)).uppercase()} TO NOW"
-                } else {
-                    "ALL TIME"
-                }
-
+                // The finance phone app pushes its current-period snapshot to the hub; we read it
+                // back over the local network (same HMAC channel as /dashboard). No cloud involved.
+                val body = app.hubRepository.fetchSidecar("finance")
+                val o = org.json.JSONObject(body)
+                if (!o.has("periodLabel")) throw IllegalStateException("no finance snapshot yet")
                 val snapshot = FinanceSnapshot(
-                    periodLabel = periodLabel,
-                    income = income,
-                    expense = expense,
-                    balance = balance,
-                    savings = savings
+                    periodLabel = o.optString("periodLabel", "ALL TIME"),
+                    income = o.optDouble("income", 0.0),
+                    expense = o.optDouble("expense", 0.0),
+                    balance = o.optDouble("balance", o.optDouble("income", 0.0) - o.optDouble("expense", 0.0)),
+                    savings = o.optDouble("savings", 0.0)
                 )
                 saveFinanceSnapshot(snapshot)
-
-                withContext(Dispatchers.Main) {
-                    renderFinanceSnapshot(snapshot)
-                }
+                renderFinanceSnapshot(snapshot)
             } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    val cached = loadFinanceSnapshot()
-                    if (cached != null) {
-                        renderFinanceSnapshot(cached)
-                        binding.tvFinancePeriod.text = "CACHED"
-                    } else {
-                        binding.tvFinancePeriod.text = "OFFLINE"
-                        binding.tvFinanceIncome.text = "--"
-                        binding.tvFinanceExpense.text = "--"
-                        binding.tvFinanceBal.text = "--"
-                        binding.tvFinanceSavings.text = "--"
-                    }
+                val cached = loadFinanceSnapshot()
+                if (cached != null) {
+                    renderFinanceSnapshot(cached)
+                    binding.tvFinancePeriod.text = "CACHED"
+                } else {
+                    binding.tvFinancePeriod.text = "OFFLINE"
+                    binding.tvFinanceIncome.text = "--"
+                    binding.tvFinanceExpense.text = "--"
+                    binding.tvFinanceBal.text = "--"
+                    binding.tvFinanceSavings.text = "--"
                 }
                 RemoteLogger.e("finance card fetch failed: ${e.message.orEmpty()}")
             }
         }
     }
 
-    private fun fetchRequiredBody(url: String, label: String): String {
-        client.newCall(Request.Builder().url(url).build()).execute().use { response ->
-            val body = response.body?.string().orEmpty()
-            if (!response.isSuccessful) {
-                val detail = body.take(120).replace('\n', ' ').trim()
-                throw IllegalStateException(
-                    if (detail.isEmpty()) "$label ${response.code}"
-                    else "$label ${response.code}: $detail"
-                )
-            }
-            if (body.isBlank()) throw IllegalStateException("$label body empty")
-            return body
-        }
-    }
     private fun renderFinanceSnapshot(snapshot: FinanceSnapshot) {
         binding.tvFinancePeriod.text = snapshot.periodLabel
         binding.tvFinanceIncome.text = formatVnd(snapshot.income)
@@ -529,38 +472,66 @@ class MainActivity : AppCompatActivity() {
 
     private fun fetchTimesheet() {
         val month = java.time.YearMonth.now().toString()
-        CoroutineScope(Dispatchers.IO).launch {
+        lifecycleScope.launch {
             try {
-                val req = Request.Builder()
-                    .url("http://100.107.143.20:9000/timesheet?month=$month")
-                    .build()
-                val json = org.json.JSONObject(
-                    client.newCall(req).execute().body?.string() ?: return@launch)
-
-                val totalHours  = json.optDouble("total_hours", 0.0)
-                val sessionsArr = json.optJSONArray("sessions")
-                val sessionCount = sessionsArr?.length() ?: 0
+                // The timesheet phone app mirrors its session log to the hub; we parse the lines for
+                // the current month here (same computation the old laptop server did). No cloud/laptop.
+                val body = app.hubRepository.fetchSidecar("timesheet")
+                val arr = org.json.JSONObject(body).optJSONArray("sessions")
+                    ?: throw IllegalStateException("no timesheet snapshot yet")
+                val pattern = Regex(
+                    """\[TIMESHEET\]\s+(\d{4}-\d{2}-\d{2})\s+(.+?)\s+\((\w+)\)\s+(\d+)\s+period.*?×\s*(\d+)min\s*=\s*(\d+)min"""
+                )
+                var totalHours = 0.0
+                var sessionCount = 0
                 var earned = 0L
-                if (sessionsArr != null) {
-                    for (i in 0 until sessionsArr.length()) {
-                        val s = sessionsArr.getJSONObject(i)
-                        earned += (s.optDouble("total_hours", 0.0) * tsSchoolRate(s.optString("school", ""))).toLong()
-                    }
+                for (i in 0 until arr.length()) {
+                    val line = arr.optString(i)
+                    if (!line.contains(month)) continue
+                    val m = pattern.find(line) ?: continue
+                    val date = m.groupValues[1]
+                    if (!date.startsWith(month)) continue
+                    val school = m.groupValues[2].trim()
+                    val tMins = m.groupValues[6].toIntOrNull() ?: continue
+                    val hours = tMins / 60.0
+                    totalHours += hours
+                    sessionCount += 1
+                    earned += (hours * tsSchoolRate(school)).toLong()
                 }
-                withContext(Dispatchers.Main) {
-                    binding.tvTimesheetStatus.text = "ONLINE"
-                    binding.tvTimesheetEarned.text = formatVnd(earned)
-                    binding.tvTimesheetHours.text  =
-                        "${String.format("%.1f", totalHours)}h  ·  $sessionCount session${if (sessionCount != 1) "s" else ""}"
-                }
-            } catch (_: Exception) {
-                withContext(Dispatchers.Main) {
+                val hoursLabel =
+                    "${String.format("%.1f", totalHours)}h  ·  $sessionCount session${if (sessionCount != 1) "s" else ""}"
+                saveTimesheetSnapshot(earned, hoursLabel)
+                binding.tvTimesheetStatus.text = "ONLINE"
+                binding.tvTimesheetEarned.text = formatVnd(earned)
+                binding.tvTimesheetHours.text  = hoursLabel
+            } catch (e: Exception) {
+                val cached = loadTimesheetSnapshot()
+                if (cached != null) {
+                    binding.tvTimesheetStatus.text = "CACHED"
+                    binding.tvTimesheetEarned.text = formatVnd(cached.first)
+                    binding.tvTimesheetHours.text  = cached.second
+                } else {
                     binding.tvTimesheetEarned.text = "--"
                     binding.tvTimesheetStatus.text = "OFFLINE"
                     binding.tvTimesheetHours.text  = ""
                 }
+                RemoteLogger.e("timesheet card fetch failed: ${e.message.orEmpty()}")
             }
         }
+    }
+
+    private val timesheetPrefs by lazy { getSharedPreferences("timesheet_card_cache", MODE_PRIVATE) }
+
+    private fun saveTimesheetSnapshot(earned: Long, hoursLabel: String) {
+        timesheetPrefs.edit()
+            .putLong("earned", earned)
+            .putString("hoursLabel", hoursLabel)
+            .apply()
+    }
+
+    private fun loadTimesheetSnapshot(): Pair<Long, String>? {
+        if (!timesheetPrefs.contains("earned")) return null
+        return timesheetPrefs.getLong("earned", 0L) to timesheetPrefs.getString("hoursLabel", "").orEmpty()
     }
 
     private fun renderTodaySchedule() {

@@ -26,6 +26,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.aiteachingapp.data.applyUserInputs
 import com.example.aiteachingapp.ui.components.*
 import com.example.aiteachingapp.ui.theme.*
 
@@ -48,6 +49,11 @@ fun TutorialScreen(viewModel: TutorialViewModel, onBack: () -> Unit = {}) {
     val awaitingCodeWrite by viewModel.awaitingCodeWrite.collectAsStateWithLifecycle()
     val cumulativeSnippets by viewModel.cumulativeSnippets.collectAsStateWithLifecycle()
     val animationStartLineIndex by viewModel.animationStartLineIndex.collectAsStateWithLifecycle()
+    val userInputs by viewModel.userInputs.collectAsStateWithLifecycle()
+    // Student's saved values injected into the code shown on the right-hand panel.
+    val injectedSnippets = remember(cumulativeSnippets, userInputs) {
+        cumulativeSnippets.map { it.copy(code = applyUserInputs(it.code, userInputs)) }
+    }
 
     val isEn = language == AppLanguage.EN
     val isBug = currentStep.type == "bug"
@@ -353,7 +359,20 @@ fun TutorialScreen(viewModel: TutorialViewModel, onBack: () -> Unit = {}) {
                                     lineHeight = 16.sp
                                 )
                                 Spacer(Modifier.height(8.dp))
-                                val promptTextLocalized = if (isEn) currentStep.promptText.en else currentStep.promptText.vn
+                                // Editable "paste your own info" card (e.g. Firebase URL).
+                                if (currentStep.userInputs.isNotEmpty()) {
+                                    CredentialInputCard(
+                                        fields = currentStep.userInputs,
+                                        values = userInputs,
+                                        isEnglish = isEn,
+                                        onValueChange = { key, value -> viewModel.setUserInput(key, value) }
+                                    )
+                                    Spacer(Modifier.height(8.dp))
+                                }
+                                val promptTextLocalized = applyUserInputs(
+                                    if (isEn) currentStep.promptText.en else currentStep.promptText.vn,
+                                    userInputs
+                                )
                                 if (promptTextLocalized.isNotBlank()) {
                                     CopyablePromptBox(
                                         promptText = promptTextLocalized,
@@ -420,7 +439,7 @@ fun TutorialScreen(viewModel: TutorialViewModel, onBack: () -> Unit = {}) {
                         elevation = CardDefaults.cardElevation(0.dp)
                     ) {
                         CodeDisplayPanel(
-                            snippets = cumulativeSnippets,
+                            snippets = injectedSnippets,
                             selectedSnippetIndex = selectedSnippetIndex,
                             currentLineIndex = currentLineIndex,
                             language = language,

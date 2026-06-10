@@ -36,5 +36,6 @@ class TutorialRepository(private val context: Context) {
             .mapNotNull { filename ->
                 runCatching { loadFromAsset(filename) }.getOrNull()
             }
+            .sortedWith(compareBy({ it.order }, { it.title.en }))
     }
 }

@@ -37,6 +37,27 @@ class HubRepository(
         }
     }
 
+    /**
+     * Reads a sidecar snapshot (finance/timesheet) the phone apps pushed to the hub. Same local
+     * HMAC channel as the dashboard fetch — no cloud involved. Returns the raw JSON body; throws
+     * on any failure so the caller can fall back to its cached value.
+     */
+    suspend fun fetchSidecar(kind: String): String = withContext(Dispatchers.IO) {
+        val settings = settingsRepository.get()
+        val ts = System.currentTimeMillis()
+        val device = "home-hub-dashboard"
+        val request = Request.Builder()
+            .url("http://${settings.hubHost}:8767/sidecar/$kind")
+            .header("X-PhotoSync-Timestamp", ts.toString())
+            .header("X-PhotoSync-Device", device)
+            .header("X-PhotoSync-HMAC", sign("$ts:$device"))
+            .build()
+        client.newCall(request).execute().use { response ->
+            if (!response.isSuccessful) error("sidecar $kind status ${response.code}")
+            response.body?.string().orEmpty()
+        }
+    }
+
     fun mapToUi(response: HubDashboardResponse): HubUiState {
         val progress = if (response.progressTotal > 0) {
             "${response.progressCurrent}/${response.progressTotal}  ${response.currentFile}"

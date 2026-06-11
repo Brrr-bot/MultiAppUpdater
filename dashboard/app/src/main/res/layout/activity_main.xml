@@ -220,7 +220,7 @@
                         android:fontFamily="monospace"
                         android:text="INCOME"
                         android:textColor="#FF00E676"
-                        android:textSize="9sp"
+                        android:textSize="10sp"
                         android:textStyle="bold" />
 
                     <TextView
@@ -233,7 +233,7 @@
                         android:text="--"
                         android:textAlignment="viewEnd"
                         android:textColor="#FF00E676"
-                        android:textSize="15sp"
+                        android:textSize="13sp"
                         android:textStyle="bold" />
                 </LinearLayout>
 
@@ -250,7 +250,7 @@
                         android:fontFamily="monospace"
                         android:text="EXPENSE"
                         android:textColor="#FFFF5252"
-                        android:textSize="9sp"
+                        android:textSize="10sp"
                         android:textStyle="bold" />
 
                     <TextView
@@ -263,7 +263,7 @@
                         android:text="--"
                         android:textAlignment="viewEnd"
                         android:textColor="#FFFF5252"
-                        android:textSize="15sp"
+                        android:textSize="13sp"
                         android:textStyle="bold" />
                 </LinearLayout>
 
@@ -280,7 +280,7 @@
                         android:fontFamily="monospace"
                         android:text="BALANCE"
                         android:textColor="#FFFFB300"
-                        android:textSize="9sp"
+                        android:textSize="10sp"
                         android:textStyle="bold" />
 
                     <TextView
@@ -293,7 +293,7 @@
                         android:text="--"
                         android:textAlignment="viewEnd"
                         android:textColor="#FFFFB300"
-                        android:textSize="15sp"
+                        android:textSize="13sp"
                         android:textStyle="bold" />
                 </LinearLayout>
 
@@ -317,7 +317,7 @@
                         android:fontFamily="monospace"
                         android:text="SAVINGS"
                         android:textColor="@color/neon_cyan"
-                        android:textSize="9sp"
+                        android:textSize="10sp"
                         android:textStyle="bold" />
 
                     <TextView
@@ -330,7 +330,7 @@
                         android:text="--"
                         android:textAlignment="viewEnd"
                         android:textColor="@color/neon_cyan"
-                        android:textSize="15sp"
+                        android:textSize="13sp"
                         android:textStyle="bold" />
                 </LinearLayout>
             </LinearLayout>
@@ -374,37 +374,44 @@
                 </LinearLayout>
 
                 <TextView
-                    android:id="@+id/tv_timesheet_hours"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="-3dp"
-                    android:fontFamily="monospace"
-                    android:text=""
-                    android:textColor="@color/text_secondary"
-                    android:textSize="8sp" />
-
-                <TextView
-                    android:id="@+id/tv_timesheet_earned"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="monospace"
-                    android:gravity="end"
-                    android:text="--"
-                    android:textColor="#FFFFB300"
-                    android:textSize="9sp"
-                    android:textStyle="bold" />
-
-                <TextView
                     android:id="@+id/tv_timesheet_today_label"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="1dp"
+                    android:layout_marginTop="-3dp"
                     android:fontFamily="monospace"
                     android:letterSpacing="0.1"
                     android:text=""
                     android:textColor="@color/neon_green"
                     android:textSize="8sp"
                     android:textStyle="bold" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="bottom"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/tv_timesheet_hours"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="monospace"
+                        android:text=""
+                        android:textColor="@color/text_secondary"
+                        android:textSize="8sp" />
+
+                    <TextView
+                        android:id="@+id/tv_timesheet_earned"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:fontFamily="monospace"
+                        android:gravity="end"
+                        android:text="--"
+                        android:textColor="#FFFFB300"
+                        android:textSize="9sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"

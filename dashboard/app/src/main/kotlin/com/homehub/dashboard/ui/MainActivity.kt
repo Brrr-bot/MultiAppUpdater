@@ -768,8 +768,41 @@ class MainActivity : AppCompatActivity() {
             append(state.transferLine)
             if (state.compressionLine != "Idle") append("  |  compression: ${state.compressionLine}")
         }
-        binding.tvHubLogs.text = state.logs.joinToString("\n")
+        // Colour-code each log line the same way the PhotoSync client/hub apps do (LogStyle).
+        val sb = android.text.SpannableStringBuilder()
+        state.logs.forEachIndexed { i, line ->
+            val start = sb.length
+            sb.append(line)
+            sb.setSpan(
+                android.text.style.ForegroundColorSpan(hubLogColor(line)),
+                start, sb.length, android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
+            if (i < state.logs.lastIndex) sb.append("
+")
+        }
+        binding.tvHubLogs.text = sb
         binding.scrollHubLogs.post { binding.scrollHubLogs.fullScroll(android.widget.ScrollView.FOCUS_DOWN) }
+    }
+
+    /** Mirrors com.photosync.shared.LogStyle.colorFor so LIVE HUB log lines match the client/hub
+     *  apps: errors red, restore amber, video purple, image/WebP cyan, transfer blue,
+     *  maintenance yellow, success green, default grey. */
+    private fun hubLogColor(line: String): Int {
+        val s = line.lowercase(Locale.getDefault())
+        return when {
+            "✗" in line || "error" in s || "fail" in s || "unreachable" in s ||
+                "timed out" in s || "timeout" in s || "unauthorized" in s || "missing" in s -> 0xFFFF4444.toInt()
+            "↺" in line || "restore" in s -> 0xFFFFAA00.toInt()
+            "▶" in line || "videospace" in s || "videodaterepair" in s ||
+                "poster" in s || "transcod" in s -> 0xFFBF00FF.toInt()
+            "◇" in line || "webp" in s || "compress" in s -> 0xFF00E5FF.toInt()
+            "⬆" in line || "⬇" in line || "uploading" in s || "saved to usb" in s ||
+                "synced" in s || "syncing" in s || "handshake" in s || "download" in s -> 0xFF33B5FF.toInt()
+            "localfix" in s || "date" in s || "exif" in s || "reorg" in s ||
+                "dedup" in s || "cleanup" in s || "repair" in s || "manifest" in s -> 0xFFFFD54F.toInt()
+            "✓" in line || "complete" in s || "done" in s || "ready" in s -> 0xFF00FF88.toInt()
+            else -> 0xFF888888.toInt()
+        }
     }
 
     private fun startClock() {

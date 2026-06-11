@@ -107,10 +107,9 @@ class MainActivity : AppCompatActivity() {
         binding.tvCameraOverlay.setOnClickListener { openCameraFullscreen() }
         updateCameraMuteIcon()
         loadFinanceSnapshot()?.let(::renderFinanceSnapshot)
-        loadTimesheetSnapshot()?.let { (earned, hoursLabel) ->
+        loadTimesheetSnapshot()?.let { (earned, _) ->
             binding.tvTimesheetStatus.text = "CACHED"
             binding.tvTimesheetEarned.text = formatVnd(earned)
-            binding.tvTimesheetHours.text = hoursLabel
         }
 
         bindAlarms()
@@ -505,17 +504,14 @@ class MainActivity : AppCompatActivity() {
                 saveTimesheetSnapshot(earned, hoursLabel)
                 binding.tvTimesheetStatus.text = "ONLINE"
                 binding.tvTimesheetEarned.text = formatVnd(earned)
-                binding.tvTimesheetHours.text  = hoursLabel
             } catch (e: Exception) {
                 val cached = loadTimesheetSnapshot()
                 if (cached != null) {
                     binding.tvTimesheetStatus.text = "CACHED"
                     binding.tvTimesheetEarned.text = formatVnd(cached.first)
-                    binding.tvTimesheetHours.text  = cached.second
                 } else {
                     binding.tvTimesheetEarned.text = "--"
                     binding.tvTimesheetStatus.text = "OFFLINE"
-                    binding.tvTimesheetHours.text  = ""
                 }
                 RemoteLogger.e("timesheet card fetch failed: ${e.message.orEmpty()}")
             }
@@ -543,6 +539,8 @@ class MainActivity : AppCompatActivity() {
         val slots  = TODAY_SCHEDULE[dayKey] ?: emptyList()
 
         binding.tvTimesheetTodayLabel.text = fullDay
+        binding.tvTimesheetHours.text =
+            "${slots.size} session${if (slots.size != 1) "s" else ""}"
 
         val amSlots = slots.filter { it.first < "12:00" }
         val pmSlots = slots.filter { it.first >= "12:00" }

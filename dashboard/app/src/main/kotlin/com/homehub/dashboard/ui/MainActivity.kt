@@ -777,8 +777,7 @@ class MainActivity : AppCompatActivity() {
                 android.text.style.ForegroundColorSpan(hubLogColor(line)),
                 start, sb.length, android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
             )
-            if (i < state.logs.lastIndex) sb.append("
-")
+            if (i < state.logs.lastIndex) sb.append("\n")
         }
         binding.tvHubLogs.text = sb
         binding.scrollHubLogs.post { binding.scrollHubLogs.fullScroll(android.widget.ScrollView.FOCUS_DOWN) }

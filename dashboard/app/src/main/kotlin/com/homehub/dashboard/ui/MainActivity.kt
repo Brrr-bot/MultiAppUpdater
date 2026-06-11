@@ -224,8 +224,10 @@ class MainActivity : AppCompatActivity() {
 
             when (sorted.size) {
                 0 -> {
-                    tvAlarm1.text = "☾"          // dim crescent moon = no alarm set
+                    tvAlarm1.text = "+"          // add-alarm affordance, centered in the card
                     tvAlarm1.setTextColor(0xFF3A4A5A.toInt())
+                    tvAlarm1.textSize = 30f
+                    tvAlarm1.gravity = android.view.Gravity.CENTER
                     tvAlarm1.isClickable = false
                     tvAlarm2.text = ""
                     tvCount.text  = ""

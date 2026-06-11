@@ -138,6 +138,12 @@ jobs:
           mkdir -p ~/.android
           python3 -c "import base64; open('$HOME/.android/debug.keystore','wb').write(base64.b64decode('${{ secrets.DEBUG_KEYSTORE_B64 }}'))"
           keytool -list -keystore $HOME/.android/debug.keystore -storepass android -noprompt 2>&1 | head -3
+      - name: Write camera config from secrets
+        working-directory: dashboard
+        run: |
+          echo "camera.host=${{ secrets.CAMERA_HOST }}" >> local.properties
+          echo "camera.user=${{ secrets.CAMERA_USER }}" >> local.properties
+          echo "camera.password=${{ secrets.CAMERA_PASSWORD }}" >> local.properties
       - name: Build APK
         working-directory: dashboard
         run: chmod +x gradlew && ./gradlew :app:assembleDebug --no-daemon -PdebugKeystore=$HOME/.android/debug.keystore -PversionCode=$(( ${{ github.run_number }} + 1000 )) -PversionName=1.0.$(( ${{ github.run_number }} + 1000 ))

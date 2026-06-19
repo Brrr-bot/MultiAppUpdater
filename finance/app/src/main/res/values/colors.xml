@@ -1,25 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="bg_space">#03040A</color>
-    <color name="card_bg">#0D0D0D</color>
-    <color name="card_border">#1E1E1E</color>
-    <color name="banner_bg">#CC04040F</color>
+    <!-- Aurora design system (Finance) -->
 
-    <color name="neon_sky">#29B6F6</color>
-    <color name="neon_green">#00E676</color>
-    <color name="neon_gold">#FFB300</color>
-    <color name="neon_red">#FF1744</color>
+    <color name="bg_space">#070d18</color>
+    <color name="card_bg">#0a1322</color>
+    <color name="card_border">#1c2c45</color>
+    <color name="banner_bg">#CC0a1322</color>
 
     <color name="text_primary">#FFFFFF</color>
-    <color name="text_secondary">#646464</color>
-    <color name="text_label">#969696</color>
+    <color name="text_secondary">#b3bdcc</color>
+    <color name="text_label">#8693a6</color>
+    <color name="text_muted">#5b6b82</color>
 
-    <!-- Launcher icon -->
-    <color name="ic_launcher_background">#03040A</color>
+    <!-- 8-category Aurora system -->
+    <color name="cat_sync">#06b6d4</color>
+    <color name="cat_sync_neon">#22d3ee</color>
+    <color name="cat_sync_soft">#cff7fe</color>
+    <color name="cat_safe">#0fbf86</color>
+    <color name="cat_safe_neon">#2ee6a6</color>
+    <color name="cat_safe_soft">#ccf6e6</color>
+    <color name="cat_free">#74c41a</color>
+    <color name="cat_free_neon">#a3e635</color>
+    <color name="cat_free_soft">#e3f7c9</color>
+    <color name="cat_share">#2f7bf6</color>
+    <color name="cat_share_neon">#5b9dff</color>
+    <color name="cat_share_soft">#d6e6ff</color>
+    <color name="cat_smart">#8b5cf6</color>
+    <color name="cat_smart_neon">#a98bff</color>
+    <color name="cat_smart_soft">#e7defb</color>
+    <color name="cat_pending">#f0a92b</color>
+    <color name="cat_pending_neon">#ffc44d</color>
+    <color name="cat_pending_soft">#fdebc6</color>
+    <color name="cat_alert">#ef5350</color>
+    <color name="cat_alert_neon">#ff7a78</color>
+    <color name="cat_alert_soft">#fdd9d9</color>
+    <color name="cat_people">#ec4899</color>
+    <color name="cat_people_neon">#ff74b8</color>
+    <color name="cat_people_soft">#fcd9ec</color>
 
-    <!-- Legacy aliases for Material theme -->
-    <color name="forest_green">#29B6F6</color>
-    <color name="amber">#FFB300</color>
-    <color name="light_sage">#03040A</color>
-    <color name="card_white">#0D0D0D</color>
+    <!-- Finance semantic aliases -->
+    <color name="neon_sky">#22d3ee</color>
+    <color name="neon_green">#2ee6a6</color>
+    <color name="neon_gold">#ffc44d</color>
+    <color name="neon_red">#ff7a78</color>
+    <color name="neon_sky_glow">#3622d3ee</color>
+    <color name="neon_green_glow">#362ee6a6</color>
+    <color name="neon_gold_glow">#36ffc44d</color>
+    <color name="neon_red_glow">#36ff7a78</color>
+
+    <color name="ic_launcher_background">#070d18</color>
 </resources>

@@ -1,41 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Space background -->
-    <color name="bg_space">#03040A</color>
-    <color name="card_bg">#0D0D0D</color>
-    <color name="card_border">#1E1E1E</color>
-    <color name="banner_bg">#CC04040F</color>
+    <!-- Aurora design system (Timesheet) -->
 
-    <!-- Accent colours (matching AiALVN dashboard.py) -->
-    <color name="neon_sky">#29B6F6</color>      <!-- TTH — sky blue -->
-    <color name="neon_green">#00E676</color>    <!-- LVV — neon green -->
-    <color name="neon_gold">#FFB300</color>     <!-- AL  — gold -->
-    <color name="neon_purple">#CE93D8</color>   <!-- TQB — purple -->
+    <color name="bg_space">#070d18</color>
+    <color name="card_bg">#0a1322</color>
+    <color name="card_border">#1c2c45</color>
+    <color name="banner_bg">#CC0a1322</color>
 
-    <!-- School bg tints -->
-    <color name="school_tth_bg">#021829</color>
-    <color name="school_lvv_bg">#011409</color>
-    <color name="school_al_bg">#140E00</color>
-    <color name="school_tqb_bg">#0E0716</color>
-
-    <!-- Text -->
     <color name="text_primary">#FFFFFF</color>
-    <color name="text_secondary">#646464</color>
-    <color name="text_label">#969696</color>
+    <color name="text_secondary">#b3bdcc</color>
+    <color name="text_label">#8693a6</color>
+    <color name="text_muted">#5b6b82</color>
     <color name="text_white">#FFFFFF</color>
     <color name="text_white_70">#B3FFFFFF</color>
 
-    <!-- Legacy names kept for item_session.xml -->
-    <color name="forest_green">#29B6F6</color>
-    <color name="amber">#FFB300</color>
-    <color name="light_sage">#03040A</color>
-    <color name="card_white">#0D0D0D</color>
-    <color name="school_default">#646464</color>
-    <color name="progress_track">#1E1E1E</color>
+    <!-- 8-category Aurora system -->
+    <color name="cat_sync">#06b6d4</color>
+    <color name="cat_sync_neon">#22d3ee</color>
+    <color name="cat_sync_soft">#cff7fe</color>
+    <color name="cat_safe">#0fbf86</color>
+    <color name="cat_safe_neon">#2ee6a6</color>
+    <color name="cat_safe_soft">#ccf6e6</color>
+    <color name="cat_free">#74c41a</color>
+    <color name="cat_free_neon">#a3e635</color>
+    <color name="cat_free_soft">#e3f7c9</color>
+    <color name="cat_share">#2f7bf6</color>
+    <color name="cat_share_neon">#5b9dff</color>
+    <color name="cat_share_soft">#d6e6ff</color>
+    <color name="cat_smart">#8b5cf6</color>
+    <color name="cat_smart_neon">#a98bff</color>
+    <color name="cat_smart_soft">#e7defb</color>
+    <color name="cat_pending">#f0a92b</color>
+    <color name="cat_pending_neon">#ffc44d</color>
+    <color name="cat_pending_soft">#fdebc6</color>
+    <color name="cat_alert">#ef5350</color>
+    <color name="cat_alert_neon">#ff7a78</color>
+    <color name="cat_alert_soft">#fdd9d9</color>
+    <color name="cat_people">#ec4899</color>
+    <color name="cat_people_neon">#ff74b8</color>
+    <color name="cat_people_soft">#fcd9ec</color>
 
-    <!-- School stripe colours in session list -->
-    <color name="school_tan_thoi_hoa">#29B6F6</color>
-    <color name="school_le_van_viet">#00E676</color>
-    <color name="school_an_lac">#FFB300</color>
-    <color name="school_ta_quang_buu">#CE93D8</color>
+    <!-- School stripe colours (Aurora category system) -->
+    <color name="neon_sky">#5b9dff</color>
+    <color name="neon_green">#2ee6a6</color>
+    <color name="neon_gold">#ffc44d</color>
+    <color name="neon_purple">#a98bff</color>
+
+    <color name="school_tan_thoi_hoa">#5b9dff</color>
+    <color name="school_le_van_viet">#2ee6a6</color>
+    <color name="school_an_lac">#ffc44d</color>
+    <color name="school_ta_quang_buu">#a98bff</color>
+
+    <!-- School bg tints -->
+    <color name="school_tth_bg">#0a1a2e</color>
+    <color name="school_lvv_bg">#061a12</color>
+    <color name="school_al_bg">#1a130a</color>
+    <color name="school_tqb_bg">#120a1e</color>
+
+    <!-- Legacy aliases -->
+    <color name="forest_green">#5b9dff</color>
+    <color name="amber">#ffc44d</color>
+    <color name="light_sage">#070d18</color>
+    <color name="card_white">#0a1322</color>
+    <color name="school_default">#5b6b82</color>
+    <color name="progress_track">#1c2c45</color>
 </resources>

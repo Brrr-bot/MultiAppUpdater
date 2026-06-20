@@ -58,8 +58,6 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
-import android.graphics.Color
-import com.homehub.dashboard.ui.GlowCardLayout
 
 private val Int.dp get() = (this * android.content.res.Resources.getSystem().displayMetrics.density).toInt()
 

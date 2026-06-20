@@ -58,6 +58,8 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
+import android.graphics.Color
+import com.homehub.dashboard.ui.GlowCardLayout
 
 private val Int.dp get() = (this * android.content.res.Resources.getSystem().displayMetrics.density).toInt()
 
@@ -903,5 +905,18 @@ class MainActivity : AppCompatActivity() {
     private fun formatAlarm(alarm: AlarmEntity): String {
         return String.format(Locale.getDefault(), "%02d:%02d", alarm.hour, alarm.minute)
     }
+    private fun setupGlowCards() {
+        listOf(
+            R.id.glow_card_weather   to Color.argb(100, 0x22, 0xd3, 0xee),
+            R.id.glow_card_hub       to Color.argb(100, 0xa9, 0x8b, 0xff),
+            R.id.glow_card_finance   to Color.argb(100, 0x22, 0xd3, 0xee),
+            R.id.glow_card_timesheet to Color.argb(100, 0x2e, 0xe6, 0xa6),
+            R.id.glow_card_camera    to Color.argb(100, 0xa9, 0x8b, 0xff),
+            R.id.glow_card_alarms    to Color.argb(100, 0x2e, 0xe6, 0xa6),
+        ).forEach { (id, color) ->
+            findViewById<GlowCardLayout>(id)?.setGlowColor(color)
+        }
+    }
+
 }
 

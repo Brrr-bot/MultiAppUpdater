@@ -190,7 +190,7 @@ class MainActivity : AppCompatActivity() {
 
         // Swipe refresh
         b.swipeRefresh.setColorSchemeColors(
-            Color.parseColor("#29B6F6"), Color.parseColor("#FFB300")
+            Color.parseColor("#22d3ee"), Color.parseColor("#FFB300")
         )
         b.swipeRefresh.setOnRefreshListener {
             if (b.layoutHistory.visibility == View.VISIBLE) fetchHistory()
@@ -309,7 +309,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun processReceiptImage(uri: Uri) {
-        flash("Scanning…", "#29B6F6")
+        flash("Scanning…", "#22d3ee")
         try {
             val image = InputImage.fromFilePath(this, uri)
             TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
@@ -330,7 +330,7 @@ class MainActivity : AppCompatActivity() {
                             b.etAmount.setText(formatAmountForField(e.amount))
                             if (e.suggestedDesc.isNotEmpty()) b.etWhat.setText(e.suggestedDesc)
                             e.date?.let { selectedDate = it; updateDateDisplay() }
-                            flash("Filled from scan", "#29B6F6")
+                            flash("Filled from scan", "#22d3ee")
                         }
                         else -> showAmountPickerDialog(entries)
                     }
@@ -488,7 +488,7 @@ class MainActivity : AppCompatActivity() {
             setPadding(dp(16), dp(12), dp(16), dp(12))
         }
         val sv = ScrollView(this).also { it.addView(tv) }
-        android.app.AlertDialog.Builder(this)
+        android.app.AlertDialog.Builder(this, R.style.DatePickerTheme)
             .setTitle("NO AMOUNTS FOUND")
             .setMessage("OCR read the following text:")
             .setView(sv)
@@ -516,8 +516,8 @@ class MainActivity : AppCompatActivity() {
             val initDesc = suggestedDesc
         }
 
-        val sky     = Color.parseColor("#29B6F6")
-        val selBg   = Color.parseColor("#0D2233")
+        val sky     = Color.parseColor("#22d3ee")
+        val selBg   = Color.parseColor("#0a1322")
         val unselBg = Color.parseColor("#1A1A1A")
         val fieldBg = Color.parseColor("#0A0A0A")
         val dim     = Color.parseColor("#646464")
@@ -600,7 +600,7 @@ class MainActivity : AppCompatActivity() {
             catTv.setOnClickListener {
                 val arr = cats.toTypedArray()
                 val cur = arr.indexOf(state.cat).coerceAtLeast(0)
-                android.app.AlertDialog.Builder(this)
+                android.app.AlertDialog.Builder(this, R.style.DatePickerTheme)
                     .setTitle("Category")
                     .setSingleChoiceItems(arr, cur) { dlg, idx ->
                         state.cat = arr[idx]; catTv.text = state.cat; catTv.setTextColor(sky)
@@ -638,7 +638,7 @@ class MainActivity : AppCompatActivity() {
 
         val sv = ScrollView(this).also { it.addView(outer) }
 
-        android.app.AlertDialog.Builder(this)
+        android.app.AlertDialog.Builder(this, R.style.DatePickerTheme)
             .setTitle("${entries.size} AMOUNTS FOUND")
             .setView(sv)
             .setPositiveButton("SAVE SELECTED") { _, _ ->
@@ -673,7 +673,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun saveBatchFromDialog(entries: List<EntryToSave>) {
-        flash("Saving ${entries.size} entries…", "#29B6F6")
+        flash("Saving ${entries.size} entries…", "#22d3ee")
         CoroutineScope(Dispatchers.IO).launch {
             var savedCount = 0
             for (entry in entries) {
@@ -741,7 +741,7 @@ class MainActivity : AppCompatActivity() {
         catButtons.clear()
 
         val cats = if (direction == "in") CATEGORIES_IN else CATEGORIES_OUT
-        val sky  = Color.parseColor("#29B6F6")
+        val sky  = Color.parseColor("#22d3ee")
         val dim  = Color.parseColor("#646464")
 
         // Split cats into rows of 3
@@ -771,7 +771,7 @@ class MainActivity : AppCompatActivity() {
     private fun selectCat(cat: String) {
         selectedCat = cat
         if (b.etWhat.text.isNullOrBlank()) b.etWhat.setText(cat)
-        val sky = Color.parseColor("#29B6F6")
+        val sky = Color.parseColor("#22d3ee")
         val dim = Color.parseColor("#646464")
         catButtons.forEach { (c, btn) ->
             if (c == cat) {
@@ -1148,11 +1148,11 @@ class MainActivity : AppCompatActivity() {
         val container = b.historyContainer
         container.removeAllViews()
 
-        val sky    = Color.parseColor("#29B6F6")
+        val sky    = Color.parseColor("#22d3ee")
         val gold   = Color.parseColor("#FFB300")
         val green  = Color.parseColor("#00E676")
         val red    = Color.parseColor("#FF1744")
-        val cardBg = Color.parseColor("#0D0D0D")
+        val cardBg = Color.parseColor("#0a1322")
         val dim    = Color.parseColor("#646464")
 
         val localDateFmt = java.text.SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
@@ -1374,7 +1374,7 @@ class MainActivity : AppCompatActivity() {
 
     // 0 = Add, 1 = History, 2 = Summary
     private fun showTab(tab: Int) {
-        val sky = Color.parseColor("#29B6F6")
+        val sky = Color.parseColor("#22d3ee")
         val dim = Color.parseColor("#646464")
 
         b.layoutAdd.visibility     = if (tab == 0) View.VISIBLE else View.GONE
@@ -1402,7 +1402,7 @@ class MainActivity : AppCompatActivity() {
         val green   = Color.parseColor("#00E676")
         val red      = Color.parseColor("#FF1744")
         val gold     = Color.parseColor("#FFB300")
-        val cardBg   = Color.parseColor("#0D0D0D")
+        val cardBg   = Color.parseColor("#0a1322")
 
         fun dp(v: Int) = (v * resources.displayMetrics.density).toInt()
 
@@ -1412,7 +1412,7 @@ class MainActivity : AppCompatActivity() {
             setPadding(dp(8), dp(10), dp(8), dp(6))
         }
         val prev = TextView(this).apply {
-            text = "‹"; textSize = 24f; typeface = mono; setTextColor(Color.parseColor("#29B6F6"))
+            text = "‹"; textSize = 24f; typeface = mono; setTextColor(Color.parseColor("#22d3ee"))
             setPadding(dp(22), dp(4), dp(22), dp(4)); isClickable = true
             setOnClickListener {
                 val idx = salaryDates.indexOf(periodStart)
@@ -1427,7 +1427,7 @@ class MainActivity : AppCompatActivity() {
             gravity = Gravity.CENTER; layoutParams = LinearLayout.LayoutParams(0, WRAP, 1f)
         }
         val next = TextView(this).apply {
-            text = "›"; textSize = 24f; typeface = mono; setTextColor(Color.parseColor("#29B6F6"))
+            text = "›"; textSize = 24f; typeface = mono; setTextColor(Color.parseColor("#22d3ee"))
             setPadding(dp(22), dp(4), dp(22), dp(4)); isClickable = true
             setOnClickListener {
                 val idx = salaryDates.indexOf(periodStart)
@@ -1447,7 +1447,7 @@ class MainActivity : AppCompatActivity() {
             textSize = 10f
             typeface = mono
             setTypeface(typeface, Typeface.BOLD)
-            setTextColor(Color.parseColor("#29B6F6"))
+            setTextColor(Color.parseColor("#22d3ee"))
             gravity = Gravity.CENTER
             setBackgroundResource(R.drawable.cat_btn_inactive)
             isClickable = true

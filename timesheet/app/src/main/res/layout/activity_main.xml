@@ -46,7 +46,7 @@
                         android:textColor="@color/neon_sky"
                         android:textSize="18sp"
                         android:textStyle="bold"
-                        android:fontFamily="monospace"
+                        android:fontFamily="@font/jetbrains_mono"
                         android:letterSpacing="0.08"/>
 
                     <TextView
@@ -75,7 +75,7 @@
                         android:textColor="@color/neon_gold"
                         android:textSize="22sp"
                         android:textStyle="bold"
-                        android:fontFamily="monospace"/>
+                        android:fontFamily="@font/jetbrains_mono"/>
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -112,7 +112,7 @@
                         android:textColor="@color/neon_sky"
                         android:textSize="12sp"
                         android:textStyle="bold"
-                        android:fontFamily="monospace"
+                        android:fontFamily="@font/jetbrains_mono"
                         android:letterSpacing="0.1"
                         android:paddingTop="6dp"
                         android:paddingBottom="8dp"
@@ -144,7 +144,7 @@
                         android:textColor="@color/text_secondary"
                         android:textSize="12sp"
                         android:textStyle="bold"
-                        android:fontFamily="monospace"
+                        android:fontFamily="@font/jetbrains_mono"
                         android:letterSpacing="0.1"
                         android:paddingTop="6dp"
                         android:paddingBottom="8dp"
@@ -176,7 +176,7 @@
                         android:textColor="@color/text_secondary"
                         android:textSize="12sp"
                         android:textStyle="bold"
-                        android:fontFamily="monospace"
+                        android:fontFamily="@font/jetbrains_mono"
                         android:letterSpacing="0.1"
                         android:paddingTop="6dp"
                         android:paddingBottom="8dp"
@@ -227,7 +227,7 @@
                     android:textColor="@color/text_primary"
                     android:textSize="13sp"
                     android:textStyle="bold"
-                    android:fontFamily="monospace"
+                    android:fontFamily="@font/jetbrains_mono"
                     android:letterSpacing="0.08"/>
 
                 <ImageButton
@@ -341,7 +341,7 @@
                                     android:textColor="@color/neon_sky"
                                     android:textSize="15sp"
                                     android:textStyle="bold"
-                                    android:fontFamily="monospace"
+                                    android:fontFamily="@font/jetbrains_mono"
                                     android:layout_marginBottom="10dp"/>
 
                                 <LinearLayout
@@ -361,7 +361,7 @@
                                             android:text="HOURS"
                                             android:textColor="@color/text_secondary"
                                             android:textSize="10sp"
-                                            android:fontFamily="monospace"
+                                            android:fontFamily="@font/jetbrains_mono"
                                             android:letterSpacing="0.1"/>
                                         <TextView
                                             android:id="@+id/tvSummaryHours"
@@ -371,7 +371,7 @@
                                             android:textColor="@color/text_primary"
                                             android:textSize="18sp"
                                             android:textStyle="bold"
-                                            android:fontFamily="monospace"/>
+                                            android:fontFamily="@font/jetbrains_mono"/>
                                     </LinearLayout>
 
                                     <LinearLayout
@@ -385,7 +385,7 @@
                                             android:text="PERIODS"
                                             android:textColor="@color/text_secondary"
                                             android:textSize="10sp"
-                                            android:fontFamily="monospace"
+                                            android:fontFamily="@font/jetbrains_mono"
                                             android:letterSpacing="0.1"/>
                                         <TextView
                                             android:id="@+id/tvSummaryPeriods"
@@ -395,7 +395,7 @@
                                             android:textColor="@color/text_primary"
                                             android:textSize="18sp"
                                             android:textStyle="bold"
-                                            android:fontFamily="monospace"/>
+                                            android:fontFamily="@font/jetbrains_mono"/>
                                     </LinearLayout>
 
                                     <LinearLayout
@@ -409,7 +409,7 @@
                                             android:text="EARNED"
                                             android:textColor="@color/text_secondary"
                                             android:textSize="10sp"
-                                            android:fontFamily="monospace"
+                                            android:fontFamily="@font/jetbrains_mono"
                                             android:letterSpacing="0.1"/>
                                         <TextView
                                             android:id="@+id/tvSummaryEarnings"
@@ -419,7 +419,7 @@
                                             android:textColor="@color/neon_gold"
                                             android:textSize="16sp"
                                             android:textStyle="bold"
-                                            android:fontFamily="monospace"/>
+                                            android:fontFamily="@font/jetbrains_mono"/>
                                     </LinearLayout>
 
                                 </LinearLayout>
@@ -430,7 +430,7 @@
                                     android:text="@string/monthly_target"
                                     android:textColor="@color/text_secondary"
                                     android:textSize="10sp"
-                                    android:fontFamily="monospace"
+                                    android:fontFamily="@font/jetbrains_mono"
                                     android:layout_marginBottom="4dp"/>
 
                                 <ProgressBar
@@ -450,7 +450,7 @@
                                     android:text="0 / 80 hrs"
                                     android:textColor="@color/text_secondary"
                                     android:textSize="10sp"
-                                    android:fontFamily="monospace"
+                                    android:fontFamily="@font/jetbrains_mono"
                                     android:layout_marginTop="4dp"/>
 
                             </LinearLayout>
@@ -473,7 +473,7 @@
                                 android:text="@string/error_network"
                                 android:textColor="@color/text_label"
                                 android:textSize="13sp"
-                                android:fontFamily="monospace"
+                                android:fontFamily="@font/jetbrains_mono"
                                 android:gravity="center"
                                 android:layout_marginBottom="16dp"/>
 
@@ -482,7 +482,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="@string/retry"
-                                android:fontFamily="monospace"
+                                android:fontFamily="@font/jetbrains_mono"
                                 app:backgroundTint="@color/neon_sky"/>
 
                         </LinearLayout>
@@ -508,7 +508,7 @@
                                 android:text="@string/loading"
                                 android:textColor="@color/text_label"
                                 android:textSize="12sp"
-                                android:fontFamily="monospace"
+                                android:fontFamily="@font/jetbrains_mono"
                                 android:layout_marginTop="12dp"/>
 
                         </LinearLayout>
@@ -521,7 +521,7 @@
                             android:text="@string/no_sessions"
                             android:textColor="@color/text_secondary"
                             android:textSize="13sp"
-                            android:fontFamily="monospace"
+                            android:fontFamily="@font/jetbrains_mono"
                             android:gravity="center"
                             android:padding="32dp"
                             android:visibility="gone"/>

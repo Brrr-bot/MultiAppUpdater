@@ -4,6 +4,6 @@
     android:layout_height="wrap_content"
     android:padding="12dp"
     android:textSize="13sp"
-    android:fontFamily="monospace"
+    android:fontFamily="@font/jetbrains_mono"
     android:textColor="#FFFFFF"
     android:background="#0D0D0D"/>

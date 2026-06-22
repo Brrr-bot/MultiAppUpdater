@@ -903,14 +903,8 @@ class MainActivity : AppCompatActivity() {
             // Day card — dark, no elevation shadow, border via accent stripe
             val dayCard = LinearLayout(this).apply {
                 orientation = LinearLayout.VERTICAL
-                background = android.graphics.drawable.GradientDrawable().apply {
-                    shape = android.graphics.drawable.GradientDrawable.RECTANGLE
-                    setColor(cardBg)
-                    cornerRadius = dp(10).toFloat()
-                }
-                clipToOutline = true
                 layoutParams = LinearLayout.LayoutParams(MATCH, WRAP).also {
-                    it.setMargins(dp(8), dp(6), dp(8), dp(8))
+                    it.setMargins(dp(8), dp(4), dp(8), dp(16))
                 }
             }
 
@@ -919,8 +913,9 @@ class MainActivity : AppCompatActivity() {
             val headerRow = LinearLayout(this).apply {
                 orientation = LinearLayout.HORIZONTAL
                 gravity     = Gravity.CENTER_VERTICAL
-                setBackgroundColor(Color.parseColor("#0D0D0D"))
-                layoutParams = LinearLayout.LayoutParams(MATCH, WRAP)
+                layoutParams = LinearLayout.LayoutParams(MATCH, WRAP).also {
+                    it.bottomMargin = dp(6)
+                }
             }
             // Accent stripe on left of header
             headerRow.addView(View(this).apply {
@@ -951,12 +946,6 @@ class MainActivity : AppCompatActivity() {
             })
 
             dayCard.addView(headerRow)
-
-            // Thin accent divider under header
-            dayCard.addView(View(this).apply {
-                setBackgroundColor(headerAcc)
-                layoutParams = LinearLayout.LayoutParams(MATCH, dp(1))
-            })
 
             if (slots.isEmpty()) {
                 dayCard.addView(TextView(this).apply {

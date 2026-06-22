@@ -1200,7 +1200,7 @@ class MainActivity : AppCompatActivity() {
     private fun renderData(data: TimesheetResponse) {
         b.swipeRefresh.isRefreshing = false
         b.layoutLoading.visibility = View.GONE
-        b.layoutError.visibility   = View.GONE
+        showErrorSection(false)
 
         val earnings = data.sessions.sumOf { s -> (s.totalHours * schoolRate(s.school)).toLong() }
 
@@ -2691,7 +2691,7 @@ class MainActivity : AppCompatActivity() {
     private fun showLoading() {
         b.swipeRefresh.isRefreshing       = false
         b.layoutLoading.visibility        = View.VISIBLE
-        b.layoutError.visibility          = View.GONE
+        showErrorSection(false)
         b.tvEmpty.visibility              = View.GONE
         b.historyContainer.visibility     = View.GONE
     }
@@ -2699,7 +2699,7 @@ class MainActivity : AppCompatActivity() {
     private fun showError(msg: String) {
         b.swipeRefresh.isRefreshing       = false
         b.layoutLoading.visibility        = View.GONE
-        b.layoutError.visibility          = View.VISIBLE
+        showErrorSection(true)
         b.tvError.text                    = msg
         b.tvEmpty.visibility              = View.GONE
         b.historyContainer.visibility     = View.GONE

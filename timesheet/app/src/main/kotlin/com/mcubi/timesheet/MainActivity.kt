@@ -642,11 +642,25 @@ class MainActivity : AppCompatActivity() {
     }
 
     private val dismissedPendingSchools = mutableSetOf<String>()
-    private var dismissedDate: String = ""
+    private val dismissPrefs by lazy { getSharedPreferences("pending_dismiss", MODE_PRIVATE) }
+    private fun loadDismissedSchools() {
+        val today = LocalDate.now().toString()
+        val saved = dismissPrefs.getString("dismiss_date", "")
+        if (saved == today) {
+            dismissedPendingSchools.addAll(dismissPrefs.getStringSet("dismissed_schools", emptySet()) ?: emptySet())
+        } else {
+            dismissedPendingSchools.clear()
+        }
+    }
+    private fun saveDismissedSchools() {
+        dismissPrefs.edit()
+            .putStringSet("dismissed_schools", dismissedPendingSchools.toSet())
+            .putString("dismiss_date", LocalDate.now().toString())
+            .apply()
+    }
 
     private fun showPendingCards(pending: List<PendingSchool>) {
-        val today = java.time.LocalDate.now().toString()
-        if (dismissedDate != today) { dismissedPendingSchools.clear(); dismissedDate = today }
+        loadDismissedSchools()
         val container = b.pendingVerifySection
         container.removeAllViews()
         val filtered = pending.filter { it.school !in dismissedPendingSchools }
@@ -687,7 +701,7 @@ class MainActivity : AppCompatActivity() {
             isClickable = true; isFocusable = true
             setOnClickListener {
                 filtered.forEach { dismissedPendingSchools.add(it.school) }
-                dismissedDate = java.time.LocalDate.now().toString()
+                saveDismissedSchools()
                 showPendingSection(false)
             }
         })
@@ -790,6 +804,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun verifySession(school: String, periods: Int, minsPerPeriod: Int) {
         dismissedPendingSchools.remove(school)
+        saveDismissedSchools()
         val today     = LocalDate.now().toString()
         val totalMins = periods * minsPerPeriod
         val hours     = totalMins / 60.0
@@ -1658,32 +1673,35 @@ class MainActivity : AppCompatActivity() {
 
         // Grand total (all time)
         val totalCard = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            gravity = Gravity.CENTER_VERTICAL
-            setBackgroundColor(Color.parseColor("#140E00"))
-            setPadding(dp(17), dp(14), dp(17), dp(14))
+            orientation = LinearLayout.VERTICAL
+            background = android.graphics.drawable.GradientDrawable().apply {
+                shape = android.graphics.drawable.GradientDrawable.RECTANGLE
+                setColor(Color.parseColor("#0a1322"))
+                setStroke(dp(1), gold)
+                cornerRadius = dp(8).toFloat()
+            }
+            clipToOutline = true
+            setPadding(dp(16), dp(14), dp(16), dp(16))
             layoutParams = LinearLayout.LayoutParams(MATCH, WRAP).also {
                 it.setMargins(dp(12), dp(10), dp(12), dp(8))
             }
         }
         totalCard.addView(TextView(this).apply {
             text = "$monthLabel TOTAL"
-            setTextColor(gold); textSize = 12f; typeface = mono
-            setTypeface(typeface, android.graphics.Typeface.BOLD); letterSpacing = 0.08f
-            layoutParams = LinearLayout.LayoutParams(0, WRAP, 1f)
-        })
-        totalCard.addView(TextView(this).apply {
-            text = "$grandPeriods p"
-            setTextColor(dim); textSize = 12f; typeface = mono
-            layoutParams = LinearLayout.LayoutParams(dp(60), WRAP)
-            gravity = Gravity.END
+            setTextColor(gold); textSize = 11f; typeface = mono
+            setTypeface(typeface, android.graphics.Typeface.BOLD); letterSpacing = 0.1f
+            layoutParams = LinearLayout.LayoutParams(MATCH, WRAP).also { it.bottomMargin = dp(8) }
         })
         totalCard.addView(TextView(this).apply {
             text = formatVnd(grandEarn)
-            setTextColor(gold); textSize = 15f; typeface = mono
+            setTextColor(gold); textSize = 22f; typeface = mono
             setTypeface(typeface, android.graphics.Typeface.BOLD)
-            gravity = Gravity.END
-            layoutParams = LinearLayout.LayoutParams(WRAP, WRAP)
+            layoutParams = LinearLayout.LayoutParams(MATCH, WRAP).also { it.bottomMargin = dp(4) }
+        })
+        totalCard.addView(TextView(this).apply {
+            text = "$grandPeriods periods"
+            setTextColor(dim); textSize = 12f; typeface = mono
+            layoutParams = LinearLayout.LayoutParams(MATCH, WRAP)
         })
         container.addView(totalCard)
     }

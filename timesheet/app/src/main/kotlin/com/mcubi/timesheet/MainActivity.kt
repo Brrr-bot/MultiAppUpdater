@@ -903,9 +903,14 @@ class MainActivity : AppCompatActivity() {
             // Day card — dark, no elevation shadow, border via accent stripe
             val dayCard = LinearLayout(this).apply {
                 orientation = LinearLayout.VERTICAL
-                setBackgroundColor(cardBg)
+                background = android.graphics.drawable.GradientDrawable().apply {
+                    shape = android.graphics.drawable.GradientDrawable.RECTANGLE
+                    setColor(cardBg)
+                    cornerRadius = dp(10).toFloat()
+                }
+                clipToOutline = true
                 layoutParams = LinearLayout.LayoutParams(MATCH, WRAP).also {
-                    it.setMargins(dp(12), dp(8), dp(12), 0)
+                    it.setMargins(dp(8), dp(6), dp(8), dp(8))
                 }
             }
 
@@ -1011,7 +1016,7 @@ class MainActivity : AppCompatActivity() {
                     for (slot in group.slots) {
                     val slotContent = LinearLayout(this).apply {
                         orientation = LinearLayout.VERTICAL
-                        setPadding(dp(10), dp(5), dp(10), dp(5))
+                        setPadding(dp(10), dp(9), dp(10), dp(9))
                         layoutParams = LinearLayout.LayoutParams(MATCH, WRAP)
                     }
 

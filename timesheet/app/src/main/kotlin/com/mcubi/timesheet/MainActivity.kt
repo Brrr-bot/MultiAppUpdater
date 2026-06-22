@@ -1024,7 +1024,7 @@ class MainActivity : AppCompatActivity() {
         b.layoutSummary.visibility  = if (tab == 2) View.VISIBLE else View.GONE
         // Hide inactive GlowCardLayout wrappers so their margins disappear
         findViewById<GlowCardLayout>(R.id.glow_card_schedule)?.visibility = if (tab == 0) View.VISIBLE else View.GONE
-        findViewById<GlowCardLayout>(R.id.glow_card_history)?.visibility  = if (tab == 1) View.VISIBLE else View.GONE
+        findViewById<GlowCardLayout>(R.id.glow_card_history)?.visibility  = if (tab == 1 || tab == 2) View.VISIBLE else View.GONE
         // Month nav only applies to the History tab
         b.monthNav.visibility       = if (tab == 1) View.VISIBLE else View.GONE
 
@@ -2763,7 +2763,7 @@ class MainActivity : AppCompatActivity() {
         if (glowPending != null) {
             if (show) {
                 glowPending.visibility = android.view.View.VISIBLE
-                glowPending.setGlowColor(Color.argb(100, 0xff, 0xc4, 0x4d)) // amber
+                glowPending.setGlowColor(Color.argb(100, 0xff, 0x7a, 0x78)) // alert red
                 glowPending.startPulse()
                 // Stop pulse when any child of pendingVerifySection is tapped
                 b.pendingVerifySection.setOnTouchListener { _, _ ->

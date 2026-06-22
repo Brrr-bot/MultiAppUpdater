@@ -497,6 +497,7 @@ class MainActivity : AppCompatActivity() {
         buildScheduleView()
         showTab(1)
         fetchData()
+        loadDismissedSchools()
         fetchTodayPending()
         syncTimesheetBackup()   // pull cloud backup / restore on reinstall, then mirror up
         requestLocationPermissions()

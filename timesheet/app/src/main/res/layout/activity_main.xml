@@ -19,7 +19,8 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:background="@color/banner_bg"
-            android:elevation="4dp">
+            android:elevation="4dp"
+            android:fitsSystemWindows="true">
 
             <!-- Title row -->
             <TextView
@@ -34,7 +35,7 @@
                 android:letterSpacing="0.08"
                 android:paddingStart="16dp"
                 android:paddingEnd="16dp"
-                android:paddingTop="40dp"
+                android:paddingTop="4dp"
                 android:paddingBottom="2dp"/>
 
             <!-- Subtitle + earnings row: label left, amount right -->

@@ -18,7 +18,8 @@ import kotlin.math.*
 class LocationTracker(
     private val context: Context,
     private val onLog: ((String) -> Unit)? = null,
-    private val onTeachingDetected: ((SchoolMatcher.School, Long, Int) -> Unit)? = null
+    private val onTeachingDetected: ((SchoolMatcher.School, Long, Int) -> Unit)? = null,
+    private val onTeachingEnded: ((SchoolMatcher.School, Int) -> Unit)? = null
 ) {
 
     private val TAG = "LocationTracker"
@@ -215,6 +216,7 @@ class LocationTracker(
                         track.loggedDepart = true
                         val mins = (track.totalMs / 60_000L).toInt()
                         log("[SCHOOL] left: ${school.name} (was ~${mins} min)")
+                        if (track.logged45) onTeachingEnded?.invoke(school, mins)
                     }
                 }
             }

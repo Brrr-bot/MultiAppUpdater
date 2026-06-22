@@ -971,7 +971,7 @@ class MainActivity : AppCompatActivity() {
             } else {
                 val slotsContainer = LinearLayout(this).apply {
                     orientation  = LinearLayout.VERTICAL
-                    setPadding(dp(6), dp(6), dp(6), dp(6))
+                    setPadding(0, 0, 0, 0)
                     layoutParams = LinearLayout.LayoutParams(MATCH, WRAP)
                 }
 
@@ -990,18 +990,18 @@ class MainActivity : AppCompatActivity() {
                     val acc    = schoolAccColor(group.school)
                     val slotBg = schoolBgColor(group.school)
 
-                    // School subcard with coloured border
+                    // School subcard with coloured border — full width, no side gap
                     val subCard = LinearLayout(this).apply {
                         orientation = LinearLayout.VERTICAL
                         background = android.graphics.drawable.GradientDrawable().apply {
                             shape = android.graphics.drawable.GradientDrawable.RECTANGLE
                             setColor(slotBg)
                             setStroke(dp(1), acc)
-                            cornerRadius = dp(6).toFloat()
+                            cornerRadius = dp(10).toFloat()
                         }
                         clipToOutline = true
                         layoutParams = LinearLayout.LayoutParams(MATCH, WRAP).also {
-                            it.setMargins(0, 0, 0, dp(6))
+                            it.setMargins(0, 0, 0, 0)
                         }
                     }
                     // School name header inside subcard
@@ -1010,13 +1010,13 @@ class MainActivity : AppCompatActivity() {
                         textSize = 10f; typeface = android.graphics.Typeface.MONOSPACE
                         setTypeface(typeface, android.graphics.Typeface.BOLD)
                         setTextColor(acc); letterSpacing = 0.04f
-                        setPadding(dp(10), dp(6), dp(10), dp(2))
+                        setPadding(dp(14), dp(10), dp(14), dp(4))
                     })
 
                     for (slot in group.slots) {
                     val slotContent = LinearLayout(this).apply {
                         orientation = LinearLayout.VERTICAL
-                        setPadding(dp(10), dp(9), dp(10), dp(9))
+                        setPadding(dp(14), dp(8), dp(14), dp(10))
                         layoutParams = LinearLayout.LayoutParams(MATCH, WRAP)
                     }
 

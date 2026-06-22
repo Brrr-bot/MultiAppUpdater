@@ -897,10 +897,31 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun flash(msg: String, colorHex: String) {
-        b.tvSaveMsg.text = msg
-        b.tvSaveMsg.setTextColor(Color.parseColor(colorHex))
-        b.tvSaveMsg.postDelayed({ b.tvSaveMsg.text = "" }, 2500)
+        val argb = try { Color.parseColor(colorHex) } catch (_: Exception) { Color.WHITE }
+        // Derive aurora-ish alpha-100 glow color from the text color
+        val glowColor = Color.argb(100, Color.red(argb), Color.green(argb), Color.blue(argb))
+        showNotify(msg, glowColor)
     }
+    private fun setupNotifyCard() {
+        val card = findViewById<GlowCardLayout>(R.id.glow_notify) ?: return
+        val dismiss = findViewById<android.widget.TextView>(R.id.btnNotifyDismiss)
+        val dismissAction = {
+            card.stopPulse()
+            card.visibility = android.view.View.GONE
+        }
+        card.setOnClickListener { dismissAction() }
+        dismiss?.setOnClickListener { dismissAction() }
+    }
+
+    fun showNotify(msg: String, colorArgb: Int) {
+        val card = findViewById<GlowCardLayout>(R.id.glow_notify) ?: return
+        val tv   = findViewById<android.widget.TextView>(R.id.tvNotifyMsg) ?: return
+        tv.text  = msg
+        card.setGlowColor(colorArgb)
+        card.visibility = android.view.View.VISIBLE
+        card.startPulse()
+    }
+
 
     // ── Balance pill ──────────────────────────────────────────────────────────
 

@@ -64,4 +64,7 @@
     <color name="card_white">#0a1322</color>
     <color name="school_default">#5b6b82</color>
     <color name="progress_track">#1c2c45</color>
+    <!-- Aurora drawable color aliases -->
+    <color name="neon_cyan">#22d3ee</color>
+    <color name="neon_amber">#ffc44d</color>
 </resources>

@@ -1685,4 +1685,12 @@ class MainActivity : AppCompatActivity() {
     private fun dp(v: Int) = (v * resources.displayMetrics.density).toInt()
     private val MATCH = ViewGroup.LayoutParams.MATCH_PARENT
     private val WRAP  = ViewGroup.LayoutParams.WRAP_CONTENT
+    private fun setupGlowCards() {
+        listOf(
+            R.id.glow_card_add     to Color.argb(100, 0x22, 0xd3, 0xee),
+            R.id.glow_card_history to Color.argb(100, 0x2e, 0xe6, 0xa6),
+            R.id.glow_card_summary to Color.argb(100, 0xa9, 0x8b, 0xff),
+        ).forEach { (id, color) -> findViewById<GlowCardLayout>(id)?.setGlowColor(color) }
+    }
+
 }

@@ -1077,7 +1077,11 @@ class MainActivity : AppCompatActivity() {
         b.layoutSummary.visibility  = if (tab == 2) View.VISIBLE else View.GONE
         // Hide inactive GlowCardLayout wrappers so their margins disappear
         findViewById<GlowCardLayout>(R.id.glow_card_schedule)?.visibility = if (tab == 0) View.VISIBLE else View.GONE
-        findViewById<GlowCardLayout>(R.id.glow_card_history)?.visibility  = if (tab == 1 || tab == 2) View.VISIBLE else View.GONE
+        val histGlow = findViewById<GlowCardLayout>(R.id.glow_card_history)
+        histGlow?.visibility  = if (tab == 1 || tab == 2) View.VISIBLE else View.GONE
+        // Kill glow on summary tab — it wraps both tabs but the ambient bloom looks wrong on summary
+        if (tab == 2) histGlow?.setGlowColor(android.graphics.Color.TRANSPARENT)
+        else if (tab == 1) histGlow?.setGlowColor(android.graphics.Color.argb(50, 0x2e, 0xe6, 0xa6))
         // Month nav only applies to the History tab
         b.monthNav.visibility       = if (tab == 1) View.VISIBLE else View.GONE
 
@@ -1663,7 +1667,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
         totalCard.addView(TextView(this).apply {
-            text = "TOTAL ALL TIME"
+            text = "$monthLabel TOTAL"
             setTextColor(gold); textSize = 12f; typeface = mono
             setTypeface(typeface, android.graphics.Typeface.BOLD); letterSpacing = 0.08f
             layoutParams = LinearLayout.LayoutParams(0, WRAP, 1f)

@@ -2780,12 +2780,16 @@ class MainActivity : AppCompatActivity() {
         if (glowError != null) {
             if (show) {
                 glowError.visibility = android.view.View.VISIBLE
-                glowError.setGlowColor(Color.argb(100, 0xff, 0x7a, 0x78)) // alert red
+                glowError.setGlowColor(Color.argb(100, 0xff, 0x7a, 0x78))
                 glowError.startPulse()
-                b.btnRetry.setOnClickListener {
-                    glowError.stopPulse()
-                    glowError.visibility = android.view.View.GONE
-                    loadSessions()
+                // Stop pulse when retry is tapped (existing click listener calls fetchData())
+                b.btnRetry.post {
+                    val orig = b.btnRetry.tag as? android.view.View.OnClickListener
+                    b.btnRetry.setOnClickListener {
+                        glowError.stopPulse()
+                        glowError.visibility = android.view.View.GONE
+                        fetchData()
+                    }
                 }
             } else {
                 glowError.stopPulse()

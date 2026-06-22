@@ -1559,17 +1559,17 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        // Month header
+        // Month header — prominent title at top
         container.addView(TextView(this).apply {
             text = monthLabel
-            setTextColor(gold); textSize = 14f; typeface = mono
-            setTypeface(typeface, android.graphics.Typeface.BOLD); letterSpacing = 0.08f
-            layoutParams = LinearLayout.LayoutParams(MATCH, WRAP).also { it.setMargins(dp(14), dp(12), dp(14), dp(2)) }
+            setTextColor(gold); textSize = 20f; typeface = mono
+            setTypeface(typeface, android.graphics.Typeface.BOLD); letterSpacing = 0.06f
+            layoutParams = LinearLayout.LayoutParams(MATCH, WRAP).also { it.setMargins(dp(14), dp(14), dp(14), dp(2)) }
         })
         container.addView(TextView(this).apply {
             text = "Tap for monthly grid  ·  long-press to edit rate"
             setTextColor(dimmer); textSize = 10f; typeface = mono
-            layoutParams = LinearLayout.LayoutParams(MATCH, WRAP).also { it.setMargins(dp(14), dp(2), dp(14), dp(4)) }
+            layoutParams = LinearLayout.LayoutParams(MATCH, WRAP).also { it.setMargins(dp(14), dp(2), dp(14), dp(8)) }
         })
 
         val byCat   = sessions.groupBy { schoolCategory(it.school) }
@@ -1672,9 +1672,10 @@ class MainActivity : AppCompatActivity() {
             container.addView(card)
         }
 
-        // Grand total (all time)
+        // Grand total card — horizontal: left=label+periods, right=big earnings
         val totalCard = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
             background = android.graphics.drawable.GradientDrawable().apply {
                 shape = android.graphics.drawable.GradientDrawable.RECTANGLE
                 setColor(Color.parseColor("#0a1322"))
@@ -1682,27 +1683,32 @@ class MainActivity : AppCompatActivity() {
                 cornerRadius = dp(8).toFloat()
             }
             clipToOutline = true
-            setPadding(dp(16), dp(14), dp(16), dp(16))
+            setPadding(dp(16), dp(14), dp(16), dp(14))
             layoutParams = LinearLayout.LayoutParams(MATCH, WRAP).also {
                 it.setMargins(dp(12), dp(10), dp(12), dp(8))
             }
         }
-        totalCard.addView(TextView(this).apply {
-            text = "$monthLabel TOTAL"
+        val totalLeft = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            layoutParams = LinearLayout.LayoutParams(0, WRAP, 1f)
+        }
+        totalLeft.addView(TextView(this).apply {
+            text = "TOTAL"
             setTextColor(gold); textSize = 11f; typeface = mono
             setTypeface(typeface, android.graphics.Typeface.BOLD); letterSpacing = 0.1f
-            layoutParams = LinearLayout.LayoutParams(MATCH, WRAP).also { it.bottomMargin = dp(8) }
+            layoutParams = LinearLayout.LayoutParams(WRAP, WRAP).also { it.bottomMargin = dp(4) }
         })
+        totalLeft.addView(TextView(this).apply {
+            text = "$grandPeriods periods"
+            setTextColor(dim); textSize = 12f; typeface = mono
+            layoutParams = LinearLayout.LayoutParams(WRAP, WRAP)
+        })
+        totalCard.addView(totalLeft)
         totalCard.addView(TextView(this).apply {
             text = formatVnd(grandEarn)
             setTextColor(gold); textSize = 22f; typeface = mono
             setTypeface(typeface, android.graphics.Typeface.BOLD)
-            layoutParams = LinearLayout.LayoutParams(MATCH, WRAP).also { it.bottomMargin = dp(4) }
-        })
-        totalCard.addView(TextView(this).apply {
-            text = "$grandPeriods periods"
-            setTextColor(dim); textSize = 12f; typeface = mono
-            layoutParams = LinearLayout.LayoutParams(MATCH, WRAP)
+            gravity = Gravity.END or Gravity.CENTER_VERTICAL
         })
         container.addView(totalCard)
     }

@@ -1401,6 +1401,10 @@ class MainActivity : AppCompatActivity() {
         b.layoutAdd.visibility     = if (tab == 0) View.VISIBLE else View.GONE
         b.layoutHistory.visibility = if (tab == 1) View.VISIBLE else View.GONE
         b.layoutSummary.visibility = if (tab == 2) View.VISIBLE else View.GONE
+        // Hide inactive GlowCardLayout wrappers so their margins disappear
+        findViewById<GlowCardLayout>(R.id.glow_card_add)?.visibility     = if (tab == 0) View.VISIBLE else View.GONE
+        findViewById<GlowCardLayout>(R.id.glow_card_history)?.visibility = if (tab == 1) View.VISIBLE else View.GONE
+        findViewById<GlowCardLayout>(R.id.glow_card_summary)?.visibility = if (tab == 2) View.VISIBLE else View.GONE
         b.btnTabAdd.setTextColor(    if (tab == 0) sky else dim)
         b.btnTabHistory.setTextColor(if (tab == 1) sky else dim)
         b.btnTabSummary.setTextColor(if (tab == 2) sky else dim)

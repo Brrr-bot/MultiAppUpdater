@@ -211,14 +211,25 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:clipChildren="false"
+                android:clipToPadding="false">
 
                 <!-- ── ADD TAB ── -->
+                <com.mcubi.finances.GlowCardLayout
+                    android:id="@+id/glow_card_add"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="12dp"
+                    android:clipChildren="false"
+                    android:clipToPadding="false">
+
                 <LinearLayout
                     android:id="@+id/layoutAdd"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
+                    android:background="@drawable/card_surface_cyan"
                     android:padding="12dp"
                     android:paddingBottom="32dp"
                     android:visibility="visible">
@@ -412,13 +423,23 @@
                         android:minHeight="18dp"/>
 
                 </LinearLayout>
+                </com.mcubi.finances.GlowCardLayout>
 
                 <!-- ── HISTORY TAB ── -->
+                <com.mcubi.finances.GlowCardLayout
+                    android:id="@+id/glow_card_history"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="12dp"
+                    android:clipChildren="false"
+                    android:clipToPadding="false">
+
                 <LinearLayout
                     android:id="@+id/layoutHistory"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
+                    android:background="@drawable/card_surface_green"
                     android:paddingBottom="32dp"
                     android:visibility="gone">
 
@@ -633,13 +654,23 @@
                         android:paddingTop="4dp"/>
 
                 </LinearLayout>
+                </com.mcubi.finances.GlowCardLayout>
 
                 <!-- ── SUMMARY TAB ── -->
+                <com.mcubi.finances.GlowCardLayout
+                    android:id="@+id/glow_card_summary"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="12dp"
+                    android:clipChildren="false"
+                    android:clipToPadding="false">
+
                 <LinearLayout
                     android:id="@+id/layoutSummary"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
+                    android:background="@drawable/card_surface_purple"
                     android:paddingBottom="32dp"
                     android:visibility="gone">
 
@@ -650,6 +681,7 @@
                         android:orientation="vertical"/>
 
                 </LinearLayout>
+                </com.mcubi.finances.GlowCardLayout>
 
             </LinearLayout>
         </androidx.core.widget.NestedScrollView>

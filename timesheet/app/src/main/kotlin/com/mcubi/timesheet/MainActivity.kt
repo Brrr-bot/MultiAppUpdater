@@ -645,10 +645,10 @@ class MainActivity : AppCompatActivity() {
         val container = b.pendingVerifySection
         container.removeAllViews()
         if (pending.isEmpty()) {
-            container.visibility = View.GONE
+            showPendingSection(false)
             return
         }
-        container.visibility = View.VISIBLE
+        showPendingSection(true)
 
         val sky     = Color.parseColor("#29B6F6")
         val gold    = Color.parseColor("#FFB300")

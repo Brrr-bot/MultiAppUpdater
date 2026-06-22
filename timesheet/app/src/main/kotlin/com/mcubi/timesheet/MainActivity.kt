@@ -2728,4 +2728,11 @@ class MainActivity : AppCompatActivity() {
         private const val REQ_LOCATION       = 101
         private const val REQ_BACKGROUND_LOC = 102
     }
+    private fun setupGlowCards() {
+        listOf(
+            R.id.glow_card_schedule to Color.argb(100, 0x22, 0xd3, 0xee),
+            R.id.glow_card_history  to Color.argb(100, 0x2e, 0xe6, 0xa6),
+        ).forEach { (id, color) -> findViewById<GlowCardLayout>(id)?.setGlowColor(color) }
+    }
+
 }

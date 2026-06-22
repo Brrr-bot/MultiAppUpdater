@@ -990,7 +990,7 @@ class MainActivity : AppCompatActivity() {
                         }
                         clipToOutline = true
                         layoutParams = LinearLayout.LayoutParams(MATCH, WRAP).also {
-                            it.setMargins(0, 0, 0, 0)
+                            it.setMargins(0, 0, 0, dp(8))
                         }
                     }
                     // School name header inside subcard

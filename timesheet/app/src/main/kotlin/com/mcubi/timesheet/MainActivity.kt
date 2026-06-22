@@ -2735,4 +2735,65 @@ class MainActivity : AppCompatActivity() {
         ).forEach { (id, color) -> findViewById<GlowCardLayout>(id)?.setGlowColor(color) }
     }
 
+    private fun setupNotifyCard() {
+        val card = findViewById<GlowCardLayout>(R.id.glow_notify) ?: return
+        val dismiss = findViewById<android.widget.TextView>(R.id.btnNotifyDismiss)
+        val dismissAction = {
+            card.stopPulse()
+            card.visibility = android.view.View.GONE
+        }
+        card.setOnClickListener { dismissAction() }
+        dismiss?.setOnClickListener { dismissAction() }
+    }
+
+    fun showNotify(msg: String, colorArgb: Int) {
+        val card = findViewById<GlowCardLayout>(R.id.glow_notify) ?: return
+        val tv   = findViewById<android.widget.TextView>(R.id.tvNotifyMsg) ?: return
+        tv.text  = msg
+        card.setGlowColor(colorArgb)
+        card.visibility = android.view.View.VISIBLE
+        card.startPulse()
+    }
+
+    private fun showPendingSection(show: Boolean) {
+        val glowPending = findViewById<GlowCardLayout>(R.id.glow_pending)
+        if (glowPending != null) {
+            if (show) {
+                glowPending.visibility = android.view.View.VISIBLE
+                glowPending.setGlowColor(Color.argb(100, 0xff, 0xc4, 0x4d)) // amber
+                glowPending.startPulse()
+                // Stop pulse when any child of pendingVerifySection is tapped
+                b.pendingVerifySection.setOnTouchListener { _, _ ->
+                    glowPending.stopPulse(); false
+                }
+            } else {
+                glowPending.stopPulse()
+                glowPending.visibility = android.view.View.GONE
+            }
+        } else {
+            b.pendingVerifySection.visibility = if (show) android.view.View.VISIBLE else android.view.View.GONE
+        }
+    }
+
+    private fun showErrorSection(show: Boolean) {
+        val glowError = findViewById<GlowCardLayout>(R.id.glow_error)
+        if (glowError != null) {
+            if (show) {
+                glowError.visibility = android.view.View.VISIBLE
+                glowError.setGlowColor(Color.argb(100, 0xff, 0x7a, 0x78)) // alert red
+                glowError.startPulse()
+                b.btnRetry.setOnClickListener {
+                    glowError.stopPulse()
+                    glowError.visibility = android.view.View.GONE
+                    loadSessions()
+                }
+            } else {
+                glowError.stopPulse()
+                glowError.visibility = android.view.View.GONE
+            }
+        } else {
+            b.layoutError.visibility = if (show) android.view.View.VISIBLE else android.view.View.GONE
+        }
+    }
+
 }

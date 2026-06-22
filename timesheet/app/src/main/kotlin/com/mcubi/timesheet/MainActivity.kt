@@ -641,10 +641,16 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private val dismissedPendingSchools = mutableSetOf<String>()
+    private var dismissedDate: String = ""
+
     private fun showPendingCards(pending: List<PendingSchool>) {
+        val today = java.time.LocalDate.now().toString()
+        if (dismissedDate != today) { dismissedPendingSchools.clear(); dismissedDate = today }
         val container = b.pendingVerifySection
         container.removeAllViews()
-        if (pending.isEmpty()) {
+        val filtered = pending.filter { it.school !in dismissedPendingSchools }
+        if (filtered.isEmpty()) {
             showPendingSection(false)
             return
         }
@@ -679,7 +685,11 @@ class MainActivity : AppCompatActivity() {
             setTextColor(dimText)
             setPadding(dp(16), dp(10), dp(16), dp(4))
             isClickable = true; isFocusable = true
-            setOnClickListener { showPendingSection(false) }
+            setOnClickListener {
+                filtered.forEach { dismissedPendingSchools.add(it.school) }
+                dismissedDate = java.time.LocalDate.now().toString()
+                showPendingSection(false)
+            }
         })
         container.addView(headerRow)
 
@@ -779,6 +789,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun verifySession(school: String, periods: Int, minsPerPeriod: Int) {
+        dismissedPendingSchools.remove(school)
         val today     = LocalDate.now().toString()
         val totalMins = periods * minsPerPeriod
         val hours     = totalMins / 60.0
@@ -939,31 +950,52 @@ class MainActivity : AppCompatActivity() {
             } else {
                 val slotsContainer = LinearLayout(this).apply {
                     orientation  = LinearLayout.VERTICAL
-                    setPadding(dp(8), dp(8), dp(8), dp(8))
+                    setPadding(dp(6), dp(6), dp(6), dp(6))
                     layoutParams = LinearLayout.LayoutParams(MATCH, WRAP)
                 }
 
-                for (slot in slots) {
-                    val acc    = schoolAccColor(slot.school)
-                    val slotBg = schoolBgColor(slot.school)
+                // Group consecutive slots by school into coloured subcards
+                data class SlotGroup(val school: String, val slots: List<Slot>)
+                val groups = mutableListOf<SlotGroup>()
+                var curSchool = slots.first().school
+                var curSlots  = mutableListOf<Slot>()
+                for (s in slots) {
+                    if (s.school == curSchool) { curSlots.add(s) }
+                    else { groups.add(SlotGroup(curSchool, curSlots.toList())); curSchool = s.school; curSlots = mutableListOf(s) }
+                }
+                groups.add(SlotGroup(curSchool, curSlots.toList()))
 
-                    val slotRow = LinearLayout(this).apply {
-                        orientation = LinearLayout.HORIZONTAL
-                        setBackgroundColor(slotBg)
+                for (group in groups) {
+                    val acc    = schoolAccColor(group.school)
+                    val slotBg = schoolBgColor(group.school)
+
+                    // School subcard with coloured border
+                    val subCard = LinearLayout(this).apply {
+                        orientation = LinearLayout.VERTICAL
+                        background = android.graphics.drawable.GradientDrawable().apply {
+                            shape = android.graphics.drawable.GradientDrawable.RECTANGLE
+                            setColor(slotBg)
+                            setStroke(dp(1), acc)
+                            cornerRadius = dp(6).toFloat()
+                        }
+                        clipToOutline = true
                         layoutParams = LinearLayout.LayoutParams(MATCH, WRAP).also {
-                            it.setMargins(0, 0, 0, dp(5))
+                            it.setMargins(0, 0, 0, dp(6))
                         }
                     }
-
-                    // Accent left stripe
-                    slotRow.addView(View(this).apply {
-                        setBackgroundColor(acc)
-                        layoutParams = LinearLayout.LayoutParams(dp(3), MATCH)
+                    // School name header inside subcard
+                    subCard.addView(TextView(this).apply {
+                        text = group.school
+                        textSize = 10f; typeface = android.graphics.Typeface.MONOSPACE
+                        setTypeface(typeface, android.graphics.Typeface.BOLD)
+                        setTextColor(acc); letterSpacing = 0.04f
+                        setPadding(dp(10), dp(6), dp(10), dp(2))
                     })
 
+                    for (slot in group.slots) {
                     val slotContent = LinearLayout(this).apply {
                         orientation = LinearLayout.VERTICAL
-                        setPadding(dp(10), dp(7), dp(10), dp(7))
+                        setPadding(dp(10), dp(5), dp(10), dp(5))
                         layoutParams = LinearLayout.LayoutParams(MATCH, WRAP)
                     }
 
@@ -1018,9 +1050,10 @@ class MainActivity : AppCompatActivity() {
                     })
 
                     slotContent.addView(badgeRow)
-                    slotRow.addView(slotContent)
-                    slotsContainer.addView(slotRow)
-                }
+                    subCard.addView(slotContent)
+                    } // end for slot in group.slots
+                    slotsContainer.addView(subCard)
+                } // end for group in groups
                 dayCard.addView(slotsContainer)
             }
 
@@ -1230,7 +1263,7 @@ class MainActivity : AppCompatActivity() {
         b.tvTopBarEarnings.text  = formatVnd(earnings)
         b.tvSummaryMonth.text    = currentMonth.format(MONTH_FMT)
         b.tvSummaryHours.text    = formatHours(data.totalHours)
-        b.tvSummaryPeriods.text  = "${data.sessions.sumOf { it.periods }} periods"
+        b.tvSummaryPeriods.text  = "${data.sessions.sumOf { it.periods }} p"
         b.tvSummaryEarnings.text = formatVnd(earnings)
 
         val pct = min(100, ((data.totalHours / 80.0) * 100).toInt())
@@ -1489,10 +1522,13 @@ class MainActivity : AppCompatActivity() {
         val dim      = Color.parseColor("#969696")
         val dimmer   = Color.parseColor("#646464")
         val gold     = Color.parseColor("#FFB300")
-        val cardBg   = Color.parseColor("#0D0D0D")
+        val cardBg   = Color.parseColor("#0a1322")
         val mono     = android.graphics.Typeface.MONOSPACE
 
-        val sessions = readAllSessions()
+        // Task 1: current month only
+        val monthStr = java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM"))
+        val monthLabel = java.time.YearMonth.now().format(java.time.format.DateTimeFormatter.ofPattern("MMMM yyyy", java.util.Locale.ENGLISH)).uppercase()
+        val sessions = readAllSessions().filter { it.date.startsWith(monthStr) }
         if (sessions.isEmpty()) {
             container.addView(TextView(this).apply {
                 text = "No sessions logged yet"
@@ -1503,10 +1539,17 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
+        // Month header
         container.addView(TextView(this).apply {
-            text = "Tap a company for the monthly grid · long-press to edit its rate"
+            text = monthLabel
+            setTextColor(gold); textSize = 14f; typeface = mono
+            setTypeface(typeface, android.graphics.Typeface.BOLD); letterSpacing = 0.08f
+            layoutParams = LinearLayout.LayoutParams(MATCH, WRAP).also { it.setMargins(dp(14), dp(12), dp(14), dp(2)) }
+        })
+        container.addView(TextView(this).apply {
+            text = "Tap for monthly grid  ·  long-press to edit rate"
             setTextColor(dimmer); textSize = 10f; typeface = mono
-            layoutParams = LinearLayout.LayoutParams(MATCH, WRAP).also { it.setMargins(dp(14), dp(8), dp(14), dp(2)) }
+            layoutParams = LinearLayout.LayoutParams(MATCH, WRAP).also { it.setMargins(dp(14), dp(2), dp(14), dp(4)) }
         })
 
         val byCat   = sessions.groupBy { schoolCategory(it.school) }
@@ -1527,15 +1570,18 @@ class MainActivity : AppCompatActivity() {
 
             val card = LinearLayout(this).apply {
                 orientation = LinearLayout.HORIZONTAL
-                setBackgroundColor(cardBg)
+                background = android.graphics.drawable.GradientDrawable().apply {
+                    shape = android.graphics.drawable.GradientDrawable.RECTANGLE
+                    setColor(cardBg)
+                    setStroke(dp(1), accent)
+                    cornerRadius = dp(8).toFloat()
+                }
+                clipToOutline = true
                 layoutParams = LinearLayout.LayoutParams(MATCH, WRAP).also {
                     it.setMargins(dp(12), dp(8), dp(12), dp(4))
                 }
             }
-            card.addView(View(this).apply {
-                setBackgroundColor(accent)
-                layoutParams = LinearLayout.LayoutParams(dp(3), MATCH)
-            })
+            // No left stripe needed — border IS the accent colour
             val col = LinearLayout(this).apply {
                 orientation = LinearLayout.VERTICAL
                 setPadding(dp(14), dp(12), dp(14), dp(12))

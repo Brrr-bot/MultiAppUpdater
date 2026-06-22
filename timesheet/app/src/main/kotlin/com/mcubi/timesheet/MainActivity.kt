@@ -656,17 +656,32 @@ class MainActivity : AppCompatActivity() {
         val dimText = Color.parseColor("#646464")
         val white   = Color.WHITE
 
-        // Section header
-        container.addView(TextView(this).apply {
+        // Section header + dismiss button
+        val headerRow = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity     = android.view.Gravity.CENTER_VERTICAL
+            layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        }
+        headerRow.addView(TextView(this).apply {
             text          = "▸  VERIFY TODAY"
             textSize      = 11f
             typeface      = android.graphics.Typeface.MONOSPACE
             setTypeface(typeface, android.graphics.Typeface.BOLD)
             setTextColor(gold)
             letterSpacing = 0.1f
-            setPadding(dp(16), dp(12), dp(16), dp(4))
-            layoutParams  = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+            setPadding(dp(16), dp(12), dp(8), dp(4))
+            layoutParams  = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
         })
+        headerRow.addView(TextView(this).apply {
+            text        = "✕"
+            textSize    = 15f
+            typeface    = android.graphics.Typeface.MONOSPACE
+            setTextColor(dimText)
+            setPadding(dp(16), dp(10), dp(16), dp(4))
+            isClickable = true; isFocusable = true
+            setOnClickListener { showPendingSection(false) }
+        })
+        container.addView(headerRow)
 
         for (ps in pending) {
             val acc    = schoolAccColor(ps.school)
@@ -751,6 +766,11 @@ class MainActivity : AppCompatActivity() {
             card.addView(cardContent)
             container.addView(card)
         }
+
+        // Bottom spacer for breathing room
+        container.addView(android.view.View(this).apply {
+            layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(16))
+        })
 
         // Switch to history tab so the cards are visible
         if (b.layoutHistory.visibility != View.VISIBLE) {

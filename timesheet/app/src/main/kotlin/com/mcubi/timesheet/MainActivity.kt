@@ -1022,6 +1022,9 @@ class MainActivity : AppCompatActivity() {
         b.layoutSchedule.visibility = if (tab == 0) View.VISIBLE else View.GONE
         b.layoutHistory.visibility  = if (tab == 1) View.VISIBLE else View.GONE
         b.layoutSummary.visibility  = if (tab == 2) View.VISIBLE else View.GONE
+        // Hide inactive GlowCardLayout wrappers so their margins disappear
+        findViewById<GlowCardLayout>(R.id.glow_card_schedule)?.visibility = if (tab == 0) View.VISIBLE else View.GONE
+        findViewById<GlowCardLayout>(R.id.glow_card_history)?.visibility  = if (tab == 1) View.VISIBLE else View.GONE
         // Month nav only applies to the History tab
         b.monthNav.visibility       = if (tab == 1) View.VISIBLE else View.GONE
 

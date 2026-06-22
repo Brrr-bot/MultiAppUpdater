@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Stars -->
+    <path android:fillColor="#22d3ee" android:fillAlpha="0.5"
+        android:pathData="M19,14 A1,1 0 1,0 17,14 A1,1 0 1,0 19,14"/>
+    <path android:fillColor="#22d3ee" android:fillAlpha="0.4"
+        android:pathData="M88.8,22 A0.8,0.8 0 1,0 87.2,22 A0.8,0.8 0 1,0 88.8,22"/>
+    <path android:fillColor="#22d3ee" android:fillAlpha="0.3"
+        android:pathData="M93,80 A1,1 0 1,0 91,80 A1,1 0 1,0 93,80"/>
+    <path android:fillColor="#FFB300" android:fillAlpha="0.5"
+        android:pathData="M14.7,78 A0.7,0.7 0 1,0 13.3,78 A0.7,0.7 0 1,0 14.7,78"/>
+
+    <!-- Outer glow rings -->
+    <path android:strokeColor="#22d3ee" android:strokeWidth="1.5" android:strokeAlpha="0.28"
+        android:fillColor="#00000000"
+        android:pathData="M20,48 A34,34 0 1,0 88,48 A34,34 0 1,0 20,48"/>
+    <path android:strokeColor="#22d3ee" android:strokeWidth="0.5" android:strokeAlpha="0.5"
+        android:fillColor="#00000000"
+        android:pathData="M24,48 A30,30 0 1,0 84,48 A30,30 0 1,0 24,48"/>
+
+    <!-- Pin outline — clean teardrop, no heart -->
+    <path android:strokeColor="#22d3ee" android:strokeWidth="1.8"
+        android:fillColor="#00000000"
+        android:pathData="M32,48 Q32,26 54,26 Q76,26 76,48 Q76,68 54,89 Q32,68 32,48 Z"/>
+
+    <!-- Clock face -->
+    <path android:strokeColor="#22d3ee" android:strokeWidth="1.5"
+        android:fillColor="#0a1322"
+        android:pathData="M32,48 A22,22 0 1,0 76,48 A22,22 0 1,0 32,48"/>
+
+    <!-- Tick marks 12 / 6 / 3 / 9 -->
+    <path android:strokeColor="#22d3ee" android:strokeWidth="1.5" android:strokeLineCap="round"
+        android:pathData="M54,29 L54,32"/>
+    <path android:strokeColor="#22d3ee" android:strokeWidth="1.5" android:strokeLineCap="round"
+        android:pathData="M54,64 L54,67"/>
+    <path android:strokeColor="#22d3ee" android:strokeWidth="1.5" android:strokeLineCap="round"
+        android:pathData="M72,48 L69,48"/>
+    <path android:strokeColor="#22d3ee" android:strokeWidth="1.5" android:strokeLineCap="round"
+        android:pathData="M36,48 L39,48"/>
+
+    <!-- Hour hand — gold, ~10 o'clock -->
+    <path android:strokeColor="#FFB300" android:strokeWidth="2" android:strokeLineCap="round"
+        android:pathData="M54,48 L44,42"/>
+
+    <!-- Minute hand — cyan, ~2 o'clock -->
+    <path android:strokeColor="#22d3ee" android:strokeWidth="1.5" android:strokeLineCap="round"
+        android:pathData="M54,48 L64,40"/>
+
+    <!-- Centre dot — gold -->
+    <path android:fillColor="#FFB300"
+        android:pathData="M56.5,48 A2.5,2.5 0 1,0 51.5,48 A2.5,2.5 0 1,0 56.5,48"/>
+
+    <!-- Gold dot at pin top -->
+    <path android:fillColor="#FFB300"
+        android:pathData="M57,26 A3,3 0 1,0 51,26 A3,3 0 1,0 57,26"/>
+
+</vector>

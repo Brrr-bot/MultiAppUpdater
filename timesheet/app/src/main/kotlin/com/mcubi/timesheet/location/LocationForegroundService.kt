@@ -23,6 +23,9 @@ class LocationForegroundService : Service() {
     private lateinit var tracker: LocationTracker
     private val scheduler = Executors.newSingleThreadScheduledExecutor()
 
+    @Volatile private var isTeaching = false
+    @Volatile private var teachingSchool = ""
+
     override fun onCreate() {
         super.onCreate()
         startForeground(NOTIF_ID, buildNotification())
@@ -30,7 +33,15 @@ class LocationForegroundService : Service() {
             context            = this,
             onLog              = { msg -> log(msg) },
             onTeachingDetected = { school, arrivedAt, mins ->
+                isTeaching = true
+                teachingSchool = school.name
+                refreshNotification()
                 DailySchoolCheckReceiver.fireTeachingNotification(this, school, arrivedAt, mins)
+            },
+            onTeachingEnded    = { _, _ ->
+                isTeaching = false
+                teachingSchool = ""
+                refreshNotification()
             }
         )
         tracker.start()
@@ -49,12 +60,12 @@ class LocationForegroundService : Service() {
 
     override fun onBind(intent: Intent?): IBinder? = null
 
-    // ── Logging ───────────────────────────────────────────────────────────────
+    // ── Logging ──────────────────────────────────────────────────────────────────
 
     private fun log(message: String) {
         val time = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date())
         addLog("$time  $message")
-        refreshNotification()
+        if (isTeaching) refreshNotification()
     }
 
     private fun refreshNotification() {
@@ -77,30 +88,38 @@ class LocationForegroundService : Service() {
         val pi = PendingIntent.getActivity(
             this, 0, Intent(this, MainActivity::class.java), PendingIntent.FLAG_IMMUTABLE
         )
-        val lines  = getRecentLogs().takeLast(LOG_LINES_IN_NOTIF)
-        val latest = lines.lastOrNull() ?: "Starting…"
-        val title  = "Timesheet  v${BuildConfig.VERSION_NAME}"
 
-        return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle(title)
-            .setContentText(latest)
+        val builder = NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_menu_mylocation)
-            .setColor(0xFF000000.toInt())
-            .setColorized(true)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
             .setContentIntent(pi)
-            .setStyle(
-                NotificationCompat.BigTextStyle()
-                    .setBigContentTitle(title)
-                    .bigText(lines.joinToString("\n"))
-            )
-            .build()
+
+        return if (isTeaching) {
+            val lines  = getRecentLogs().takeLast(LOG_LINES_IN_NOTIF)
+            val latest = lines.lastOrNull() ?: ""
+            builder
+                .setContentTitle("🏫 Teaching: $teachingSchool")
+                .setContentText(latest)
+                .setColor(0xFF22d3ee.toInt())
+                .setColorized(true)
+                .setStyle(
+                    NotificationCompat.BigTextStyle()
+                        .setBigContentTitle("🏫 $teachingSchool")
+                        .bigText(lines.joinToString("\n"))
+                )
+                .build()
+        } else {
+            builder
+                .setContentTitle("Timesheet  v${BuildConfig.VERSION_NAME}")
+                .setColor(0xFF070d18.toInt())
+                .build()
+        }
     }
 
     companion object {
-        private const val NOTIF_ID          = 1001
-        private const val CHANNEL_ID        = "location_tracking"
+        private const val NOTIF_ID           = 1001
+        private const val CHANNEL_ID         = "location_tracking"
         private const val LOG_LINES_IN_NOTIF = 6
 
         private val recentLogs = ArrayDeque<String>(100)

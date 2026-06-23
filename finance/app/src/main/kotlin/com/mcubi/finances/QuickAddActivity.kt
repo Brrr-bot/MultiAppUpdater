@@ -222,7 +222,12 @@ class QuickAddActivity : AppCompatActivity() {
 
         glowCard.addView(root)
         requestWindowFeature(android.view.Window.FEATURE_NO_TITLE)
-        setContentView(ScrollView(this).apply { addView(glowCard) })
+        val dp28 = (28 * resources.displayMetrics.density).toInt()
+        setContentView(ScrollView(this).apply {
+            clipChildren = false; clipToPadding = false
+            setPadding(dp28, dp28, dp28, dp28)
+            addView(glowCard)
+        })
         // Wait for layout so buildPath has dimensions before starting pulse
         glowCard.viewTreeObserver.addOnGlobalLayoutListener(object : android.view.ViewTreeObserver.OnGlobalLayoutListener {
             override fun onGlobalLayout() {

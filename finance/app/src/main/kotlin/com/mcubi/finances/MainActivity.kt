@@ -724,7 +724,8 @@ class MainActivity : AppCompatActivity() {
             b.btnDirOut.setBackgroundResource(R.drawable.btn_out_inactive)
             b.btnDirOut.setTextColor(Color.parseColor("#646464"))
             findViewById<GlowCardLayout>(R.id.glow_card_add)?.apply {
-                setGlowColor(Color.argb(120, 0x00, 0xE6, 0x76)); startPulse()
+                setGlowColor(Color.argb(120, 0x00, 0xE6, 0x76))
+                stopPulse(); startBreathing()
             }
         } else {
             b.btnDirIn.setBackgroundResource(R.drawable.btn_in_inactive)
@@ -732,7 +733,8 @@ class MainActivity : AppCompatActivity() {
             b.btnDirOut.setBackgroundResource(R.drawable.btn_out_active)
             b.btnDirOut.setTextColor(Color.parseColor("#FF1744"))
             findViewById<GlowCardLayout>(R.id.glow_card_add)?.apply {
-                setGlowColor(Color.argb(120, 0xFF, 0x17, 0x44)); startPulse()
+                setGlowColor(Color.argb(120, 0xFF, 0x17, 0x44))
+                stopPulse(); startBreathing()
             }
         }
         selectedCat = ""
@@ -1718,11 +1720,14 @@ class MainActivity : AppCompatActivity() {
     private val WRAP  = ViewGroup.LayoutParams.WRAP_CONTENT
     private fun setupGlowCards() {
         listOf(
-            R.id.glow_card_add     to Color.argb(120, 0xFF, 0x17, 0x44),  // default "out" = red
             R.id.glow_card_history to Color.argb(100, 0x2e, 0xe6, 0xa6),
             R.id.glow_card_summary to Color.argb(100, 0xa9, 0x8b, 0xff),
         ).forEach { (id, color) ->
-            findViewById<GlowCardLayout>(id)?.apply { setGlowColor(color); startPulse() }
+            findViewById<GlowCardLayout>(id)?.apply { setGlowColor(color); startBreathing() }
+        }
+        // Add card starts red (default OUT), direction toggle changes it + starts pulse
+        findViewById<GlowCardLayout>(R.id.glow_card_add)?.apply {
+            setGlowColor(Color.argb(120, 0xFF, 0x17, 0x44)); startBreathing()
         }
     }
 

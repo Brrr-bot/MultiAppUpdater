@@ -230,7 +230,7 @@ class QuickAddActivity : AppCompatActivity() {
         }
         glowCard.addView(scrollView)
         setContentView(glowCard)
-        glowCard.post { glowCard.startPulse() }
+        glowCard.post { glowCard.startBreathing() }
 
         if (editEntryId != 0) {
             etAmount.setText(intent.getDoubleExtra(EXTRA_AMOUNT, 0.0).toString().removeSuffix(".0"))

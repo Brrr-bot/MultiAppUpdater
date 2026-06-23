@@ -20,7 +20,7 @@ class FinanceWidget : AppWidgetProvider() {
             fun pending(dir: String, reqCode: Int): PendingIntent {
                 val i = Intent(context, QuickAddActivity::class.java).apply {
                     putExtra(QuickAddActivity.EXTRA_DIRECTION, dir)
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
                 }
                 return PendingIntent.getActivity(
                     context, reqCode, i,

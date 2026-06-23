@@ -1578,9 +1578,9 @@ class MainActivity : AppCompatActivity() {
         // Month header — prominent title at top
         container.addView(TextView(this).apply {
             text = monthLabel
-            setTextColor(gold); textSize = 20f; typeface = mono
+            setTextColor(gold); textSize = 28f; typeface = mono
             setTypeface(typeface, android.graphics.Typeface.BOLD); letterSpacing = 0.06f
-            layoutParams = LinearLayout.LayoutParams(MATCH, WRAP).also { it.setMargins(dp(14), dp(14), dp(14), dp(2)) }
+            layoutParams = LinearLayout.LayoutParams(MATCH, WRAP).also { it.setMargins(dp(14), dp(20), dp(14), dp(2)) }
         })
         container.addView(TextView(this).apply {
             text = "Tap for monthly grid  ·  long-press to edit rate"
@@ -1694,21 +1694,25 @@ class MainActivity : AppCompatActivity() {
             glowCard.startBreathing()
         }
 
-        // Grand total card — horizontal: left=label+periods, right=big earnings
+        // Grand total card — GlowCardLayout with half-speed pulse
+        val totalGlow = GlowCardLayout(this).apply {
+            layoutParams = LinearLayout.LayoutParams(MATCH, WRAP).also {
+                it.setMargins(dp(6), dp(16), dp(6), dp(16))
+            }
+            clipChildren = false; clipToPadding = false
+            setGlowColor(gold)
+        }
         val totalCard = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
             background = android.graphics.drawable.GradientDrawable().apply {
                 shape = android.graphics.drawable.GradientDrawable.RECTANGLE
                 setColor(Color.parseColor("#0a1322"))
-                setStroke(dp(1), gold)
-                cornerRadius = dp(8).toFloat()
+                cornerRadius = dp(12).toFloat()
             }
             clipToOutline = true
             setPadding(dp(16), dp(14), dp(16), dp(14))
-            layoutParams = LinearLayout.LayoutParams(MATCH, WRAP).also {
-                it.setMargins(dp(12), dp(10), dp(12), dp(8))
-            }
+            layoutParams = android.widget.FrameLayout.LayoutParams(MATCH, WRAP)
         }
         val totalLeft = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
@@ -1732,7 +1736,17 @@ class MainActivity : AppCompatActivity() {
             setTypeface(typeface, android.graphics.Typeface.BOLD)
             gravity = Gravity.END or Gravity.CENTER_VERTICAL
         })
-        container.addView(totalCard)
+        totalGlow.addView(totalCard)
+        container.addView(totalGlow)
+        // Half-speed pulse: use a separate animator at 6s instead of shared 3s
+        android.animation.ValueAnimator.ofFloat(0f, 1f).apply {
+            duration = 6000L
+            repeatCount = android.animation.ValueAnimator.INFINITE
+            repeatMode = android.animation.ValueAnimator.RESTART
+            interpolator = android.view.animation.DecelerateInterpolator(2f)
+            addUpdateListener { totalGlow.forceComet(it.animatedValue as Float) }
+            start()
+        }
     }
 
     /** Monthly timekeeping grid for one company: schools (rows) × days (columns),

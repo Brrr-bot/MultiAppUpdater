@@ -109,6 +109,7 @@ class MainActivity : AppCompatActivity() {
         loadFinanceSnapshot()?.let(::renderFinanceSnapshot)
         loadTimesheetSnapshot()?.let { (earned, _) ->
             binding.tvTimesheetStatus.text = "CACHED"
+                    binding.root.post { glowCard(R.id.glow_card_timesheet)?.setAlertMode(false) }
             binding.tvTimesheetEarned.text = formatVnd(earned)
         }
 
@@ -417,8 +418,10 @@ class MainActivity : AppCompatActivity() {
                 if (cached != null) {
                     renderFinanceSnapshot(cached)
                     binding.tvFinancePeriod.text = "CACHED"
+                    binding.root.post { glowCard(R.id.glow_card_finance)?.setAlertMode(false) }
                 } else {
                     binding.tvFinancePeriod.text = "OFFLINE"
+                    binding.root.post { glowCard(R.id.glow_card_finance)?.setAlertMode(true) }
                     binding.tvFinanceIncome.text = "--"
                     binding.tvFinanceExpense.text = "--"
                     binding.tvFinanceBal.text = "--"
@@ -431,6 +434,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun renderFinanceSnapshot(snapshot: FinanceSnapshot) {
         binding.tvFinancePeriod.text = snapshot.periodLabel
+        glowCard(R.id.glow_card_finance)?.setAlertMode(false)
         binding.tvFinanceIncome.text = formatVnd(snapshot.income)
         binding.tvFinanceExpense.text = formatVnd(snapshot.expense)
         binding.tvFinanceBal.text = formatVnd(snapshot.balance)
@@ -503,15 +507,18 @@ class MainActivity : AppCompatActivity() {
                     "${String.format("%.1f", totalHours)}h  ·  $sessionCount session${if (sessionCount != 1) "s" else ""}"
                 saveTimesheetSnapshot(earned, hoursLabel)
                 binding.tvTimesheetStatus.text = "ONLINE"
+                glowCard(R.id.glow_card_timesheet)?.setAlertMode(false)
                 binding.tvTimesheetEarned.text = formatVnd(earned)
             } catch (e: Exception) {
                 val cached = loadTimesheetSnapshot()
                 if (cached != null) {
                     binding.tvTimesheetStatus.text = "CACHED"
+                    binding.root.post { glowCard(R.id.glow_card_timesheet)?.setAlertMode(false) }
                     binding.tvTimesheetEarned.text = formatVnd(cached.first)
                 } else {
                     binding.tvTimesheetEarned.text = "--"
                     binding.tvTimesheetStatus.text = "OFFLINE"
+                    binding.root.post { glowCard(R.id.glow_card_timesheet)?.setAlertMode(true) }
                 }
                 RemoteLogger.e("timesheet card fetch failed: ${e.message.orEmpty()}")
             }
@@ -580,6 +587,7 @@ class MainActivity : AppCompatActivity() {
         val password = BuildConfig.CAMERA_PASSWORD.trim()
         if (host.isEmpty() || user.isEmpty() || password.isEmpty()) {
             binding.tvCameraStatus.text = "camera not configured"
+            glowCard(R.id.glow_card_camera)?.setAlertMode(true)
             binding.tvCameraOverlay.visibility = View.VISIBLE
             return
         }
@@ -598,14 +606,17 @@ class MainActivity : AppCompatActivity() {
                     when (playbackState) {
                         Player.STATE_BUFFERING -> {
                             binding.tvCameraStatus.text = "live view"
+                            glowCard(R.id.glow_card_camera)?.setAlertMode(false)
                             binding.tvCameraOverlay.visibility = View.VISIBLE
                         }
                         Player.STATE_READY -> {
                             binding.tvCameraStatus.text = "live view"
+                            glowCard(R.id.glow_card_camera)?.setAlertMode(false)
                             binding.tvCameraOverlay.visibility = View.GONE
                         }
                         Player.STATE_ENDED -> {
                             binding.tvCameraStatus.text = "stream ended"
+                            glowCard(R.id.glow_card_camera)?.setAlertMode(true)
                             binding.tvCameraOverlay.visibility = View.VISIBLE
                         }
                     }
@@ -616,12 +627,14 @@ class MainActivity : AppCompatActivity() {
                     val retryPath = CameraStreamConfig.streamPaths.firstOrNull { it !in attemptedCameraStreamPaths }
                     if (retryPath != null && failedPath != null) {
                         binding.tvCameraStatus.text = "live view"
+                            glowCard(R.id.glow_card_camera)?.setAlertMode(false)
                         binding.tvCameraOverlay.visibility = View.VISIBLE
                         RemoteLogger.e("camera rtsp error on $failedPath: ${error.errorCodeName} ${error.message.orEmpty()}")
                         playCameraStream(exo, retryPath)
                         return
                     }
                     binding.tvCameraStatus.text = "camera error: ${error.errorCodeName.lowercase(Locale.US)}"
+                        glowCard(R.id.glow_card_camera)?.setAlertMode(true)
                     binding.tvCameraOverlay.visibility = View.VISIBLE
                     RemoteLogger.e("camera rtsp error: ${error.errorCodeName} ${error.message.orEmpty()}")
                 }
@@ -644,6 +657,7 @@ class MainActivity : AppCompatActivity() {
         activeCameraStreamPath = streamPath
         attemptedCameraStreamPaths += streamPath
         binding.tvCameraStatus.text = "live view"
+                            glowCard(R.id.glow_card_camera)?.setAlertMode(false)
         player.setMediaItem(MediaItem.fromUri(CameraStreamConfig.buildUri(streamPath)))
         player.prepare()
         RemoteLogger.i("camera rtsp start -> ${BuildConfig.CAMERA_HOST.trim()}/$streamPath")
@@ -763,6 +777,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun renderHub(state: HubUiState) {
         binding.tvHubStatus.text = state.statusLine
+        val hubOk = !state.statusLine.startsWith("X") && !state.statusLine.contains("Offline", ignoreCase = true)
+        glowCard(R.id.glow_card_hub)?.setAlertMode(!hubOk)
         binding.tvHubLastUpdated.text = state.lastUpdated
         binding.tvHubTransfer.text = buildString {
             append(state.transferLine)
@@ -903,6 +919,9 @@ class MainActivity : AppCompatActivity() {
     private fun formatAlarm(alarm: AlarmEntity): String {
         return String.format(Locale.getDefault(), "%02d:%02d", alarm.hour, alarm.minute)
     }
+
+    private fun glowCard(id: Int) = findViewById<GlowCardLayout>(id)
+
     private fun setupGlowCards() {
         listOf(
             R.id.glow_card_weather   to Color.argb(100, 0x22, 0xd3, 0xee),
@@ -912,7 +931,7 @@ class MainActivity : AppCompatActivity() {
             R.id.glow_card_camera    to Color.argb(100, 0xa9, 0x8b, 0xff),
             R.id.glow_card_alarms    to Color.argb(100, 0x2e, 0xe6, 0xa6),
         ).forEach { (id, color) ->
-            findViewById<GlowCardLayout>(id)?.setGlowColor(color)
+            findViewById<GlowCardLayout>(id)?.apply { setGlowColor(color); startBreathing() }
         }
     }
 

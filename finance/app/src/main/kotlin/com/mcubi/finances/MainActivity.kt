@@ -904,7 +904,13 @@ class MainActivity : AppCompatActivity() {
 
     private fun flash(msg: String, colorHex: String) {
         val argb = try { Color.parseColor(colorHex) } catch (_: Exception) { Color.WHITE }
-        // Derive aurora-ish alpha-100 glow color from the text color
+        // Green success (save confirmations) → quiet inline label, not the notify card
+        if (colorHex == "#00E676") {
+            b.tvSaveMsg.setTextColor(argb)
+            b.tvSaveMsg.text = msg
+            b.tvSaveMsg.postDelayed({ b.tvSaveMsg.text = "" }, 2000)
+            return
+        }
         val glowColor = Color.argb(100, Color.red(argb), Color.green(argb), Color.blue(argb))
         showNotify(msg, glowColor)
     }

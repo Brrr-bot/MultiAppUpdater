@@ -63,7 +63,7 @@ class GlowCardLayout @JvmOverloads constructor(
         if (pulseAnimator?.isRunning == true) return
         pulseOverlay.visibility = VISIBLE
         pulseAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
-            duration     = 3000L
+            duration     = 6000L
             repeatCount  = ValueAnimator.INFINITE
             repeatMode   = ValueAnimator.RESTART
             interpolator = DecelerateInterpolator(2f)

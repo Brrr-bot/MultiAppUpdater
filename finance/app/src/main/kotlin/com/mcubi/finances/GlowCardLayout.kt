@@ -145,6 +145,24 @@ class GlowCardLayout @JvmOverloads constructor(
         }
     }
 
+    // Skip breath→pulse transition; show comet immediately. Use for cards that never breathe.
+    fun forcePulseNow() {
+        breathingOverlay.visibility = GONE
+        if (!alertMode) pulseOverlay.setAccent(glowColor)
+        pulseOverlay.visibility = VISIBLE
+        isPulsing = true
+        pulsePending = false
+        if (pulseListener == null) {
+            val l = ValueAnimator.AnimatorUpdateListener { anim ->
+                val p = anim.animatedValue as Float
+                if (isPulsing) pulseOverlay.setProgress(p)
+                lastPulseProgress = p
+            }
+            pulseListener = l
+            sharedPulse.addUpdateListener(l)
+        }
+    }
+
     fun setAlertMode(alert: Boolean) {
         alertMode = alert
         if (alert) {

@@ -222,6 +222,8 @@ class QuickAddActivity : AppCompatActivity() {
 
         glowCard.addView(root)
         requestWindowFeature(android.view.Window.FEATURE_NO_TITLE)
+        window.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT))
+        window.setLayout(android.view.WindowManager.LayoutParams.MATCH_PARENT, android.view.WindowManager.LayoutParams.MATCH_PARENT)
         val dp28 = (28 * resources.displayMetrics.density).toInt()
         setContentView(ScrollView(this).apply {
             clipChildren = false; clipToPadding = false

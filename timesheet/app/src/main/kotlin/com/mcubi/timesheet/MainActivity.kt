@@ -154,7 +154,10 @@ private val SCHOOL_ACC = mapOf(
     "Hòa Bình"             to Color.parseColor("#CE93D8"),
     "Hoa Binh"             to Color.parseColor("#CE93D8"),
     "STEM Club"            to Color.parseColor("#00E5FF"),
-    "Lotus English Center" to Color.parseColor("#FF80AB")
+    "Lotus English Center" to Color.parseColor("#FF80AB"),
+    "Mầm Non 30-4"         to Color.parseColor("#FF6B9D"),
+    "Mam Non 30-4"         to Color.parseColor("#FF6B9D"),
+    "30-4"                 to Color.parseColor("#FF6B9D")
 )
 private val SCHOOL_BG = mapOf(
     "Tân Thới Hòa"         to Color.parseColor("#021829"),
@@ -168,7 +171,10 @@ private val SCHOOL_BG = mapOf(
     "Hòa Bình"             to Color.parseColor("#0E0716"),
     "Hoa Binh"             to Color.parseColor("#0E0716"),
     "STEM Club"            to Color.parseColor("#001A1F"),
-    "Lotus English Center" to Color.parseColor("#1A0010")
+    "Lotus English Center" to Color.parseColor("#1A0010"),
+    "Mầm Non 30-4"         to Color.parseColor("#1A0010"),
+    "Mam Non 30-4"         to Color.parseColor("#1A0010"),
+    "30-4"                 to Color.parseColor("#1A0010")
 )
 
 // Google Maps search query per school
@@ -212,8 +218,13 @@ private fun schoolAccColor(school: String): Int {
         lower.contains("hòa bình") || lower.contains("hoa binh") -> Color.parseColor("#CE93D8")
         lower.contains("stem")                            -> Color.parseColor("#00E5FF")
         lower.contains("lotus")                           -> Color.parseColor("#FF80AB")
-        else                                              -> Color.parseColor("#29B6F6")
+        else -> deterministicColor(lower)
     }
+}
+private fun deterministicColor(key: String): Int {
+    val palette = arrayOf("#29B6F6","#00E676","#FFB300","#69F0AE","#CE93D8","#00E5FF",
+                          "#FF80AB","#FF6B9D","#FFCA28","#80CBC4","#EF9A9A","#B39DDB")
+    return Color.parseColor(palette[(key.hashCode() and 0x7FFFFFFF) % palette.size])
 }
 private fun schoolBgColor(school: String): Int {
     val lower = school.lowercase()

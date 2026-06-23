@@ -613,6 +613,8 @@
                     <!-- SUMMARY TAB -->
                     <LinearLayout
                         android:id="@+id/layoutSummary"
+                        android:clipChildren="false"
+                        android:clipToPadding="false"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
@@ -622,6 +624,8 @@
 
                         <LinearLayout
                             android:id="@+id/summaryContainer"
+                            android:clipChildren="false"
+                            android:clipToPadding="false"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:orientation="vertical"/>

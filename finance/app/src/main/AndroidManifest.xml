@@ -54,6 +54,8 @@
         <activity
             android:name=".QuickAddActivity"
             android:exported="false"
+            android:taskAffinity=""
+            android:excludeFromRecents="true"
             android:theme="@style/Theme.Finance.QuickAdd"
             android:windowSoftInputMode="adjustResize" />
 

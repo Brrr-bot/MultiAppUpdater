@@ -2842,10 +2842,16 @@ class MainActivity : AppCompatActivity() {
         private const val REQ_BACKGROUND_LOC = 102
     }
     private fun setupGlowCards() {
+    private fun setupGlowCards() {
         listOf(
-            R.id.glow_card_schedule to Color.argb(50, 0x22, 0xd3, 0xee),
-            R.id.glow_card_history  to Color.argb(50, 0x2e, 0xe6, 0xa6),
-        ).forEach { (id, color) -> findViewById<GlowCardLayout>(id)?.setGlowColor(color) }
+            R.id.glow_card_schedule to Color.argb(100, 0x22, 0xd3, 0xee),
+            R.id.glow_card_history  to Color.argb(100, 0x2e, 0xe6, 0xa6),
+            R.id.glow_pending       to Color.argb(100, 0xFF, 0xC4, 0x4D),
+            R.id.glow_error         to Color.argb(100, 0xFF, 0x3B, 0x3B),
+            R.id.glow_notify        to Color.argb(100, 0x22, 0xd3, 0xee),
+        ).forEach { (id, color) ->
+            findViewById<GlowCardLayout>(id)?.apply { setGlowColor(color); startBreathing() }
+        }
     }
 
     private fun setupNotifyCard() {

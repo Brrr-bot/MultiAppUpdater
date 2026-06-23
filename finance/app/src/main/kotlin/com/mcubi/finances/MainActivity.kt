@@ -724,8 +724,7 @@ class MainActivity : AppCompatActivity() {
             b.btnDirOut.setBackgroundResource(R.drawable.btn_out_inactive)
             b.btnDirOut.setTextColor(Color.parseColor("#646464"))
             findViewById<GlowCardLayout>(R.id.glow_card_add)?.apply {
-                setGlowColor(Color.argb(120, 0x00, 0xE6, 0x76))
-                stopPulse(); startBreathing()
+                setGlowColor(Color.argb(120, 0x00, 0xE6, 0x76)); forcePulseNow()
             }
         } else {
             b.btnDirIn.setBackgroundResource(R.drawable.btn_in_inactive)
@@ -733,8 +732,7 @@ class MainActivity : AppCompatActivity() {
             b.btnDirOut.setBackgroundResource(R.drawable.btn_out_active)
             b.btnDirOut.setTextColor(Color.parseColor("#FF1744"))
             findViewById<GlowCardLayout>(R.id.glow_card_add)?.apply {
-                setGlowColor(Color.argb(120, 0xFF, 0x17, 0x44))
-                stopPulse(); startBreathing()
+                setGlowColor(Color.argb(120, 0xFF, 0x17, 0x44)); forcePulseNow()
             }
         }
         selectedCat = ""
@@ -1734,9 +1732,9 @@ class MainActivity : AppCompatActivity() {
         ).forEach { (id, color) ->
             findViewById<GlowCardLayout>(id)?.apply { setGlowColor(color); startBreathing() }
         }
-        // Add card starts red (default OUT), direction toggle changes it + starts pulse
+        // Add card: immediate red pulse, no breathing
         findViewById<GlowCardLayout>(R.id.glow_card_add)?.apply {
-            setGlowColor(Color.argb(120, 0xFF, 0x17, 0x44)); startBreathing()
+            setGlowColor(Color.argb(120, 0xFF, 0x17, 0x44)); forcePulseNow()
         }
     }
 

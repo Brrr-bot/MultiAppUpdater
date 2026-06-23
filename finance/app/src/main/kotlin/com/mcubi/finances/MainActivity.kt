@@ -933,16 +933,20 @@ class MainActivity : AppCompatActivity() {
 
     // ── Balance pill ──────────────────────────────────────────────────────────
 
+    private var lastBalance = Double.NaN
+
     private fun fetchBalancePill() {
-        // Compute from local DB instantly
         CoroutineScope(Dispatchers.IO).launch {
             val (income, expense) = db.getSummaryForPeriod(periodStart, periodEnd)
             val bal = income - expense
             withContext(Dispatchers.Main) {
-                b.tvTopBalance.text = (if (bal >= 0) "+" else "") + fmt(bal)
-                b.tvTopBalance.setTextColor(
-                    if (bal >= 0) Color.parseColor("#FFB300") else Color.parseColor("#FF1744")
-                )
+                val baseColor = if (bal >= 0) Color.parseColor("#FFB300") else Color.parseColor("#FF1744")
+                val flashColor = if (!lastBalance.isNaN() && bal > lastBalance)
+                    Color.parseColor("#00FF88") else if (!lastBalance.isNaN() && bal < lastBalance)
+                    Color.parseColor("#FF3B3B") else baseColor
+                animateCountTo(b.tvTopBalance, lastBalance.takeIf { !it.isNaN() } ?: bal, bal,
+                    prefix = if (bal >= 0) "+" else "", baseColor = baseColor, flashColor = flashColor)
+                lastBalance = bal
             }
             pushFinanceToHub()
         }
@@ -992,11 +996,16 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private var lastSavings = Double.NaN
+
     private fun updateSavingsDisplay(total: Double) {
-        b.tvTopSavings.text = (if (total >= 0) "+" else "") + fmt(total)
-        b.tvTopSavings.setTextColor(
-            if (total >= 0) Color.parseColor("#00E676") else Color.parseColor("#FF1744")
-        )
+        val baseColor = if (total >= 0) Color.parseColor("#00E676") else Color.parseColor("#FF1744")
+        val flashColor = if (!lastSavings.isNaN() && total > lastSavings)
+            Color.parseColor("#00FF88") else if (!lastSavings.isNaN() && total < lastSavings)
+            Color.parseColor("#FF3B3B") else baseColor
+        animateCountTo(b.tvTopSavings, lastSavings.takeIf { !it.isNaN() } ?: total, total,
+            prefix = if (total >= 0) "+" else "", baseColor = baseColor, flashColor = flashColor)
+        lastSavings = total
     }
 
     // Load salary dates from local DB immediately, then sync all entries from server in background
@@ -1728,6 +1737,40 @@ class MainActivity : AppCompatActivity() {
         // Add card starts red (default OUT), direction toggle changes it + starts pulse
         findViewById<GlowCardLayout>(R.id.glow_card_add)?.apply {
             setGlowColor(Color.argb(120, 0xFF, 0x17, 0x44)); startBreathing()
+        }
+    }
+
+
+    // ── Animated counter ──────────────────────────────────────────────────────
+    // Rolls a TextView from `from` to `to` over 600ms, flashing flashColor → baseColor.
+    private fun animateCountTo(
+        tv: android.widget.TextView,
+        from: Double, to: Double,
+        prefix: String = "",
+        baseColor: Int,
+        flashColor: Int
+    ) {
+        tv.animate().cancel()
+        android.animation.ValueAnimator.ofFloat(from.toFloat(), to.toFloat()).apply {
+            duration = 600L
+            interpolator = android.view.animation.DecelerateInterpolator(1.5f)
+            addUpdateListener { anim ->
+                val v = (anim.animatedValue as Float).toDouble()
+                tv.text = prefix + fmt(v)
+                val frac = anim.animatedFraction
+                // Blend flashColor → baseColor over the animation
+                val r = (Color.red(flashColor)   + frac * (Color.red(baseColor)   - Color.red(flashColor))).toInt()
+                val g = (Color.green(flashColor) + frac * (Color.green(baseColor) - Color.green(flashColor))).toInt()
+                val b = (Color.blue(flashColor)  + frac * (Color.blue(baseColor)  - Color.blue(flashColor))).toInt()
+                tv.setTextColor(Color.rgb(r, g, b))
+            }
+            addListener(object : android.animation.AnimatorListenerAdapter() {
+                override fun onAnimationEnd(a: android.animation.Animator) {
+                    tv.text = prefix + fmt(to)
+                    tv.setTextColor(baseColor)
+                }
+            })
+            start()
         }
     }
 

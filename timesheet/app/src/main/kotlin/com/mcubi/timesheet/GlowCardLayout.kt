@@ -129,6 +129,15 @@ class GlowCardLayout @JvmOverloads constructor(
         else breathingOverlay.visibility = VISIBLE
     }
 
+    // Drive pulseOverlay directly with an external animator (e.g. half-speed total card)
+    fun forceComet(progress: Float) {
+        if (pulseOverlay.visibility != VISIBLE) {
+            breathingOverlay.visibility = GONE
+            pulseOverlay.visibility = VISIBLE
+        }
+        pulseOverlay.setProgress(progress)
+    }
+
     fun setAlertMode(alert: Boolean) {
         alertMode = alert
         if (alert) { pulseOverlay.setAccent(0xFFFF3B3B.toInt()); startPulse() }

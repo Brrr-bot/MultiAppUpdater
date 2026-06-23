@@ -12,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:padding="10dp"
+        android:padding="24dp"
         android:clipChildren="false"
         android:clipToPadding="false">
 
@@ -46,7 +46,6 @@
         </LinearLayout>
 
                 <com.homehub.dashboard.ui.GlowCardLayout
-                android:layout_margin="28dp"
             android:id="@+id/glow_card_weather"
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -111,7 +110,6 @@
             android:weightSum="4">
 
                         <com.homehub.dashboard.ui.GlowCardLayout
-                android:layout_margin="28dp"
                 android:id="@+id/glow_card_hub"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
@@ -184,7 +182,6 @@
             </com.homehub.dashboard.ui.GlowCardLayout>
 
                         <com.homehub.dashboard.ui.GlowCardLayout
-                android:layout_margin="28dp"
                 android:id="@+id/glow_card_finance"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
@@ -354,7 +351,6 @@
             </com.homehub.dashboard.ui.GlowCardLayout>
 
                         <com.homehub.dashboard.ui.GlowCardLayout
-                android:layout_margin="28dp"
                 android:id="@+id/glow_card_timesheet"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
@@ -460,7 +456,6 @@
             </com.homehub.dashboard.ui.GlowCardLayout>
 
                         <com.homehub.dashboard.ui.GlowCardLayout
-                android:layout_margin="28dp"
                 android:id="@+id/glow_card_camera"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
@@ -549,7 +544,6 @@
         </LinearLayout>
 
                 <com.homehub.dashboard.ui.GlowCardLayout
-                android:layout_margin="28dp"
             android:id="@+id/glow_card_alarms"
             android:layout_width="match_parent"
             android:layout_height="0dp"

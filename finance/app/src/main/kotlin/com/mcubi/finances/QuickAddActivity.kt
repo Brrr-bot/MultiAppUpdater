@@ -221,10 +221,15 @@ class QuickAddActivity : AppCompatActivity() {
         })
 
         glowCard.addView(root)
-        setContentView(ScrollView(this).apply {
-            addView(glowCard)
+        requestWindowFeature(android.view.Window.FEATURE_NO_TITLE)
+        setContentView(ScrollView(this).apply { addView(glowCard) })
+        // Wait for layout so buildPath has dimensions before starting pulse
+        glowCard.viewTreeObserver.addOnGlobalLayoutListener(object : android.view.ViewTreeObserver.OnGlobalLayoutListener {
+            override fun onGlobalLayout() {
+                glowCard.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                glowCard.forcePulseNow()
+            }
         })
-        glowCard.post { glowCard.forcePulseNow() }
 
         if (editEntryId != 0) {
             etAmount.setText(intent.getDoubleExtra(EXTRA_AMOUNT, 0.0).toString().removeSuffix(".0"))

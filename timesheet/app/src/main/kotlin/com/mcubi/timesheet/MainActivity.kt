@@ -800,7 +800,9 @@ class MainActivity : AppCompatActivity() {
             }
             cardContent.addView(btnRow)
             card.addView(cardContent)
-            container.addView(card)
+            glowCard.addView(card)
+            container.addView(glowCard)
+            glowCard.startBreathing()
         }
 
         // Bottom spacer for breathing room
@@ -1467,7 +1469,9 @@ class MainActivity : AppCompatActivity() {
                         true
                     }
 
-                    container.addView(card)
+                    glowCard.addView(card)
+            container.addView(glowCard)
+            glowCard.startBreathing()
                 }
             }
 
@@ -1593,18 +1597,22 @@ class MainActivity : AppCompatActivity() {
             grandPeriods += catPeriods
             grandEarn    += catEarn
 
+            val glowCard = GlowCardLayout(this).apply {
+                layoutParams = LinearLayout.LayoutParams(MATCH, WRAP).also {
+                    it.setMargins(dp(6), dp(16), dp(6), dp(16))
+                }
+                clipChildren = false; clipToPadding = false
+                setGlowColor(accent)
+            }
             val card = LinearLayout(this).apply {
                 orientation = LinearLayout.HORIZONTAL
                 background = android.graphics.drawable.GradientDrawable().apply {
                     shape = android.graphics.drawable.GradientDrawable.RECTANGLE
                     setColor(cardBg)
-                    setStroke(dp(1), accent)
-                    cornerRadius = dp(8).toFloat()
+                    cornerRadius = dp(12).toFloat()
                 }
                 clipToOutline = true
-                layoutParams = LinearLayout.LayoutParams(MATCH, WRAP).also {
-                    it.setMargins(dp(12), dp(8), dp(12), dp(4))
-                }
+                layoutParams = android.widget.FrameLayout.LayoutParams(MATCH, WRAP)
             }
             // No left stripe needed — border IS the accent colour
             val col = LinearLayout(this).apply {
@@ -1674,7 +1682,9 @@ class MainActivity : AppCompatActivity() {
             }
 
             card.addView(col)
-            container.addView(card)
+            glowCard.addView(card)
+            container.addView(glowCard)
+            glowCard.startBreathing()
         }
 
         // Grand total card — horizontal: left=label+periods, right=big earnings

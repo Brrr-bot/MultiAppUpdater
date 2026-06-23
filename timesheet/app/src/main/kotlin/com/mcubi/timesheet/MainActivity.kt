@@ -800,9 +800,9 @@ class MainActivity : AppCompatActivity() {
             }
             cardContent.addView(btnRow)
             card.addView(cardContent)
-            glowCard.addView(card)
-            container.addView(glowCard)
-            glowCard.startBreathing()
+            container.addView(card)
+
+
         }
 
         // Bottom spacer for breathing room
@@ -1469,9 +1469,9 @@ class MainActivity : AppCompatActivity() {
                         true
                     }
 
-                    glowCard.addView(card)
-            container.addView(glowCard)
-            glowCard.startBreathing()
+                    container.addView(card)
+
+
                 }
             }
 

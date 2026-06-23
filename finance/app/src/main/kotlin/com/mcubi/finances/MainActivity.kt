@@ -1722,10 +1722,7 @@ class MainActivity : AppCompatActivity() {
             R.id.glow_card_history to Color.argb(100, 0x2e, 0xe6, 0xa6),
             R.id.glow_card_summary to Color.argb(100, 0xa9, 0x8b, 0xff),
         ).forEach { (id, color) ->
-            findViewById<GlowCardLayout>(id)?.apply {
-                setGlowColor(color)
-                if (id == R.id.glow_card_add) startPulse() else startBreathing()
-            }
+            findViewById<GlowCardLayout>(id)?.apply { setGlowColor(color); startPulse() }
         }
     }
 

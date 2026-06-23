@@ -70,20 +70,16 @@ class QuickAddActivity : AppCompatActivity() {
         val WRAP    = ViewGroup.LayoutParams.WRAP_CONTENT
         fun dp(v: Int) = (v * resources.displayMetrics.density).toInt()
 
+        val glowColor = Color.argb(120, Color.red(accent), Color.green(accent), Color.blue(accent))
         val glowCard = GlowCardLayout(this).apply {
-            layoutParams = ViewGroup.LayoutParams(MATCH, MATCH)
-            setGlowColor(Color.argb(140, Color.red(accent), Color.green(accent), Color.blue(accent)))
+            layoutParams = ViewGroup.LayoutParams(MATCH, WRAP)
+            setGlowColor(glowColor)
             clipChildren = false; clipToPadding = false
         }
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            background = android.graphics.drawable.GradientDrawable().apply {
-                shape = android.graphics.drawable.GradientDrawable.RECTANGLE
-                setColor(Color.parseColor("#0D1520"))
-                setStroke(dp(1), Color.argb(80, Color.red(accent), Color.green(accent), Color.blue(accent)))
-                cornerRadius = dp(0).toFloat()
-            }
-            setPadding(dp(20), dp(20), dp(20), dp(20))
+            setBackgroundResource(if (isIn) R.drawable.card_surface_cyan else R.drawable.card_surface_cyan)
+            setPadding(dp(16), dp(12), dp(16), dp(20))
         }
 
         // Direction header
@@ -224,13 +220,11 @@ class QuickAddActivity : AppCompatActivity() {
             setOnClickListener { saveEntry() }
         })
 
-        val scrollView = ScrollView(this).apply {
-            layoutParams = android.widget.FrameLayout.LayoutParams(MATCH, MATCH)
-            addView(root)
-        }
-        glowCard.addView(scrollView)
-        setContentView(glowCard)
-        glowCard.post { glowCard.startBreathing() }
+        glowCard.addView(root)
+        setContentView(ScrollView(this).apply {
+            addView(glowCard)
+        })
+        glowCard.post { glowCard.forcePulseNow() }
 
         if (editEntryId != 0) {
             etAmount.setText(intent.getDoubleExtra(EXTRA_AMOUNT, 0.0).toString().removeSuffix(".0"))

@@ -1546,6 +1546,13 @@ class MainActivity : AppCompatActivity() {
     private fun buildSummaryView() {
         val container = b.summaryContainer
         container.removeAllViews()
+        // Allow outer glow to bleed past parent bounds
+        container.clipChildren = false; container.clipToPadding = false
+        var vg = container.parent
+        repeat(6) {
+            (vg as? android.view.ViewGroup)?.apply { clipChildren = false; clipToPadding = false }
+            vg = (vg as? android.view.View)?.parent ?: return@repeat
+        }
 
         val white   = Color.WHITE
         val dim      = Color.parseColor("#969696")
